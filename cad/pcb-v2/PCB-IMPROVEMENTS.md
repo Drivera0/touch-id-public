@@ -8,6 +8,44 @@ tags:
 updated: 2026-08-20
 ---
 
+> [!done] APPLIED 2026-08-20 — the board is now ready for Altium
+>
+> **The file could not be opened by anything.** `pcb-v2.kicad_pcb` declared
+> `generator "pcbnew" 10.0` but had **zero top-level `(net ...)` declarations**,
+> and every pad, track and via carried `(net "NAME")` with no ordinal. That is
+> not KiCad's schema, so pcbnew would refuse it — which is why DRC had never
+> been run and the Gerbers never plotted. Fixed: 10 declarations inserted,
+> 271 references rewritten (pads → `(net <n> "NAME")`, tracks/vias → `(net <n>)`).
+>
+> **The checkers went blind the moment the schema was corrected** —
+> `check_board` reported `tracks 0` and every net as `None`, while still
+> printing a confident summary. All three scripts now expand bare ordinals
+> before matching. This is the same failure mode the handoff warns about.
+>
+> Applied since:
+> - Outline → **19.30 × 19.30, R2.0** (verified extent, 8 Edge.Cuts primitives)
+> - Mounting holes → **Ø1.30 at (+8.10, −8.10) and (−8.10, +8.10)** — diagonal
+> - **C3 +1.05 mm, C4 +1.20 mm in Y** to clear the new corner hole
+> - 16 board-edge keepouts deleted (Altium enforces edge clearance by rule);
+>   the 2 antenna keepouts kept and extended to y = +9.30
+> - `B.Paste` removed from 13 bottom-side pads
+> - 12 segments ripped (11 on the moved pads, 1 orphan GND run)
+> - Stale `pcb-v2.PcbDoc`, `.PrjPcb` and `.PcbDoc.LOG` **deleted** — git keeps them
+>
+> State: 95 pads, 175 tracks, 18 vias, 2 zones, parses clean, one sub-0.127 pair
+> (the known 0.1270). **Exactly 4 pads are unrouted — C3-1, C3-2, C4-1, C4-2** —
+> which is what the autorouter is for. No orphan copper.
+>
+> ### Importing into Altium
+> Do **not** reopen the old `.PcbDoc`; it is gone and it was stale. Use
+> **File → Import → KiCad** (AD 26.9.1 has it) on `pcb-v2.kicad_pcb`. Verify
+> after import that nets and footprints came across, not just copper — check
+> the net count is 9 and that U1 still has 61 pads. Then autoroute the 4
+> unrouted pads and run DRC.
+>
+> Still not done: the +3V3/VBAT pair at exactly 0.1270 mm, and J2 is still six
+> hand-solder pads split across both strips.
+
 # PCB improvements for the v4 housing
 
 Scope: `cad/pcb-v2/` only. Driven by the new enclosure
