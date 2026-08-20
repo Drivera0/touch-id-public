@@ -23,3 +23,7 @@ Project Logs*/
 *.kicad_prl
 fp-info-cache
 *-backups/
+
+# KiCad lock files
+*.lck
+~*.lck

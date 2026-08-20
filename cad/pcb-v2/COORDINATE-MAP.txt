@@ -1,0 +1,23 @@
+Mapping between the ordered Gerber and pcb-v2.kicad_pcb
+=======================================================
+Verified 2026-08-20 by matching all 80 SMD pads of the ordered top-paste
+layer against the imported KiCad board. 80/80 matched, max error 0.0000 mm.
+
+    kicad_x = gerber_x + 48.5011
+    kicad_y = 113.8036 - gerber_y      <-- Y IS MIRRORED
+
+Altium and KiCad use opposite Y conventions, so the importer mirrors Y.
+Any coordinate taken from the Gerber or from Altium must be converted with
+the line above before being used in the .kicad_pcb.
+
+U2 target values (the fix), converted:
+
+    pad     gerber X   gerber Y      kicad X     kicad Y     size        rot
+    U2-1     91.979     12.125       140.480     101.679     0.36x0.30     0
+    U2-2     91.979     11.475       140.480     102.329     0.36x0.30     0
+    U2-3     92.821     11.475       141.322     102.329     0.36x0.30     0
+    U2-4     92.821     12.125       141.322     101.679     0.36x0.30     0
+    U2-5     92.400     11.800       140.901     102.004     0.48x0.48    45
+
+Note the Y mirror swaps which physical corner each pad number lands on, so
+pin 1 stays pin 1 but its Y offset changes sign relative to the Gerber.
