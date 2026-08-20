@@ -3285,6 +3285,7 @@
 			(at -5.90002 1.9 270)
 			(size 0.4 0.8)
 			(layers "F.Cu" "F.Mask" "F.Paste")
+			(net "+3V3")
 			(solder_mask_margin 0)
 			(uuid "2abb6b3f-4440-450c-84ba-ebfcff508ecb")
 		)
@@ -3840,6 +3841,14 @@
 		)
 		(layer "Edge.Cuts")
 		(uuid "5986cfd7-315f-450d-bf23-4e8d37f2ee21")
+	)
+	(segment
+		(start 154.4011 103.1036)
+		(end 153.733 103.1036)
+		(width 0.254)
+		(layer "F.Cu")
+		(net "+3V3")
+		(uuid "f78923fe-5896-4566-bfd4-d01ed509317a")
 	)
 	(segment
 		(start 144.50111 98.09441)
