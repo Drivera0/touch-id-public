@@ -15,6 +15,15 @@ BX0,BY0,BX1,BY1 = 138.7011, 96.2036, 158.3011, 113.8036   # board outline
 EDGE=0.25
 
 t=open(PCB).read()
+# --- 2026-08-20: the board now uses KiCad's real net schema ---
+# Top level declares (net <n> "NAME"); pads carry (net <n> "NAME") but tracks
+# and vias carry only (net <n>). Expand the bare ordinals back to names here so
+# every regex below keeps working unchanged.
+_NETNAMES = dict(__import__("re").findall(r'\(net (\d+) "([^"]*)"\)', t))
+t = __import__("re").sub(r'\(net (\d+)\)',
+                         lambda _m: '(net %s "%s")' % (_m.group(1), _NETNAMES.get(_m.group(1), "")),
+                         t)
+
 def blocks(tag):
     out,i=[],0
     while True:
@@ -46,7 +55,7 @@ for fp in blocks('footprint "'):
     for pm in re.finditer(r'\(pad "([^"]*)" (\w+) (\w+)\s*\n\s*\(at ([-\d.]+) ([-\d.]+)(?: ([-\d.]+))?\)\s*\n\s*\(size ([\d.]+) ([\d.]+)\)(.*?)\n\t\t\)',fp,re.S):
         nm,pt,sh,px,py,pa,w,h,tail=pm.groups()
         dx,dy=rot(float(px),float(py),fa)
-        rr=re.search(r'\(roundrect_rratio ([\d.]+)\)',tail); net=re.search(r'\(net "([^"]*)"\)',tail)
+        rr=re.search(r'\(roundrect_rratio ([\d.]+)\)',tail); net=re.search(r'\(net (?:\d+ )?"([^"]*)"\)',tail)
         g=shp(sh,fx+dx,fy+dy,float(w),float(h),float(rr.group(1)) if rr else None,float(pa or 0)+fa)
         L=[l for l in ('F','B') if (l+'.Cu') in tail] or (['F','B'] if pt=='thru_hole' else [])
         if (_ref,nm)==SRC_PAD:
@@ -54,13 +63,13 @@ for fp in blocks('footprint "'):
             continue                      # source pad: not an obstacle
         for l in L:
             (target if (net and net.group(1)==NET) else obst)[l].append(g)
-for m in re.finditer(r'\(segment\s*\n\s*\(start ([-\d.]+) ([-\d.]+)\)\s*\n\s*\(end ([-\d.]+) ([-\d.]+)\)\s*\n\s*\(width ([\d.]+)\)\s*\n\s*\(layer "([^"]+)"\)\s*\n\s*\(net "([^"]*)"\)',t):
+for m in re.finditer(r'\(segment\s*\n\s*\(start ([-\d.]+) ([-\d.]+)\)\s*\n\s*\(end ([-\d.]+) ([-\d.]+)\)\s*\n\s*\(width ([\d.]+)\)\s*\n\s*\(layer "([^"]+)"\)\s*\n\s*\(net (?:\d+ )?"([^"]*)"\)',t):
     sx,sy,ex,ey,w,lay,net=m.groups()
     g=LineString([(float(sx),float(sy)),(float(ex),float(ey))]).buffer(float(w)/2,cap_style=2)
     l='F' if lay=='F.Cu' else 'B'
     (target if net==NET else obst)[l].append(g)
 for b in blocks('via'):
-    m=re.search(r'\(at ([-\d.]+) ([-\d.]+)\)\s*\n\s*\(size ([\d.]+)\)',b); net=re.search(r'\(net "([^"]*)"\)',b)
+    m=re.search(r'\(at ([-\d.]+) ([-\d.]+)\)\s*\n\s*\(size ([\d.]+)\)',b); net=re.search(r'\(net (?:\d+ )?"([^"]*)"\)',b)
     if not m: continue
     g=Point(float(m.group(1)),float(m.group(2))).buffer(float(m.group(3))/2,32)
     for l in ('F','B'): (target if (net and net.group(1)==NET) else obst)[l].append(g)

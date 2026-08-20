@@ -18,6 +18,15 @@ PCB = sys.argv[1] if len(sys.argv) > 1 else "pcb-v2.kicad_pcb"
 MIN_CU = 0.127          # JLCPCB minimum copper to copper
 
 t = open(PCB).read()
+# --- 2026-08-20: the board now uses KiCad's real net schema ---
+# Top level declares (net <n> "NAME"); pads carry (net <n> "NAME") but tracks
+# and vias carry only (net <n>). Expand the bare ordinals back to names here so
+# every regex below keeps working unchanged.
+_NETNAMES = dict(__import__("re").findall(r'\(net (\d+) "([^"]*)"\)', t))
+t = __import__("re").sub(r'\(net (\d+)\)',
+                         lambda _m: '(net %s "%s")' % (_m.group(1), _NETNAMES.get(_m.group(1), "")),
+                         t)
+
 
 # ---------------------------------------------------------------- footprints
 def blocks(tag):
@@ -68,7 +77,7 @@ for fp in blocks('footprint "'):
         dx, dy = rot(float(px), float(py), fa)
         x, y = fx + dx, fy + dy
         rr = re.search(r'\(roundrect_rratio ([\d.]+)\)', tail)
-        net = re.search(r'\(net "([^"]*)"\)', tail)
+        net = re.search(r'\(net (?:\d+ )?"([^"]*)"\)', tail)
         pads.append(dict(
             ref=ref, nm=nm, shape=shape, net=net.group(1) if net else None,
             g=pad_shape(shape, x, y, float(w), float(h),
@@ -79,7 +88,7 @@ for fp in blocks('footprint "'):
 trk = []
 for m in re.finditer(
         r'\(segment\s*\n\s*\(start ([-\d.]+) ([-\d.]+)\)\s*\n\s*\(end ([-\d.]+) ([-\d.]+)\)'
-        r'\s*\n\s*\(width ([\d.]+)\)\s*\n\s*\(layer "([^"]+)"\)\s*\n\s*\(net "([^"]*)"\)', t):
+        r'\s*\n\s*\(width ([\d.]+)\)\s*\n\s*\(layer "([^"]+)"\)\s*\n\s*\(net (?:\d+ )?"([^"]*)"\)', t):
     sx, sy, ex, ey, w, lay, net = m.groups()
     trk.append(dict(g=LineString([(float(sx), float(sy)), (float(ex), float(ey))])
                     .buffer(float(w) / 2, cap_style=2, resolution=16),
@@ -90,7 +99,7 @@ for m in re.finditer(r'\(via\s*\n\s*\(at ([-\d.]+) ([-\d.]+)\)\s*\n\s*\(size ([\
                      r'\s*\n\s*\(drill ([\d.]+)\)\s*\n\s*\(layers "([^"]+)" "([^"]+)"\)'
                      r'(.*?)\n\t\)', t, re.S):
     x, y, s, d, l1, l2, tail = m.groups()
-    net = re.search(r'\(net "([^"]*)"\)', tail)
+    net = re.search(r'\(net (?:\d+ )?"([^"]*)"\)', tail)
     vias.append(dict(g=Point(float(x), float(y)).buffer(float(s) / 2, 64),
                      net=net.group(1) if net else None, F=True, B=True))
 
