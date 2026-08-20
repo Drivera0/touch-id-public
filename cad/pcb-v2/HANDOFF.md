@@ -92,7 +92,40 @@ boot, the mode used to flash firmware over USB. Both are now tied high.
 
 ## Open issues, ranked
 
-### 1. U1's chamfered thermal pad is misplaced by exactly 1.45 mm — NEEDS DECISION
+> **2026-08-20 update.** Issues 1, 2 and the C1–C4 half of issue 5 are now
+> closed. Every footprint has been traced to the vendor drawing behind its
+> JLCPCB part number; see `JLCPCB DFM Report.md`, which has been rewritten. What
+> changed in `pcb-v2.kicad_pcb`:
+>
+> - **U1 pad 49** rebuilt as one custom pad at (−1.97501, 0.725) carrying
+>   Espressif's chamfer polygon on F.Cu + F.Mask + F.Paste; the detached
+>   copper-only island deleted. The polygon's global bbox and cut corner now
+>   match the Y6 `G36` region exactly.
+> - **U2** rebuilt to TI 4215302/E *copper*: 0.46 × 0.31 chamfered pads at
+>   (±0.43, ±0.325), mask 0.36 × 0.21, thermal 0.58 diamond / 0.48 mask /
+>   0.45 paste. The previous fix had used TI's mask-opening numbers as copper
+>   and then shrank the mask again, leaving 31 % less wetted copper than TI
+>   specifies.
+> - **C3/C4** re-spaced to Samsung's 2012 ±0.20 land table: 1.40 × 0.96 pads,
+>   1.84 mm centres (gap 0.88, span 2.80). The GND return run between them moved
+>   0.15 mm outboard and the VBAT jog beside U2 moved 0.06 mm, both to clear the
+>   larger pads.
+> - **C1/C2 were already fully in spec** against Samsung's 1005 table and were
+>   not touched.
+>
+> Post-edit state: `sexp_check` parses clean (95 pads, 187 segments, 18 vias,
+> 18 zones, 0 bare LF), all 9 nets single-island, and `check_board` now reports
+> **one** sub-0.127 pair instead of four — only the pre-existing +3V3/VBAT pair
+> at exactly 0.1270. The three U2 pairs at 0.0697 mm are gone; the chamfers are
+> what clears the diamond.
+>
+> Issue 3 (DRC, plot, independent Gerber verification, BOM/CPL rebuild) is still
+> open and still blocks ordering. Issue 6 (sensor not sourced) is unchanged. One
+> new item: the file uses `(net "NAME")` in pads with no net declaration block,
+> which is not KiCad's schema — confirm KiCad actually opens and plots it before
+> assuming the export will work.
+
+### 1. ~~U1's chamfered thermal pad is misplaced by exactly 1.45 mm~~ — CLOSED 2026-08-20
 
 Found 2026-08-20 by diffing the current board against
 `production-file-old-version.zip`.
@@ -122,7 +155,7 @@ the ordered artwork.
 > the Gerber both support it, but confirm by opening the board in KiCad and
 > looking at U1's thermal grid before editing anything.
 
-### 2. `JLCPCB DFM Report.md` is substantially wrong
+### 2. ~~`JLCPCB DFM Report.md` is substantially wrong~~ — CLOSED 2026-08-20, rewritten
 
 It claims U1's footprint is defective. **It is not.** Parsing the ordered
 Gerber's apertures proves U1 is correct: 26 × `R,0.4×0.8` + 22 × `R,0.8×0.4` =
@@ -153,13 +186,19 @@ order.
 
 ### 5. Accepted as-is
 
-- **C1–C4 still use the old, smaller land patterns.** The 0805 land is ~0.51 mm
-  short in the toe direction, which is most of the solder fillet. Fixing it
-  forces re-spacing and re-routing C3/C4. Marginal, not broken.
+- ~~**C1–C4 still use the old, smaller land patterns.** The 0805 land is
+  ~0.51 mm short in the toe direction~~ — **wrong, and now fixed.** The span was
+  inside Samsung's range all along; the real deviations were the gap (+0.17) and
+  the pad width (−0.10). C1/C2 were already fully in spec. C3/C4 corrected
+  2026-08-20.
 - **One +3V3/VBAT track pair at exactly 0.1270 mm**, JLCPCB's stated minimum.
-  Zero margin, but passed on the ordered board too.
-- **Three U2 pairs at 0.0697 mm** — inherent to the X2SON-4 package, separated
-  by a 0.1749 mm mask dam. Fine.
+  Zero margin, but passed on the ordered board too. Still open.
+- ~~**Three U2 pairs at 0.0697 mm**~~ — gone. They were an artefact of the
+  intermediate U2 fix, not inherent to X2SON-4. TI's chamfered pads clear the
+  diamond thermal with 0.22 mm to spare.
+- **J2's six Ø1.2 mm pads carry F.Paste.** They are hand-soldered wire pads for
+  the sensor pigtail, so the stencil will print six solder domes on 1.5 mm
+  pitch. Decide before plotting.
 
 ### 6. Long-standing
 
