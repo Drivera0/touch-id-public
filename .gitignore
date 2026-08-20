@@ -1,0 +1,25 @@
+# ---- editor / OS junk ----
+__pycache__/
+*.pyc
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# ---- VS Code local history (contains its own nested .git) ----
+.history/
+
+# ---- Obsidian workspace state ----
+.obsidian/workspace*.json
+
+# ---- Altium working / autosave files ----
+*.PcbDoc.LOG
+*.PrjPcbStructure
+History/
+__Previews/
+Project Logs*/
+*.~*
+
+# ---- KiCad local state ----
+*.kicad_prl
+fp-info-cache
+*-backups/

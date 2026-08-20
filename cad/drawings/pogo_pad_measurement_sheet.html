@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Pogo-pad measurement sheet — TouchID module</title>
+<style>
+  body { font-family: "Segoe UI", Arial, sans-serif; margin: 24px; color:#111; max-width: 1200px; }
+  h1 { font-size: 22px; margin-bottom: 4px; }
+  .sub { color:#444; margin: 2px 0; font-size: 14px; }
+  .warn { color:#b00020; font-size: 14px; }
+  .wrap { display: flex; gap: 28px; flex-wrap: wrap; align-items: flex-start; margin-top: 14px; }
+  svg { flex: 0 0 auto; border: 1px solid #ddd; border-radius: 8px; background: #fff; }
+  table { border-collapse: collapse; font-size: 14px; flex: 1 1 480px; }
+  th, td { border: 1px solid #ccc; padding: 6px 8px; text-align: left; }
+  th { background: #efefef; }
+  tr.crit td { background: #fdecec; }
+  input.meas { width: 90px; font-size: 15px; padding: 4px 6px; border: 1.5px solid #999; border-radius: 5px; }
+  input.ok    { border-color: #1a9e46; background: #e9f8ee; }
+  input.bad   { border-color: #c40000; background: #fdeaea; }
+  .refb { display:inline-block; width:22px; height:22px; line-height:22px; text-align:center;
+          border:2px solid #c40000; color:#c40000; border-radius:50%; font-weight:bold; font-size:13px; }
+  #summary { margin-top: 18px; }
+  textarea { width: 100%; height: 130px; font-family: Consolas, monospace; font-size: 13px; }
+  button { padding: 8px 14px; font-size: 14px; border-radius: 6px; border: 1px solid #888; background:#f2f2f2; cursor: pointer; }
+  button:hover { background:#e2e2e2; }
+  .hint { font-size: 13px; color: #555; margin-top: 6px; }
+</style>
+</head>
+<body>
+<h1>Pogo-pad measurement sheet — TouchID module / NuPhy knob PCB</h1>
+<p class="sub">PAD-SIDE VIEW — as seen looking at the gold pads of the <b>knob module PCB</b> (its pads mate with the same spring pins). All values in <b>mm</b>.</p>
+<p class="warn">★ D and E are the critical ones (2.54 vs 2.0 pitch). Fields turn green within ±0.2 mm of the assumed value, red otherwise — red doesn't mean wrong, it means the design must be updated.</p>
+
+<div class="wrap">
+<svg width="560" height="480" viewBox="0 0 760 640">
+  <defs>
+    <marker id="ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#c40000"/>
+    </marker>
+  </defs>
+  <rect x="140" y="140" width="429" height="429" rx="44" fill="#f0f4f0" stroke="#222" stroke-width="2"/>
+  <!-- J11 group -->
+  <circle cx="207.8" cy="177.0" r="24.2" fill="#e8c34a" stroke="#8a6d1d" stroke-width="1.5"/>
+  <circle cx="263.6" cy="177.0" r="24.2" fill="#e8c34a" stroke="#8a6d1d" stroke-width="1.5"/>
+  <circle cx="207.8" cy="232.8" r="24.2" fill="#e8c34a" stroke="#8a6d1d" stroke-width="1.5"/>
+  <circle cx="263.6" cy="232.8" r="24.2" fill="#e8c34a" stroke="#8a6d1d" stroke-width="1.5"/>
+  <text x="200" y="288" font-size="14" font-weight="bold" fill="#555">J11 (4)</text>
+  <!-- J4 group -->
+  <circle cx="505.6" cy="182.0" r="24.2" fill="#e8c34a" stroke="#8a6d1d" stroke-width="1.5"/>
+  <circle cx="449.8" cy="182.0" r="24.2" fill="#e8c34a" stroke="#8a6d1d" stroke-width="1.5"/>
+  <circle cx="505.6" cy="237.9" r="24.2" fill="#e8c34a" stroke="#8a6d1d" stroke-width="1.5"/>
+  <circle cx="449.8" cy="237.9" r="24.2" fill="#e8c34a" stroke="#8a6d1d" stroke-width="1.5"/>
+  <circle cx="505.6" cy="293.8" r="24.2" fill="#e8c34a" stroke="#8a6d1d" stroke-width="1.5"/>
+  <circle cx="449.8" cy="293.8" r="24.2" fill="#e8c34a" stroke="#8a6d1d" stroke-width="1.5"/>
+  <text x="443" y="348" font-size="14" font-weight="bold" fill="#555">J4 (6)</text>
+  <!-- context -->
+  <circle cx="171.9" cy="354.5" r="24.2" fill="white" stroke="#999" stroke-width="1.5" stroke-dasharray="4 3"/>
+  <circle cx="537.1" cy="354.5" r="24.2" fill="white" stroke="#999" stroke-width="1.5" stroke-dasharray="4 3"/>
+  <circle cx="310.5" cy="383.1" r="19.8" fill="#ddd" stroke="#aaa"/>
+  <circle cx="354.5" cy="383.1" r="19.8" fill="#ddd" stroke="#aaa"/>
+  <circle cx="398.5" cy="383.1" r="19.8" fill="#ddd" stroke="#aaa"/>
+  <rect x="205" y="430" width="300" height="105" fill="none" stroke="#bbb" stroke-dasharray="5 4"/>
+  <text x="248" y="490" font-size="12" fill="#999">programming pads — ignore</text>
+  <g stroke="#c40000" stroke-width="1.4" fill="none">
+    <line x1="449.8" y1="182" x2="449.8" y2="108"/><line x1="505.6" y1="182" x2="505.6" y2="108"/>
+    <line x1="449.8" y1="115" x2="505.6" y2="115" marker-start="url(#ar)" marker-end="url(#ar)"/>
+    <line x1="425.6" y1="182" x2="425.6" y2="80"/><line x1="529.8" y1="182" x2="529.8" y2="80"/>
+    <line x1="425.6" y1="87" x2="529.8" y2="87" marker-start="url(#ar)" marker-end="url(#ar)"/>
+    <line x1="505.6" y1="182" x2="600" y2="182"/><line x1="505.6" y1="237.9" x2="600" y2="237.9"/>
+    <line x1="593" y1="182" x2="593" y2="237.9" marker-start="url(#ar)" marker-end="url(#ar)"/>
+    <line x1="505.6" y1="157.8" x2="640" y2="157.8"/><line x1="505.6" y1="318" x2="640" y2="318"/>
+    <line x1="633" y1="157.8" x2="633" y2="318" marker-start="url(#ar)" marker-end="url(#ar)"/>
+    <line x1="529.8" y1="270" x2="569" y2="270" marker-start="url(#ar)" marker-end="url(#ar)"/>
+    <line x1="549" y1="270" x2="660" y2="400"/>
+    <line x1="481" y1="157.8" x2="481" y2="140" marker-start="url(#ar)" marker-end="url(#ar)"/>
+    <line x1="481" y1="149" x2="660" y2="60"/>
+    <line x1="207.8" y1="177" x2="207.8" y2="108"/><line x1="263.6" y1="177" x2="263.6" y2="108"/>
+    <line x1="207.8" y1="115" x2="263.6" y2="115" marker-start="url(#ar)" marker-end="url(#ar)"/>
+    <line x1="183.6" y1="177" x2="183.6" y2="80"/><line x1="287.8" y1="177" x2="287.8" y2="80"/>
+    <line x1="183.6" y1="87" x2="287.8" y2="87" marker-start="url(#ar)" marker-end="url(#ar)"/>
+    <line x1="140" y1="260" x2="183.6" y2="260" marker-start="url(#ar)" marker-end="url(#ar)"/>
+    <line x1="161" y1="260" x2="80" y2="330"/>
+    <line x1="230" y1="152.8" x2="230" y2="140" marker-start="url(#ar)" marker-end="url(#ar)"/>
+    <line x1="230" y1="146" x2="90" y2="60"/>
+    <line x1="287.8" y1="232.8" x2="287.8" y2="375"/><line x1="425.6" y1="237.9" x2="425.6" y2="375"/>
+    <line x1="287.8" y1="368" x2="425.6" y2="368" marker-start="url(#ar)" marker-end="url(#ar)"/>
+    <line x1="449.8" y1="262.1" x2="380" y2="310"/>
+    <line x1="140" y1="569" x2="140" y2="612"/><line x1="569" y1="569" x2="569" y2="612"/>
+    <line x1="140" y1="605" x2="569" y2="605" marker-start="url(#ar)" marker-end="url(#ar)"/>
+    <line x1="140" y1="140" x2="70" y2="140"/><line x1="140" y1="569" x2="70" y2="569"/>
+    <line x1="77" y1="140" x2="77" y2="569" marker-start="url(#ar)" marker-end="url(#ar)"/>
+  </g>
+  <g font-size="13" font-weight="bold" text-anchor="middle">
+    <circle cx="477.7" cy="115" r="11" fill="white" stroke="#c40000"/><text x="477.7" y="119.5" fill="#c40000">D</text>
+    <circle cx="477.7" cy="66" r="11" fill="white" stroke="#c40000"/><text x="477.7" y="70.5" fill="#c40000">F</text>
+    <circle cx="612" cy="210" r="11" fill="white" stroke="#c40000"/><text x="612" y="214.5" fill="#c40000">E</text>
+    <circle cx="655" cy="238" r="11" fill="white" stroke="#c40000"/><text x="655" y="242.5" fill="#c40000">G</text>
+    <circle cx="672" cy="415" r="11" fill="white" stroke="#c40000"/><text x="672" y="419.5" fill="#c40000">H</text>
+    <circle cx="672" cy="55" r="11" fill="white" stroke="#c40000"/><text x="672" y="59.5" fill="#c40000">I</text>
+    <circle cx="235.7" cy="115" r="11" fill="white" stroke="#c40000"/><text x="235.7" y="119.5" fill="#c40000">J</text>
+    <circle cx="235.7" cy="66" r="11" fill="white" stroke="#c40000"/><text x="235.7" y="70.5" fill="#c40000">K</text>
+    <circle cx="70" cy="342" r="11" fill="white" stroke="#c40000"/><text x="70" y="346.5" fill="#c40000">L</text>
+    <circle cx="80" cy="55" r="11" fill="white" stroke="#c40000"/><text x="80" y="59.5" fill="#c40000">M</text>
+    <circle cx="356.7" cy="368" r="11" fill="white" stroke="#c40000"/><text x="356.7" y="372.5" fill="#c40000">N</text>
+    <circle cx="368" cy="320" r="11" fill="white" stroke="#c40000"/><text x="368" y="324.5" fill="#c40000">C</text>
+    <circle cx="354.5" cy="605" r="11" fill="white" stroke="#c40000"/><text x="354.5" y="609.5" fill="#c40000">A</text>
+    <circle cx="77" cy="354" r="11" fill="white" stroke="#c40000"/><text x="77" y="358.5" fill="#c40000">B</text>
+  </g>
+</svg>
+
+<table id="tbl">
+  <tr><th>Ref</th><th>What to measure</th><th>Assumed</th><th>Measured (mm)</th></tr>
+  <tr><td><span class="refb">A</span></td><td>PCB outline width</td><td>19.50 (lip meas. 19.72)</td><td><input class="meas" data-exp="19.5" data-tol="0.45" id="A"></td></tr>
+  <tr><td><span class="refb">B</span></td><td>PCB outline height</td><td>19.50</td><td><input class="meas" data-exp="19.5" data-tol="0.45" id="B"></td></tr>
+  <tr><td><span class="refb">C</span></td><td>Gold pad diameter (any pad)</td><td>2.20</td><td><input class="meas" data-exp="2.2" data-tol="0.2" id="C"></td></tr>
+  <tr class="crit"><td><span class="refb">D</span></td><td>J4 column pitch, center-to-center ★</td><td>2.54</td><td><input class="meas" data-exp="2.54" data-tol="0.2" id="D"></td></tr>
+  <tr class="crit"><td><span class="refb">E</span></td><td>J4 row pitch, center-to-center ★</td><td>2.54</td><td><input class="meas" data-exp="2.54" data-tol="0.2" id="E"></td></tr>
+  <tr><td><span class="refb">F</span></td><td>J4 outer span, 2 columns outside-to-outside (= D + C)</td><td>4.74</td><td><input class="meas" data-exp="4.74" data-tol="0.25" id="F"></td></tr>
+  <tr><td><span class="refb">G</span></td><td>J4 outer span, 3 rows outside-to-outside (= 2·E + C)</td><td>7.28</td><td><input class="meas" data-exp="7.28" data-tol="0.3" id="G"></td></tr>
+  <tr><td><span class="refb">H</span></td><td>J4 nearest pad edge → nearest board edge</td><td>1.78</td><td><input class="meas" data-exp="1.78" data-tol="0.3" id="H"></td></tr>
+  <tr><td><span class="refb">I</span></td><td>J4 top pad edge → top board edge</td><td>0.81</td><td><input class="meas" data-exp="0.81" data-tol="0.3" id="I"></td></tr>
+  <tr><td><span class="refb">J</span></td><td>J11 pitch, center-to-center (both directions)</td><td>2.54</td><td><input class="meas" data-exp="2.54" data-tol="0.2" id="J"></td></tr>
+  <tr><td><span class="refb">K</span></td><td>J11 outer span, outside-to-outside (= J + C)</td><td>4.74</td><td><input class="meas" data-exp="4.74" data-tol="0.25" id="K"></td></tr>
+  <tr><td><span class="refb">L</span></td><td>J11 nearest pad edge → nearest board edge</td><td>1.98</td><td><input class="meas" data-exp="1.98" data-tol="0.3" id="L"></td></tr>
+  <tr><td><span class="refb">M</span></td><td>J11 top pad edge → top board edge</td><td>0.58</td><td><input class="meas" data-exp="0.58" data-tol="0.3" id="M"></td></tr>
+  <tr><td><span class="refb">N</span></td><td>Gap between groups, nearest pad edge → pad edge</td><td>6.26</td><td><input class="meas" data-exp="6.26" data-tol="0.4" id="N"></td></tr>
+</table>
+</div>
+
+<div id="summary">
+  <button onclick="makeSummary()">Generate summary to copy back to Claude</button>
+  <p class="hint">Tips: the outer spans (F, G, K) are the easiest to caliper accurately — D ≈ F − C and E ≈ (G − C) / 2. Cross-check before trusting a red field.</p>
+  <textarea id="out" placeholder="Click the button after filling in your measurements…"></textarea>
+</div>
+
+<script>
+  document.querySelectorAll('input.meas').forEach(inp => {
+    inp.addEventListener('input', () => {
+      const v = parseFloat(inp.value);
+      inp.classList.remove('ok','bad');
+      if (isNaN(v)) return;
+      const exp = parseFloat(inp.dataset.exp), tol = parseFloat(inp.dataset.tol);
+      inp.classList.add(Math.abs(v - exp) <= tol ? 'ok' : 'bad');
+    });
+  });
+  function makeSummary() {
+    let lines = ['Pogo pad measurements (mm):'];
+    document.querySelectorAll('input.meas').forEach(inp => {
+      const v = inp.value.trim();
+      const exp = inp.dataset.exp;
+      lines.push(inp.id + ' = ' + (v === '' ? '(not measured)' : v) + '   (assumed ' + exp + ')');
+    });
+    document.getElementById('out').value = lines.join('\n');
+    document.getElementById('out').select();
+    try { document.execCommand('copy'); } catch(e) {}
+  }
+</script>
+</body>
+</html>

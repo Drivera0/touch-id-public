@@ -1,0 +1,34 @@
+ALTIUM PAD TABLE — corrected land patterns
+Board centre = (100.000, 8.800) mm in Altium coordinates.
+
+U1  ESP32-C3-MINI-1-N4  (LCSC C2838502)  61 pads
+  perimeter: 48 pads, 0.800 x 0.400 mm, 0.800 mm pitch
+    left (pins 1-11)       X-Size 0.800  Y-Size 0.400
+        pin  1 at (94.100, 10.100)  ->  pin 11 at (94.100, 2.100)
+    bottom (pins 12-24)    X-Size 0.400  Y-Size 0.800
+        pin 12 at (95.200, 1.200)  ->  pin 24 at (104.800, 1.200)
+    right (pins 25-35)     X-Size 0.800  Y-Size 0.400
+        pin 25 at (105.900, 2.100)  ->  pin 35 at (105.900, 10.100)
+    top (pins 36-48)       X-Size 0.400  Y-Size 0.800
+        pin 36 at (104.800, 11.000)  ->  pin 48 at (95.200, 11.000)
+  thermal pin 49: 9 pads, 1.450 x 1.450 mm
+        X: 98.025, 100.000, 101.975
+        Y: 4.125, 6.100, 8.075
+  corners pins 50-53: 0.700 x 0.700 mm
+        pin 50 at (105.950, 11.050)
+        pin 51 at (105.950, 1.150)
+        pin 52 at (94.050, 1.150)
+        pin 53 at (94.050, 11.050)
+
+U2  TPS7A2033DQNR  (LCSC C46459900)  5 pads   centre (92.400, 11.800)
+        pin 1 at (91.979, 12.125)  X-Size 0.36  Y-Size 0.3
+        pin 2 at (91.979, 11.475)  X-Size 0.36  Y-Size 0.3
+        pin 3 at (92.821, 11.475)  X-Size 0.36  Y-Size 0.3
+        pin 4 at (92.821, 12.125)  X-Size 0.36  Y-Size 0.3
+        pin 5 at (92.400, 11.800)  0.48 x 0.48  ROTATION 45  solder mask expansion -0.05 (manual)
+
+C1-C4   pad sizes from LCSC
+    C1: X-Size 0.54  Y-Size 0.5   pad1 (92.400, 14.020)   pad2 (92.400, 13.180)
+    C2: X-Size 0.54  Y-Size 0.5   pad1 (92.400, 15.920)   pad2 (92.400, 15.080)
+    C3: X-Size 1.35  Y-Size 1.41   pad1 (107.600, 12.900)   pad2 (107.600, 10.900)
+    C4: X-Size 1.35  Y-Size 1.41   pad1 (107.600, 16.510)   pad2 (107.600, 14.510)
