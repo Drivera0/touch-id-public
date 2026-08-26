@@ -7,41 +7,108 @@ tags:
   - reference
 ---
 
-# Pin Test Results — 2026-08-18
+# Pin Test Results
 
-Raw data: `cad/pin-test-results.csv`. Procedure and pin numbering: [[touchid/Pin Test Procedure|Pin Test Procedure]] (looking into the slot, typing position: J4 = 6-pin left block, J11 = 4-pin right block, top row toward rear, numbered left→right then down).
+Raw data: `cad/pin-test-results.csv` (session 1–2), `cad/pin-test-modes-2026-08-26.csv` (session 3, both modes). Logger: `pin-test-v2.html`. Procedure: [[touchid/Pin Test Procedure|Pin Test Procedure]].
 
-## Readings
+> [!warning] There is no power rail in the slot
+> Session 3 identifies **J11-1/2/3 as PWM RGB LED drive lines**, not a battery rail, and **J4 as the switch/encoder block**. The module connector carries signals and LED drive only. The keyboard cannot power an ESP32-C3 through these pins. The 2026-08-18 power architecture is **dead**, not merely reopened.
 
-| Pin | GND beep | V wired | V wireless | V off | Verdict |
-|---|---|---|---|---|---|
-| J4-1 | | 3.293 | 3.293 | 0.00 | pulled-up signal (encoder?) — **not a power rail** |
-| J4-2 | | 0.009 | 0.071 | 0.001 | idle-low signal / detect |
-| J4-3 | | 3.293 | 3.293 | 0.000 | pulled-up signal (encoder?) |
-| J4-4 | | 3.293 | 3.293 | 0.000 | pulled-up signal (encoder press?) |
-| J4-5 | **yes** | 0.000 | 0.000 | 0.000 | **GND — confirmed** |
-| J4-6 | | 0.001 | 0.000 | 0.000 | driven low / NC |
-| J11-1 | | 3.680 | 3.466 | 0.200 | **VBAT (battery rail) — switched by power slider** |
-| J11-2 | | 3.680 | 3.466 | 0.236 | **VBAT** |
-| J11-3 | | 3.685 | 3.466 | 0.280 | **VBAT** |
-| J11-4 | | 0.332 | 0.312 | 0.003 | floating / detect — leave open |
+## Pin function map — current best understanding
 
-3.680 V wired vs 3.466 V wireless = classic Li-ion behavior (charger present vs battery at partial charge). The 3.293 V on J4-1/3/4 matches CH592 3.3 V logic pull-ups, not a supply.
+| Pin | Function | Evidence |
+|---|---|---|
+| J4-1 | Encoder A (pull-up) | 3.293 V, ~55 kΩ source, both modes |
+| J4-2 | Signal, idle low | 0.03–0.07 V, no current under load |
+| J4-3 | Encoder B (pull-up) | 3.293 V, ~55 kΩ source, both modes |
+| J4-4 | **Switch / encoder press** | Loading it **muted the PC and zoomed Chrome** — a real input event |
+| J4-5 | **GND — confirmed** | Only pin that beeps to USB-C shell |
+| J4-6 | Module detect? | Steady 0.001 V, unaffected by load, doesn't beep to ground |
+| J11-1 | **RGB anode — channel 1** | PWM fluctuation, ~231–244 Ω, changes nearby RGB when loaded |
+| J11-2 | **RGB anode — channel 2** | PWM fluctuation, ~440–450 Ω, changes nearby RGB when loaded |
+| J11-3 | **RGB anode — channel 3** | PWM fluctuation, ~465–483 Ω, changes nearby RGB when loaded |
+| J11-4 | **LED common return** | Stiff ~0.3 V at 3 mA (≈3–6 Ω), goes to 0.000 when lights sleep |
 
-## Power architecture — DECIDED
+## The evidence for the LED reading
 
-The module powers from the keyboard: **J11-1 + J11-2 + J11-3 tied together = VBAT in** (parallel pins share pogo contact current), **J4-5 = GND**. All other pins left unconnected. On the module PCB: VBAT → 3.3 V LDO (low-dropout, ≥250 mA, e.g. XC6220/TPS7A02 class) → ESP32-C3-MINI-1 + fingerprint sensor. Bulk cap (≥100 µF) near the LDO input to ride out pogo-contact bounce and BLE TX peaks.
+**1. The voltages oscillate.** J11-1/2/3 don't hold a value — they sweep and repeat ("bounces from 2.9 to 3.5 then bounces back down, repeating"). A battery rail does not do this. A PWM'd LED channel read by an averaging meter does exactly this.
 
-No keyboard data lines are used → no keyboard firmware modification needed. The module is a self-contained BLE device, per [[touchid/Architecture and Design|Architecture and Design]].
+**2. They all settle to 3.530 V when the backlight sleeps.** In knob mode `v_sleep1_lightoff` reads **3.530 on all three pins simultaneously** — steady, identical. That's three anodes idling at the supply through their driver, with no PWM running. It's the single most diagnostic number in the whole dataset.
 
-## Still to measure (from the procedure)
+**3. Loading them changes the RGB lights** — and specifically "the lights in the vicinity, not all". You're loading one LED channel and dimming it. Contact resistance cannot do this.
 
-- [ ] **Sleep sweeps** (v_sleep1_lightoff, v_sleep2_deep) on J11-1 — does VBAT survive keyboard sleep? Decides whether the module needs deep-sleep + fast-boot handling.
-- [ ] **Load test** on J11-1 (100–330 Ω to J4-5): confirm the rail holds ≥3.3 V under load through the pogo pins.
-- [ ] Continuity: confirm J11-1/2/3 beep to each other (same rail, not three separate nets).
+**4. The source resistances are LED-shaped.** Recomputed against the true 3.530 V source rather than the PWM average:
+
+| Pin | Loaded (knob) | Current | Source R |
+|---|---|---|---|
+| J11-1 | 1.065 | 10.7 mA | ~231 Ω |
+| J11-2 | 0.642 | 6.4 mA | ~450 Ω |
+| J11-3 | 0.606 | 6.1 mA | ~483 Ω |
+
+Three different values in the 200–500 Ω band is the classic signature of per-colour current-limiting resistors — each colour gets a different value because red, green and blue have different forward voltages.
+
+**5. J11-4 behaves like the common return.** It holds ~0.3 V stiffly at 3 mA (3–6 Ω, the only genuinely low-impedance pin in the slot) while awake, and drops to **0.000 V** when the lights sleep.
+
+**6. J4-4 generated real input events.** Loading it muted the PC and zoomed Chrome in *both* modes. That is a switch/encoder line being pulled low, registering as a press and a rotation.
+
+## Switch mode vs knob mode
+
+Very little changed electrically. Same pull-up values on J4-1/3/4, same LED behaviour on J11, same ground. J4-4 produced input events in both modes.
+
+This argues the **module hardware is identical** in both cases — the same passive switches, encoder and RGB LEDs — and the web setting only changes how the keyboard *interprets* the encoder signals in firmware. There is no hardware reconfiguration to exploit.
+
+## What this means for the design
+
+**The slot cannot power the module.** Even if firmware were driven to hold all three LED channels full-on, the three current-limit resistors in parallel give ~116 Ω, or roughly **30 mA into a dead short and about 4.6 mA at 3.0 V**. An ESP32-C3 needs an order of magnitude more, with BLE transmit peaks into the hundreds of mA. It isn't close, and stealing it would visibly break the backlight.
+
+Remaining options, in order of preference:
+
+1. **On-board LiPo in the module**, charged over its own USB-C. Fully self-contained, no keyboard modification, no firmware dependency. Costs thickness — check against the 2.7 mm depth constraint beside U1.
+2. **Tap the keyboard's battery connector** inside the case. Real VBAT, plenty of current, but requires opening the keyboard and routing a wire into the slot.
+3. **Harvest the LED rail into a supercap** and duty-cycle hard. ~5 mA average could support an occasional fingerprint scan from deep sleep, but it fights the backlight and is fragile. Long shot.
+
+The J4 signals remain useful for a different purpose: the module could *emulate* the switch and encoder so the keyboard still sees a valid module, while the fingerprint side runs independently over BLE.
+
+## Confirming tests (cheap, no scope needed)
+
+- [ ] **AC volts on J11-1** with the lights on. A PWM line shows a clear AC component; a DC rail shows ~0. Then repeat with brightness at 0 — the AC reading should collapse.
+- [ ] **Set RGB brightness to 0** in the web settings, then re-measure J11-1/2/3 in DC. All three should read a steady 3.530 V.
+- [ ] **Set the RGB to pure red**, then green, then blue. One channel should drop each time while the others stay high — that maps colour to pin.
+- [ ] **Continuity J11-4 → J4-5** with the keyboard off. Confirms whether the return is grounded or switched.
+- [ ] Photograph the knob module's underside and confirm it contains RGB LEDs.
+- [ ] `v_sleep2_deep` still never measured in either mode.
+
+## Session 1 — 2026-08-18 (voltage survey, mode unrecorded)
+
+| Pin | GND beep | V wired | V wireless | V off |
+|---|---|---|---|---|
+| J4-1 | | 3.293 | 3.293 | 0.00 |
+| J4-2 | | 0.009 | 0.071 | 0.001 |
+| J4-3 | | 3.293 | 3.293 | 0.000 |
+| J4-4 | | 3.293 | 3.293 | 0.000 |
+| J4-5 | **yes** | 0.000 | 0.000 | 0.000 |
+| J4-6 | | 0.001 | 0.000 | 0.000 |
+| J11-1 | | 3.680 | 3.466 | 0.200 |
+| J11-2 | | 3.680 | 3.466 | 0.236 |
+| J11-3 | | 3.685 | 3.466 | 0.280 |
+| J11-4 | | 0.332 | 0.312 | 0.003 |
+
+The steady-looking 3.466 V readings were almost certainly PWM averages that happened to sit still long enough to write down. The apparent "Li-ion charging vs discharging" story (3.680 wired, 3.466 wireless) was a coincidence of duty cycle, not battery chemistry.
+
+## Session 2 — 2026-08-26 (first 100 Ω load test)
+
+J11-1/2/3 collapsed to 1.031 / 0.596 / 0.526 V, implying 236 / 482 / 559 Ω. Read at the time as a possible bad ground contact; session 3 reproduced the same numbers in both modes, so the values are real and the hand-held ground was not the problem.
+
+J4-1/3/4 collapsed to 0.006 V — ~55 kΩ, confirming weak MCU pull-ups.
+
+## Power architecture — DEAD
+
+The 2026-08-18 plan (J11-1+2+3 tied as VBAT in → 3.3 V LDO → ESP32-C3) rested on J11 being a battery rail. It is an LED connector. Do not build it.
 
 ## Related
 
+- [[touchid/Pin Test Procedure|Pin Test Procedure]]
 - [[touchid/Hardware Teardown|Hardware Teardown]]
 - [[touchid/TouchID Module Design|TouchID Module Design]]
 - [[touchid/Firmware and PCB|Firmware and PCB]]
+- [[touchid/Architecture and Design|Architecture and Design]]
