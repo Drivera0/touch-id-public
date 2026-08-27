@@ -37,7 +37,18 @@ Read this before changing anything. Sources of truth, in order:
 ## 1. Coordinate conventions — get this right first
 
 **Board (KiCad):** footprint origin at global (148.5011, 105.0036). Board-local
-coordinates in this document are `global − origin`. Board-local +Y is KiCad-up.
+coordinates in this document are `global − origin`, **keeping KiCad's Y-down file
+convention — do not negate Y**. Board-local **+Y is toward the spacebar**; −Y is
+toward the screen.
+
+> [!warning] Corrected 2026-08-27 — this line used to say "+Y is KiCad-up"
+> That was wrong and it cost a session. KiCad's file Y increases downward, so under
+> `global − origin` the pogo pads at local y −7.22 are KiCad-**up**, and local +Y is
+> KiCad-**down**. Anyone who negated Y to satisfy the old sentence got the J4 pads at
+> +1.12…+8.32 instead of −8.32…−1.12 and had the board back to front.
+> Every table in this file follows `global − origin` and is correct as printed.
+> Full derivation, with two independent confirmations from the file:
+> [[touchid/ANTENNA-ORIENTATION|Antenna orientation]].
 
 **Housing (CadQuery):**
 - `Z = 0` is the housing back plane **and** the PCB top face
