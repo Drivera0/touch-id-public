@@ -13,6 +13,15 @@ updated: 2026-08-27
 running **unattended** while Daniel is at work. He cannot answer questions. Every rule
 below exists because of a mistake this project has already paid for.
 
+> [!tip] How to start this
+> Open a session in this folder and say: **"work through NEXT-SESSION.md"**.
+> Scope agreed with Daniel: **Tasks A through E, in order.** Get as far as you can;
+> three tasks done properly beats five started.
+>
+> **Before walking away, approve the permission mode** so the session is not left
+> waiting on a prompt for hours. Claude cannot grant itself permissions — if a prompt
+> fires and nobody is at the machine, everything after it stalls.
+
 ---
 
 ## 0. Restore point
