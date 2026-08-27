@@ -97,8 +97,9 @@ This was a forced move, not a preference.
 
 The module is 15.5 mm long in a **17.94 mm lip cavity**, so its centre cannot
 exceed 8.97 − 7.75 = 1.22 or the lip wall lands on the module. 1.22 leaves
-0.02 mm, which is not a fit on a printed part, so **U1_CY = 0.90** — 0.32 mm of
-real margin, at a cost of 0.3 mm of antenna-to-edge distance.
+0.02 mm, which is not a fit on a printed part. **U1_CY = 1.00** — 0.22 mm of
+real margin, at a cost of 0.22 mm of antenna-to-edge distance. See the 0.08 mm
+note above for why it is 1.00 and not 0.90.
 
 ## Layout
 
@@ -106,10 +107,13 @@ real margin, at a cost of 0.3 mm of antenna-to-edge distance.
 |---|---|---|
 | Left strip | −8.97 … −6.25 (2.72) | U3, U4, C1, C2, BT1 pads. **Too narrow for an 0805** |
 | Right strip | 4.65 … 8.97 (4.32) | U2 and every 0805 — the only strip wide enough |
-| Bottom strip | full width, y < −6.85 | **two rows of ten 0402s** — this is what makes the twenty small parts land |
+| Bottom strip | full width, y < −6.75 | **two rows of ten 0402s** — this is what makes the twenty small parts land |
 
-Antenna keep-out, **all four copper layers**: x −7.05 … 5.45, y 4.85 … 9.65.
-Nearest pogo copper is at y −1.12, so it clears by **5.97 mm**.
+Antenna keep-out, **all four copper layers**: x −7.05 … 5.45, y 4.95 … 9.65.
+Nearest pogo copper is at y −1.12, so it clears by **6.07 mm**.
+
+Screw keep-outs, **all four copper layers**: r1.40 at (+8.10, −8.10) and
+(−8.10, +8.10) — tracks, vias, pads, pour and footprints all disallowed.
 
 The ten pogo pads keep their **exact** pcb-v2 coordinates, extracted rather than
 retyped.
