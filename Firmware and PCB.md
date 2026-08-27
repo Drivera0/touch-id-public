@@ -58,6 +58,100 @@ Module size reference:
 | **ESP32-C3-MINI-1** | 13.2 × 16.6 | ✅ (snug) | minor (BLE, no USB) |
 | ESP32-C6-MINI-1 | 13.2 × 16.6 | ✅ | minor |
 | nRF52840 module (Raytac MDBT50Q) | ~15.5 × 10.5 | ✅ easily | full rewrite; best low-power |
+
+## Chip choice REVISITED — 2026-08-26
+
+> [!warning] The ESP32-C3-MINI-1 decision is superseded
+> Two findings force a rethink: the keyboard slot supplies **no power** (see [[touchid/Pin Test Results|Pin Test Results]] — J11 is an RGB LED connector), and the C3-MINI's **13.2 mm width** is what creates the connector-vs-screws deadlock in [[touchid/Module Mechanical v3|Module Mechanical v3]].
+
+### Wi-Fi is not needed
+
+The module's only wireless job is getting an auth result to the Mac. BLE does that device-to-device with no infrastructure. Wi-Fi would mean storing router credentials on the device holding the password, depending on a network being up, and burning far more power. **BLE only.**
+
+That removes the reason to stay on Espressif. Every ESP32 MINI-1 module is 13.2 × 16.6 mm regardless of variant, so the C6 is a newer part at the same size — a drop-in, but no help dimensionally.
+
+### The width arithmetic
+
+`Module Mechanical v3` needs 5.85 mm spare width (FPC connector 3.25 + screw boss 2.60) against a 17.94 mm cavity.
+
+| Module | Chip | Size (mm) | Antenna | Width | Spare | Clears 5.85? |
+|---|---|---|---|---|---|---|
+| ESP32-C3-MINI-1 | ESP32-C3 | 13.2 × 16.6 × 2.4 | PCB | 13.2 | 4.74 | ✗ short 1.11 |
+| ESP32-C6-MINI-1 | ESP32-C6 | 13.2 × 16.6 × 2.4 | PCB | 13.2 | 4.74 | ✗ short 1.11 |
+| **Raytac MDBT42Q** | nRF52832 | 16 × 10 × 2.2 | chip | 10.0 | 7.94 | ✅ |
+| **Holyiot-17095** | nRF52832 | ~17 × 9.5 | integrated | 9.5 | 8.44 | ✅ |
+| Insight SiP ISP1807 | nRF52840 | 8 × 8 × 1.0 | integrated | 8.0 | 9.94 | ✅ |
+| u-blox ANNA-B112 | nRF52832 | 6.5 × 6.5 × 1.5 | integrated | 6.5 | 11.44 | ✅ |
+
+**All four nRF52 options clear it.** Going below 10 mm buys nothing we need, so select on practicality rather than absolute size.
+
+> [!caution] Integrated-antenna keep-out
+> A 6.5 × 6.5 module is not 6.5 × 6.5 in the layout. Integrated-antenna parts need a ground-plane keep-out — antenna end at a board edge, no copper beneath or beside it, typically several mm. On a 19 × 19 board also holding a sensor and battery, that keep-out eats much of the apparent size win. **The datasheet's placement rules matter more than the outline.**
+
+### Recommendation — revised 2026-08-26 after a sourcing sweep
+
+> [!warning] The MDBT42Q recommendation below was superseded before it was acted on
+> Two things changed it: storage now has to be a **cell**, not a supercap (see
+> [[touchid/DESIGN-SPEC|DESIGN-SPEC]] §9), which makes module **height** as binding as
+> width; and a verified pin-by-pin check showed VDDH is far rarer than assumed.
+
+| Part | Size (mm) | LCSC / JLC | 4.2 V direct | Decisive factor |
+|---|---|---|---|---|
+| **Fanstel BC840** | 7.1 × 9.2 × **1.5** | C5155822, in stock | **yes — VDDH to 5.5 V** | narrowest *and* thinnest. VDDH deletes U2 and its caps outright. ~$17 is the whole penalty |
+| **Holyiot 17095** | 9.4 × 9.25 × **?** | **C9900031218** | no | in JLCPCB's SMT catalog → a **verified land pattern**, exactly the safeguard that would have caught the invented U1/U2 footprints |
+| Raytac MDBT50Q-1MV2 | 15.5 × 10.5 × 2.05 | not at LCSC | yes, VDDH pin 30 | highest-confidence datasheet of the three, but 10.5 mm buys only 2.7 mm over the ESP32 |
+
+**MDBT42Q is out on availability** — LCSC C2828282 is out of stock, and nRF52832 has
+no VDDH so the regulator would stay.
+
+> [!danger] Two dimensions here are still unverified
+> **Holyiot 17095's height appears nowhere in its datasheet** — against a 4.96 mm
+> ceiling that is not acceptable, and a reseller listing is not a source (trap #2:
+> vendor spec tables are the package, not the module). **BC840's 2.5 mm antenna
+> keep-out is second-hand** — open `BC840-p Product Specifications.pdf` before layout.
+
+**Ruled out, with reasons worth remembering:**
+
+- **ESP32-H2-MINI-1** — 13.2 × 16.6 × 2.4, identical to the C3. Zero gain.
+- **u-blox ANNA-B112** — 6.5 × 6.5 sounds ideal, but §3.2.1 says it **cannot be
+  mounted in a metal enclosure** and it needs an antenna tuning strip drawn on the
+  host PCB. The keyboard's top frame is metal. *A 6.5 mm package is not a 6.5 mm
+  layout* — the general lesson for every integrated-antenna part.
+- **Insight SiP ISP1807** — 8 × 8 × 1.0, thinnest of all, but its `VBUS` pin is a
+  USB-regulator input, **not** VDDH. Abs max VCC 3.9 V. Cannot take a cell directly.
+- **SiLabs BGM220S** — the 6 × 6 body needs an antenna polygon copied onto your top
+  layer extending ~5 mm past the module. Real bounding box ≈ 10.8 × 9.0.
+- **No non-Nordic module accepts 4.2 V.** STM32WB5MMG 3.6 V, BGM220S 3.8 V, RSL10 SIP
+  3.63 V, PAN1760A 3.6 V. STM32WB5MMG (C2847339, 11.0 × 7.3 × 1.38) is otherwise the
+  most interesting outsider — fully self-contained antenna, 2-layer compatible, and
+  the only part in the sweep publishing a real *with-retention* sleep figure (2.1 µA).
+- **TI CC2652RSIP** — no integrated antenna.
+
+> [!note] Vendors publish sleep current *without* RAM retention
+> Raytac, Insight SiP and u-blox all quote the no-retention number. Insight SiP is the
+> honest exception, publishing **+30 nA per 4 KB retained** — so a fully-retained
+> nRF52840 is ~3.4 µA, not the advertised 1.5 µA. Budget accordingly.
+
+### Cost of the switch
+
+Leaving ESP-IDF for Nordic. Smaller than it sounds, because **tinyTouch's USB HID path was never going to survive anyway** — a module buried in a keyboard slot has to be BLE, and that rewrite was already scoped (see the correction note above). What's reusable ports cleanly: the `0xEF01` sensor protocol is plain UART, and Adafruit's nRF52 Arduino core is mature. Also note the **power argument now points the same way** — the ESP32-C3 draws ~80 mA transmitting and Nordic parts are cited at 10–16× more efficient for BLE, which stops being academic once we're on a battery we can barely fit. The fingerprint sensor dominates *active* draw regardless of MCU; the Nordic win is in idle and advertising, where the module spends virtually its whole life.
+
+### BLE limitation to design around
+
+| Scenario | Works over BLE? |
+|---|---|
+| Lock screen (Mac already booted) | ✅ Bluetooth stack running |
+| `sudo` in terminal | ✅ |
+| App / password-manager prompts | ✅ |
+| **FileVault unlock at cold boot** | ❌ likely not |
+
+At the FileVault pre-boot screen macOS loads a minimal driver set that generally excludes third-party Bluetooth keyboards; Apple's own Touch ID keyboard gets special treatment, and USB keyboards work. This contradicts the "Mac login ✅ today" row in [[touchid/Architecture and Design|Architecture and Design]], which assumed USB HID. **The module cannot be the only way into the machine.**
+
+Worth verifying on the actual Mac: pair any third-party Bluetooth keyboard, restart with FileVault on, see whether it types at the unlock prompt.
+
+### FCC note
+
+The modular-certification escape hatch still applies — MDBT42Q, Holyiot, ISP1807 and ANNA-B112 all carry modular approval, same as the ESP32-C3-MINI-1 did. Switching vendors doesn't lose that advantage.
 | bare ESP32-S3 QFN | ~7 × 7 | ✅ | advanced — own RF/antenna, loses module FCC cert |
 
 - **nRF52840** stays the low-power endgame (v3+) if battery life demands it — smaller and sips µA, but different ecosystem.

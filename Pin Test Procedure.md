@@ -155,6 +155,7 @@ Use `pin-test-v2.html` — two tables, live source-resistance calculation, mode 
 
 ## Related
 
+- [[touchid/Harvest Test Procedure|Harvest Test Procedure]] — session 4, the loaded-while-asleep test this session never ran
 - [[touchid/Pin Test Results|Pin Test Results]]
 - [[touchid/Hardware Teardown|Hardware Teardown]]
 - [[touchid/Architecture and Design|Architecture and Design]]

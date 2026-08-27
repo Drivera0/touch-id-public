@@ -19,7 +19,7 @@ Raw data: `cad/pin-test-results.csv` (session 1–2), `cad/pin-test-modes-2026-0
 | Pin | Function | Evidence |
 |---|---|---|
 | J4-1 | Encoder A (pull-up) | 3.293 V, ~55 kΩ source, both modes |
-| J4-2 | Signal, idle low | 0.03–0.07 V, no current under load |
+| J4-2 | Signal, idle low — **not ground** | 0.03–0.07 V, no current under load. Continuity to J4-5 tested 2026-08-27: **no beep** |
 | J4-3 | Encoder B (pull-up) | 3.293 V, ~55 kΩ source, both modes |
 | J4-4 | **Switch / encoder press** | Loading it **muted the PC and zoomed Chrome** — a real input event |
 | J4-5 | **GND — confirmed** | Only pin that beeps to USB-C shell |
@@ -69,14 +69,34 @@ Remaining options, in order of preference:
 
 The J4 signals remain useful for a different purpose: the module could *emulate* the switch and encoder so the keyboard still sees a valid module, while the fingerprint side runs independently over BLE.
 
-## Confirming tests (cheap, no scope needed)
+## Confirmed by physical inspection — 2026-08-26
 
-- [ ] **AC volts on J11-1** with the lights on. A PWM line shows a clear AC component; a DC rail shows ~0. Then repeat with brightness at 0 — the AC reading should collapse.
-- [ ] **Set RGB brightness to 0** in the web settings, then re-measure J11-1/2/3 in DC. All three should read a steady 3.530 V.
-- [ ] **Set the RGB to pure red**, then green, then blue. One channel should drop each time while the others stay high — that maps colour to pin.
-- [ ] **Continuity J11-4 → J4-5** with the keyboard off. Confirms whether the return is grounded or switched.
-- [ ] Photograph the knob module's underside and confirm it contains RGB LEDs.
+Examining the two stock modules settles it beyond the meter readings:
+
+| Module | J4 contacts | J11 contacts | RGB LED on PCB |
+|---|---|---|---|
+| **Knob module** | yes | **none** | no |
+| **Button module** | yes | **all four** | **yes** |
+
+A module that doesn't light up simply doesn't touch J11. A module that does, touches all four. **J11 exists solely to drive a module's RGB LED** — that is now proven by inspection, not inferred from voltages.
+
+It also means a fully functional module needs **only the J4 contacts**. The knob works on four pins: encoder A, encoder B, click, ground.
+
+### Consequences for our module
+
+- Model the TouchID module on the **button module**, not the knob. A fingerprint reader you press *is* a button, and the keyboard already knows how to handle one.
+- **The RGB is free.** Wire an RGB LED to J11-1/2/3/4 exactly as the button module does. The keyboard drives it, so it matches keyboard lighting with no firmware and no draw from our own battery.
+- The **button module PCB is a reference design** — photograph both sides and caliper the pad geometry. Given that U1/U2 footprints were invented placeholders, a known-correct pogo pad layout is worth copying rather than deriving.
+
+## Remaining tests
+
+- [ ] **Set the RGB to pure red**, then green, then blue, measuring all three pins each time. One channel should drop each time — this maps colour to pin, which is the wiring map needed if our module gets an RGB LED.
+- [ ] **Continuity J11-4 → J4-5** with the keyboard off. Confirms whether the return is grounded or switched by the keyboard.
 - [ ] `v_sleep2_deep` still never measured in either mode.
+- [ ] Trace **J4-2 and J4-6** on the keyboard PCB — if either is genuinely unconnected, it's a candidate for injecting tapped battery power into the slot.
+- [ ] Locate the keyboard's internal battery connector. Internal photos: https://fccid.io/2BE3OAIR75V3
+
+Superseded (answered by the inspection above): AC-volts PWM check, brightness-zero check, knob underside photograph.
 
 ## Session 1 — 2026-08-18 (voltage survey, mode unrecorded)
 
@@ -107,6 +127,7 @@ The 2026-08-18 plan (J11-1+2+3 tied as VBAT in → 3.3 V LDO → ESP32-C3) reste
 
 ## Related
 
+- [[touchid/Harvest Test Procedure|Harvest Test Procedure]] — session 4, decides whether the LED rail can power the module
 - [[touchid/Pin Test Procedure|Pin Test Procedure]]
 - [[touchid/Hardware Teardown|Hardware Teardown]]
 - [[touchid/TouchID Module Design|TouchID Module Design]]

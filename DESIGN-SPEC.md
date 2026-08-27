@@ -25,6 +25,13 @@ Read this before changing anything. Sources of truth, in order:
 | What was actually manufactured | `cad/pcb-v2/production-file-old-version.zip` (order Y6, scrap) |
 | Outstanding work | `cad/pcb-v2/OPEN-ISSUES.md` |
 
+> [!warning] Sections 2, 3 and 6 describe a board that is being replaced
+> Every dimension in them is still correct **as a record of what was drawn**, and the
+> outline, mounting holes, pogo positions and housing all carry forward unchanged.
+> But **U1 (ESP32-C3-MINI-1), U2 (TPS7A2033) and the whole VBAT path are dead** —
+> the slot supplies no power. See **§9 Power architecture** below, which is the
+> current thinking, and [[touchid/Pin Test Results|Pin Test Results]] for why.
+
 ---
 
 ## 1. Coordinate conventions — get this right first
@@ -213,13 +220,43 @@ U1 ∩ sensor = 0.000 mm³.
 | Barrel | Ø15.50 ±0.05 |
 | Total thickness | 2.40 ±0.20 |
 | Flange (step) | **0.20 ±0.05** |
-| Back connector | 4.50 tall — **must be desoldered**, wires go to the pads |
+| Back connector | XH-1.00-6P, 4.50 tall — **must be desoldered**, wires go to the pads |
 | Protocol | **0xEF01**, UART 3.3 V, 57600 default |
+| **Supply voltage** | **3.0 min / 3.3 typ / 3.6 max** |
+| **Standby current (sensor rail)** | **8 / 10 / 12 µA** |
+| **Operating current (algorithm MCU)** | **— / 15 / 25 mA** |
 
-Pinout (ZW09xx family): 1 GND, 2 RXD, 3 TXD, 4 VDD 3.3 V, 5 Detect, 6 SENSOR 3.3 V.
+Source: `datasheets/HLK-ZW0905-Specification-V1.0.pdf` §3, obtained 2026-08-27.
+Protocol manual: `datasheets/HiLink-Fingerprint-Protocol-0xEF01-V1.1.pdf`.
 
-**J2's existing nets already match** — `+3V3, GND, FP_TX, FP_RX, FP_INT, +3V3`.
-Two 3.3 V pins is correct: VDD and the separate SENSOR rail.
+### Pinout — CORRECTED 2026-08-27
+
+| Pin | Function |
+|---|---|
+| 1 | SENSOR_3.3V |
+| 2 | WAKEUP |
+| 3 | MCU_3.3V |
+| 4 | TX |
+| 5 | RX |
+| 6 | GND |
+
+> [!danger] The old pinout in this file was the ZW0901's, not the ZW0905's
+> It read `1 GND, 2 RXD, 3 TXD, 4 VDD, 5 Detect, 6 SENSOR` — **reversed**. The claim
+> that "J2's existing nets already match" was therefore **wrong**: GND and both 3.3 V
+> rails were in the wrong positions. Any board built to the old table would have had
+> ground and power swapped end-for-end. Re-check J2's net assignment before ordering.
+
+Two separate 3.3 V rails is still correct, and it is what makes the power design work:
+**MCU_3.3V is switched off in standby while SENSOR_3.3V stays powered**, drawing 10 µA
+and waiting for a finger. WAKEUP is the output that tells us one arrived.
+
+> [!warning] Two electrical requirements from §3 that affect the board
+> 1. **200 mA peak for 4 µs** on the sensor rail during each finger-detect scan.
+>    Hi-Link requires sensor-rail ripple **< 200 mV** and recommends a dedicated LDO
+>    rated ≥250 mA with PSRR > 60 dB, routed separately from other loads. A local
+>    10 µF holds the droop to 80 mV; 22 µF to 36 mV.
+> 2. **Pull RX and TX low when the MCU sleeps**, or they leak enough to spoil the
+>    10 µA standby figure.
 
 > **Ø18.00 is the smallest round module that exists.** ZW0919 Ø18.10 ·
 > ZW0901/ZW0906/ZW0623 Ø21.00 · ZW3020/ZW101/ZW111 Ø21 · GROW R502-B Ø22 ·
@@ -304,24 +341,187 @@ figures and re-exports both modes.
 
 ---
 
-## 9. New multimeter testing — TO FILL IN
+## 9. Power architecture
 
-You mentioned new measurements. Existing pin data is in
-[[touchid/Pin Test Results|Pin Test Results]] (`cad/pin-test-results.csv`), which
-currently records: J4-5 = GND, J11-1/2/3 = VBAT (3.680 V wired / 3.466 V
-wireless), J4-1/3/4 pulled to 3.293 V, J11-4 floating.
+> [!danger] The slot supplies no power
+> J11-1/2/3 are **PWM RGB LED drive lines**, not a battery rail. J4 is the
+> switch/encoder block. The 2026-08-18 architecture (J11 → LDO → ESP32-C3) is dead.
+> Proven by meter *and* by physical inspection: the knob module has no J11 contacts
+> and no LED; the button module has all four and an RGB LED.
 
-Open questions that measurement should close:
+### The one live possibility: harvest the LED rail
 
-- [ ] **Slot outline by caliper** — confirms the 19.30 board and the 19.54 lip
-- [ ] **Slot depth / clearance above the pogo blocks**
-- [ ] **Sleep sweep on J11-1** — does VBAT survive keyboard sleep?
-- [ ] **Load test on J11-1** (100–330 Ω to J4-5) — does the rail hold ≥3.3 V
-      through the pogo contacts under the ESP32's ~350 mA TX peaks?
-- [ ] **Continuity J11-1/2/3** to each other — one rail, or three nets?
-- [ ] **Pogo pad positions** re-verified against the keyboard now the outline is square
+The keyboard turns a module's LED off by **opening the return** (J11-4), not by
+dropping the anodes — no continuity J11-4 → J4-5, confirmed 2026-08-26. So while
+the backlight sleeps, J11-1/2/3 sit at **3.530 V** through their per-colour limit
+resistors with no path through the LED.
 
-Paste the new readings here or into `Pin Test Results` and I will fold them in.
+Current drawn from those pins and returned through **J4-5** (real chassis ground)
+never enters the LED. It lights nothing and dims nothing.
+
+### Load budget — rebuilt on datasheet numbers, 2026-08-27
+
+| | mWh/day |
+|---|---|
+| 50 scans at **25 mA max** for 1.5 s | 1.93 |
+| Sensor standby, 10 µA continuous | 0.89 |
+| nRF52 sleep, ~6 µA | 0.53 |
+| **Total, worst case** | **≈ 3.3** |
+| Total using typical figures (15 mA, 1.0 s) | ≈ 2.2 |
+
+Earlier revisions of this file assumed 50 mA scans and an unknown standby, giving
+5.5 mWh/day. The real numbers are **roughly 40% lower**, and the 10 µA standby means
+**no press-wake or backlight-gating trick is needed** — the sensor can sit in detect
+mode permanently for 0.89 mWh/day.
+
+### Measured harvest — RESOLVED 2026-08-27
+
+Four states measured at 300 Ω on J11-1. **Wired vs wireless is irrelevant. Backlight
+awake vs asleep is everything — a 35× difference.**
+
+| State | V open | V @300 Ω | Current | Source R | P at MPP, ×3 pins |
+|---|---|---|---|---|---|
+| wireless · asleep | 3.758 | 0.101 | 0.34 mA | **10,862 Ω** | 0.98 mW |
+| wired · asleep | 3.922 | 0.102 | 0.34 mA | **11,235 Ω** | 1.03 mW |
+| wireless · awake | 2.808 | 1.358 | 4.53 mA | **320 Ω** | **18.5 mW** |
+| wired · awake | 2.985 | 1.548 | 5.16 mA | **278 Ω** | **24.0 mW** |
+
+The awake figures line up with session 3's 231 Ω. The asleep state is a weak pull-up
+inside the driver, not a live rail — when the backlight sleeps the high side switches
+off.
+
+**Ground-path control test passed cleanly**: 0.096 V on the `−` rail and 0.096 V on the
+USB-C shell, identical. The contact was honest and these numbers are real.
+
+Against a **3.3 mWh/day** load, the awake state needs only **11 minutes of backlight per
+day** to break even. The asleep state alone would need 3.4 hours. Both contribute.
+
+> [!warning] Direct-connect harvesting does not work in either state
+> Asleep the source is 3.9 V open-circuit into a 3.5–3.7 V cell — a plain diode drives
+> ~16 µA. Awake the open-circuit average is only 2.8–3.0 V, i.e. **below** the cell.
+> A **boost converter with MPPT** is required in both cases.
+
+> [!danger] Do not let the MPPT run at full aggression while the backlight is awake
+> BQ25505 at VOC/2 would draw **4.4–5.4 mA per pin, 13–16 mA total** — above the
+> 10.7 mA that visibly dimmed nearby keys in session 3.
+>
+> Fix: a **series resistor on each pin**. It caps the awake draw and barely touches the
+> asleep case, which is already 11 kΩ.
+>
+> | R series | Awake, 3-pin total | Power ×3 | 4 h/day | Margin |
+> |---|---|---|---|---|
+> | none | 14.6 mA | 21.1 mW | 84 mWh | 26× |
+> | 470 Ω | 5.7 mA | 8.2 mW | 33 mWh | 10× |
+> | **1 kΩ** | **3.3 mA** | **4.9 mW** | **19 mWh** | **6×** |
+> | 2.2 kΩ | 1.7 mA | 2.5 mW | 10 mWh | 3× |
+>
+> **1 kΩ is the sensible pick** — a third of the level that dimmed anything, still six
+> times the daily budget on four hours of backlight. Verify against real keys before
+> committing; the threshold is empirical.
+
+One consequence for the layout: when the backlight is awake the pins carry PWM, so the
+"open-circuit" voltage the MPPT samples is a chopped average. The input capacitor needs
+to give the sampler something stable to read.
+
+> [!success] Proven 2026-08-27 — harvest while the backlight is on
+> The loaded-while-asleep measurement is done and the answer is that **asleep is
+> useless (11 kΩ) and awake is excellent (~300 Ω)**. The module harvests while you
+> type and coasts on the cell the rest of the time — which fits, because the backlight
+> is on exactly when you are at the keyboard. Data and thresholds in the table below.
+> Loggers: `two-tests.html`, `harvest-test.html`.
+
+### Storage must be a cell — supercapacitors are ruled out
+
+Three independent failures, any one fatal:
+
+1. **Energy.** The load needs 3.3 V, so a 1 F cap is usable only from ~3.46 down to
+   3.30 V — **0.54 J ≈ 42 minutes** against 18.9 J/day. (An earlier "1 F rides four
+   hours" figure was wrong: it assumed draining to 2.0 V, which needs a boost
+   converter there is no room for.)
+2. **Nothing fits.** No part is simultaneously ≥3.3 V rated, low-ESR enough for a
+   50 mA pulse, and inside 17.94 × 17.94 × 4.96. CAP-XX's smallest footprint is
+   20 mm; Kyocera AVX SCC and Eaton HS are Ø6.3; Eaton KR coin cells are 30–75 Ω ESR;
+   SII CPH3225A fits but is 11 mF at 160 Ω.
+3. **Headroom.** 3.466–3.680 V source into a 3.3 V load = **166 mV total droop
+   budget**, capping storage impedance at 3.3 Ω.
+
+**VARTA CP1254 A4** (77 mAh, <0.5 Ω, 210 mA pulse) is electrically ideal and fails
+geometrically twice: 5.4 mm against a 4.96 ceiling, and Ø12.1 cannot be packed beside
+any BLE module in a 17.94 square (12.1 + 7.1 = 19.2). That leaves a **semi-custom
+thin LiPo strip, roughly 2.5 × 10 × 16 mm, ~20–35 mAh**, beside the module.
+
+> [!danger] Do not draw a pad for a pouch cell from a format code
+> `TTWWLL` naming is reliable but internal resistance is not inferable, and it spans
+> "fine" to "fails the 166 mV budget." Get a vendor mechanical drawing **and** a
+> measured IR/max-discharge spec before any footprint exists. Same failure mode as
+> the invented U1/U2 land patterns.
+
+### Power path — ~18 mm², no charger, no PMIC, no supervisor
+
+```
+J11-1/2/3  (3.530 V idle when backlight sleeps)
+   └─ 3 × LM66100 ideal diode, ORed          SC-70-6, 2.1 × 2.0, 91 mΩ
+        └─ cell + bulk cap
+             ├─ nRF52 module (direct, 1.7–3.6 V)
+             └─ LM66100 #2 as load switch ← MCU GPIO
+                  └─ HLK-ZW0905, ~50 mA × 1.5 s
+   J11-4 → 100 kΩ pull-up → MCU GPIO         "backlight awake" flag
+   return: J4-5 only, never J11-4
+```
+
+Three deliberate deletions, each with a reason:
+
+- **No Schottky.** PMEG2005AEL drops 220 mV at 100 mA — more than the entire 166 mV
+  budget, and leaks 210 µA against a 62.5 µA average. LM66100 costs 4.6 mV.
+- **No charger IC.** MCP73831 needs ≥3.75 V in and this source maxes at 3.68 V. Not
+  needed either: a source that cannot exceed 3.68 V **cannot overcharge a 4.2 V
+  cell**. It self-limits at ~25–30% SOC. Gate charging on temperature in firmware —
+  Li-ion must not charge below 0 °C.
+- **No harvesting PMIC, no supervisor.** BQ25504/ADP5091 are out of spec above 3.3 V
+  input; every such chip exists to boost sub-volt sources. Boosting 3.5 V → 3.5 V
+  loses ~15%; two ideal diodes lose 0.26%. The nRF52's own SAADC reads storage
+  voltage and drives the load switch with arbitrary hysteresis, for zero board area.
+
+### MCU shortlist — BLE only, integrated antenna
+
+| Part | Size (mm) | LCSC / JLC | 4.2 V direct | Note |
+|---|---|---|---|---|
+| **Fanstel BC840** | 7.1 × 9.2 × 1.5 | C5155822, in stock | **yes, VDDH 5.5 V** | narrowest *and* thinnest; ~$17; keep-out 2.5 mm **unverified** |
+| **Holyiot 17095** | 9.4 × 9.25 × **?** | **C9900031218** | no | in JLCPCB's SMT catalog → verified land pattern; **height unstated in the datasheet** |
+| Raytac MDBT50Q | 15.5 × 10.5 × 2.05 | not at LCSC | yes, VDDH pin 30 | best-documented; 10.5 mm buys only 2.7 over the ESP32 |
+
+Ruled out: **ESP32-H2-MINI-1** is 13.2 × 16.6 — identical to the C3, zero gain.
+**u-blox ANNA-B112** is 6.5 × 6.5 but needs an antenna tuning strip drawn on the host
+board and **cannot sit in a metal enclosure** — the keyboard's top frame is metal.
+No non-Nordic module accepts 4.2 V. TI CC2652RSIP has no integrated antenna.
+
+### Keyboard setting: button, not knob
+
+The button module is the variant that carries J11 contacts and an RGB LED, so it is
+the one to model on. A fingerprint reader you press *is* a button. And in knob mode
+any stray leakage on J4-1/3/4 reads as volume/mute events — session 3 loaded J4-4 and
+it muted the PC and zoomed Chrome.
+
+Note J11 was live and PWMing in **every** measurement, all of which were taken with
+the slot **empty** — so the keyboard drives J11 unconditionally and does not gate it
+on module presence. Harvesting therefore does not depend on the setting.
+
+### Still open
+
+- [ ] **The 330 Ω loaded-while-asleep test.** Gates everything above.
+- [x] ~~ZW0905 minimum operating voltage~~ — **CLOSED 2026-08-27: 3.0 V min.** The
+      droop budget is 500 mV from a 3.5 V cell, not 166 mV. Comfortable.
+- [x] ~~ZW0905 standby current~~ — **CLOSED 2026-08-27: 10 µA typ, 12 µA max.**
+      No press-wake trick needed; the sensor can sit in detect mode permanently.
+- [x] ~~Sensor active current~~ — **15 mA typ / 25 mA max**, not the 50 mA assumed.
+      Halves the per-scan energy.
+- [ ] **ZW0905 availability.** Hi-Link's product pages `id=1225`/`id=1226` return
+      empty while every sibling page renders — consistent with it being delisted.
+      Confirm distributor stock before the housing is committed, since **no other
+      module on the market has a verified outline under 18.1 mm.**
+- [ ] Slot depth / clearance above the pogo blocks
+- [ ] Pogo pad positions re-verified now the outline is square
+- [ ] If harvest fails: trace **J4-2 and J4-6** for a keyboard-battery tap
 
 ## Related
 
