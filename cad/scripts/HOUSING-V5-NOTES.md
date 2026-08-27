@@ -33,7 +33,7 @@ housing n MCU module = 0.0000    cell n MCU module = 0.0000
 housing n sensor     = 0.0000    cell n bosses     = 0.0000
 housing n cell       = 0.0000    MCU  n sensor     = 0.0000
 cell    n sensor     = 0.0000    MCU  n bosses     = 0.0000
-housing zmin = -0.0000   zmax = 11.6600   volume = 1171.12 mm^3
+housing zmin = -0.0000   zmax = 11.6600   volume = 1101.56 mm^3
 ```
 
 ## The clearance discrepancy — the model disagrees with the brief
@@ -67,9 +67,11 @@ Resting it on the lid is simpler, gains 0.20 mm of clearance, and needs one
 cheap part: a **Ø12.5 × 0.20 PET or Kapton disc** between the lid and the can.
 
 **The collar is two arcs, not a ring.** ±X is left open on purpose: that is where
-the six hand-soldered sensor wires drop past the cell to J2 at
-(±7.60, 2.90 / 4.40 / 5.90). A full ring would seal that route. The windows are
-35° either side of the X axis, z 2.90 → 5.16.
+the six hand-soldered sensor wires drop past the cell to J2, now at
+**x −8.20 and +7.80, y 3.30 / 4.80 / 6.30**. A full ring would seal that route.
+The windows are **45°** either side of the X axis, z 2.90 → 5.16 — widened from
+35° because J2 moved outward and a wire to (8.20, 4.80) sits about 60° off +Y,
+which the narrower window only just cleared.
 
 **Cell radial slop is 0.20 mm per side** (pocket Ø12.50 on a Ø12.1 max cell).
 
