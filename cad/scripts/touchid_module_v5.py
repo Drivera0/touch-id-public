@@ -6,7 +6,7 @@
 #
 #   riser: OD 18.37, ID 15.60, z 7.16 .. 11.66   (+4.50 mm)
 #   sensor barrel bottom moves 4.96 -> 9.46
-#   cell seat: two integral fingers at +-Y, ledge top at z 2.45
+#   cell: rests on the module lid through a 0.20 mm insulating pad
 #
 # EVERY dimension used here is traced in PART-LIBRARY.md. Two of them differ
 # from the numbers in NEXT-SESSION.md, and the difference is deliberate:
@@ -15,12 +15,11 @@
 #     NEXT-SESSION says "5.4". A housing cut for 5.4 will not close on a
 #     max-tolerance cell.
 #   * The cell cannot sit at z 1.80. The MDBT50Q is 2.05 tall and the cell
-#     footprint (O12.1) sits entirely inside the module footprint
-#     (15.5 x 10.5), so the cell MUST clear the module top. 0.40 mm of gap
-#     is allowed because the module lid is a grounded metal shield and the
-#     cell can is live.
+#     (O12.1, under the centred sensor bore) sits inside the module's
+#     footprint, so it has to go ON TOP of the module -- through a 0.20 mm
+#     insulating pad, because the module lid is grounded and the can is live.
 #
-# Consequence: clearance above the cell is ~1.41 mm, not the 2.26 mm the
+# Consequence: clearance above the cell is ~1.61 mm, not the 2.26 mm the
 # brief expected. The brief says to trust the model. See HOUSING-V5-NOTES.md.
 #
 # Run:  python touchid_module_v5.py
@@ -131,18 +130,25 @@ cell_pocket_d = cell_d_max + cell_fit          # 12.50
 # The cell has to clear the BLE module's metal lid. The lid is grounded and
 # the cell can is live, so this gap is electrical, not just mechanical.
 mcu_l, mcu_w, mcu_h = 15.5, 10.5, 2.05         # MDBT50Q-1MV2, Raytac Ver. K
-mcu_center = (0.0, 0.0)         # provisional — Task C decides the real one
-cell_gap_over_mcu = 0.40
-cell_z0 = mcu_h + cell_gap_over_mcu            # 2.45
-cell_z1 = cell_z0 + cell_h_max                 # 8.05
+# SETTLED by pcb-v3: the module is 15.5 (y) x 10.5 (x) and sits OFF-CENTRE in
+# x, because the BQ25505's ~3.98 mm land will not fit beside a centred module
+# on a 19.30 board. See build_pcb_v3.py.
+mcu_center = (-0.80, 0.90)
+mcu_l, mcu_w = 10.5, 15.5       # (x, y) in board orientation
 
-# Seat fingers. The cell rim at r=6.05 is clear of the module footprint only
-# where |y| > mcu_w/2 = 5.25, i.e. in two windows centred on +Y and -Y. Two
-# fingers there support the cell without touching the module.
-seat_finger_ir = 5.00           # finger reaches in to r=5.00 (cell rests on it)
-seat_finger_t  = 0.80           # ledge thickness
-seat_half_ang  = 22.0           # +-22 deg about the Y axis -> stays clear of
-                                # the module corner at (7.75, 5.25)
+# The cell rests on the module's lid through an INSULATING PAD.
+# v5's first pass used two ledges growing in from the cavity wall at +-Y.
+# That only worked while the module was centred: once pcb-v3 pushed it to
+# x -0.80, y +1.20, the cell (O12.1 at the origin, under the centred sensor
+# bore) no longer overhangs the module anywhere except a 1.6 mm sliver on
+# +X, so no ledge can reach it from two sides. Resting it on the lid is
+# simpler and gains clearance. The lid is grounded and the cell can is live,
+# hence the pad -- it is not optional.
+cell_insulator_t = 0.20         # PET / Kapton disc, O12.5, under the cell
+cell_z0 = mcu_h + cell_insulator_t             # 2.25
+cell_z1 = cell_z0 + cell_h_max                 # 7.85
+
+# No seat ledges in this revision -- see the note above.
 
 # ---------------- rear retention shelf ----------------
 # Rectangular shelf on the REAR face that slides under the metal top case and
@@ -323,23 +329,9 @@ body = (body.faces("<Z").workplane(invert=True)
 body = (body.faces("<Z").workplane(invert=True, offset=lip_h)
         .rect(*cav_hi).cutBlind(body_h - top_t - lip_h))
 
-# ---- v5: cell seat ledges (AFTER the cavity re-cut) ----
-# Two ledges at +-Y, growing in from the lip-tier cavity wall. The cell rests
-# ONLY on these; it never touches the BLE module's grounded metal lid.
-# Inner edge at |y| = seat_y_in, which clears the module half-width
-# (mcu_w/2 = 5.25). The cell rim reaches |y| = 6.05, so it overhangs the
-# ledge inner edge and bears on the strip beyond it.
-seat_y_in   = 5.45             # 0.20 clear of the module edge at 5.25
-seat_x_half = 4.00             # ledge width in x
-seat_z1 = cell_z0                          # ledge top = cell underside, 2.45
-seat_z0 = seat_z1 - seat_finger_t          # 1.65
-for _s in (+1, -1):
-    _led = (cq.Workplane("XY").workplane(offset=seat_z0)
-            .center(0, _s * (seat_y_in + 9.5) / 2)
-            .rect(2 * seat_x_half, 9.5 - seat_y_in)
-            .extrude(seat_finger_t)
-            .intersect(outline_prism))
-    body = body.union(_led)
+# ---- v5: no cell seat ledges ----
+# The cell sits on the module lid through cell_insulator_t. Nothing to build.
+seat_z0 = seat_z1 = None
 
 # ---- v5: cell centring collar ----
 # Two arcs, ID = cell_pocket_d, OD = the top-tier cavity, so they fuse into
@@ -349,7 +341,7 @@ for _s in (+1, -1):
 collar_z0 = lip_h                       # 2.90 — top-tier cavity starts here
 collar_z1 = body_h - top_t              # 5.16 — the bore starts here
 collar_od = body_w - 2 * wall_t         # 16.77
-collar_half_ang = 55.0
+collar_half_ang = 45.0
 
 def _collar(deg_mid):
     a0 = math.radians(deg_mid - collar_half_ang)
@@ -462,6 +454,9 @@ def _vol(shape):
 # --- reference solids, all at their assembled positions ---
 mcu_solid = (cq.Workplane("XY")
              .center(*mcu_center).rect(mcu_l, mcu_w).extrude(mcu_h))
+# the insulating pad, so the boolean checks see the real stack
+pad_solid = (cq.Workplane("XY").workplane(offset=mcu_h)
+             .center(0, 0).circle(cell_pocket_d / 2).extrude(cell_insulator_t))
 
 cell_solid = (cq.Workplane("XY").workplane(offset=cell_z0)
               .circle(cell_d_max / 2).extrude(cell_h_max))
@@ -521,21 +516,20 @@ print(f"  riser            : +{riser_h:.2f}  OD {riser_od:.2f}  ID {riser_id:.2f
 print(f"  top face         : z {top_h:.2f}   (v4 was {body_h:.2f})")
 print(f"  sensor barrel bot: z {_barrel_bot:.2f}   (v4 was {body_h - (sensor_thk - sensor_flange_t):.2f})")
 print(f"  MCU module top   : z {mcu_h:.2f}")
-print(f"  cell seat ledges : z {seat_z0:.2f} .. {seat_z1:.2f}"
-      f"   inner edge |y| = {seat_y_in:.2f}")
+print(f"  cell seat        : rests on the module lid through a "
+      f"{cell_insulator_t:.2f} mm insulating pad"
+      f"")
 print(f"  cell             : z {cell_z0:.2f} .. {cell_z1:.2f}"
       f"   (O{cell_d_max} x {cell_h_max} MAX-tolerance)")
-print(f"  cell over MCU    : {cell_z0 - mcu_h:.2f} mm")
+print(f"  cell over MCU    : {cell_z0 - mcu_h:.2f} mm (the pad)")
 print(f"  CLEARANCE ABOVE CELL -> barrel : {_barrel_bot - cell_z1:.2f} mm")
 print(f"     NEXT-SESSION expected 2.26 mm."
       f"  Discrepancy = {(_barrel_bot - cell_z1) - 2.26:+.2f} mm")
 print(f"       cause 1: cell height max is 5.6, not 5.4        -0.20")
-print(f"       cause 2: cell must sit above the 2.05 module    "
+print(f"       cause 2: cell sits on the 2.05 module + pad     "
       f"{-(cell_z0 - 1.80):+.2f}")
-print(f"  ledge inner edge to module edge : "
-      f"{seat_y_in - mcu_w / 2:.2f} mm")
-print(f"  component headroom under ledges : {seat_z0:.2f} mm"
-      f"   (tallest planned part is the 22 uF 0805 at 1.25)")
+print(f"  module centre    : {mcu_center}")
+print(f"  tallest board part: 22 uF 0805 at 1.25, L1 at 1.20 — both clear")
 print(f"  cell radial slop in collar      : "
       f"{(cell_pocket_d - cell_d_max) / 2:.2f} mm per side")
 print(f"  wire windows                    : +-X, open from z {collar_z0:.2f}"
