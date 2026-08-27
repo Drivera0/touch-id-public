@@ -1,0 +1,177 @@
+ref,pin,net,part,note
+BT1,1,VBAT,VARTA CP1254 A4,"3.0 V discharge cut-off, 4.30 +-0.05 V charge, 210 mA pulse."
+BT1,2,GND,VARTA CP1254 A4,"3.0 V discharge cut-off, 4.30 +-0.05 V charge, 210 mA pulse."
+C1,1,VIN_DC,4.7uF 0603,"CIN, datasheet minimum"
+C1,2,GND,4.7uF 0603,"CIN, datasheet minimum"
+C2,1,VSTOR,4.7uF 0603,CSTOR
+C2,2,GND,4.7uF 0603,CSTOR
+C3,1,VSTOR,0.1uF 0402,CSTOR HF
+C3,2,GND,0.1uF 0402,CSTOR HF
+C4,1,VREF_SAMP,10nF 0402 low-leak,"CREF, 9-11 nF window"
+C4,2,GND,10nF 0402 low-leak,"CREF, 9-11 nF window"
+C5,1,VBAT,10uF 0805,CBAT bulk beside the cell
+C5,2,GND,10uF 0805,CBAT bulk beside the cell
+C6,1,SENSOR_3V3,1uF 0402,LDO input side of U3 is VSTOR; this is OUT
+C6,2,GND,1uF 0402,LDO input side of U3 is VSTOR; this is OUT
+C7,1,SENSOR_3V3,22uF 0805,holds the ZW0905's 200 mA / 4 us scan transient to 36 mV. 1.25 mm TALL.
+C7,2,GND,22uF 0805,holds the ZW0905's 200 mA / 4 us scan transient to 36 mV. 1.25 mm TALL.
+C8,1,SENSOR_MCU_3V3,1uF 0402,
+C8,2,GND,1uF 0402,
+C9,1,NRF_VDD,1uF 0402,REG0 output decoupling
+C9,2,GND,1uF 0402,REG0 output decoupling
+C10,1,VSTOR,0.1uF 0402,"VDDH decoupling, at the module"
+C10,2,GND,0.1uF 0402,"VDDH decoupling, at the module"
+C11,1,NRF_DCCH,1uF 0402,see FLAGS — mode not settled
+C11,2,GND,1uF 0402,see FLAGS — mode not settled
+C12,1,VBAT_SENSE,10nF 0402,SAADC sampling reservoir
+C12,2,GND,10nF 0402,SAADC sampling reservoir
+C13,1,BL_FLAG,10nF 0402,
+C13,2,GND,10nF 0402,
+J2,1,SENSOR_3V3,"Sensor pads, HLK-ZW0905 (CORRECTED pinout)","DESIGN-SPEC §5 as corrected 2026-08-27. The old table was the ZW0901's, reversed end-for-end."
+J2,2,SENSOR_WAKEUP,"Sensor pads, HLK-ZW0905 (CORRECTED pinout)","DESIGN-SPEC §5 as corrected 2026-08-27. The old table was the ZW0901's, reversed end-for-end."
+J2,3,SENSOR_MCU_3V3,"Sensor pads, HLK-ZW0905 (CORRECTED pinout)","DESIGN-SPEC §5 as corrected 2026-08-27. The old table was the ZW0901's, reversed end-for-end."
+J2,4,SENSOR_TX,"Sensor pads, HLK-ZW0905 (CORRECTED pinout)","DESIGN-SPEC §5 as corrected 2026-08-27. The old table was the ZW0901's, reversed end-for-end."
+J2,5,SENSOR_RX,"Sensor pads, HLK-ZW0905 (CORRECTED pinout)","DESIGN-SPEC §5 as corrected 2026-08-27. The old table was the ZW0901's, reversed end-for-end."
+J2,6,GND,"Sensor pads, HLK-ZW0905 (CORRECTED pinout)","DESIGN-SPEC §5 as corrected 2026-08-27. The old table was the ZW0901's, reversed end-for-end."
+J3,1,SWDIO,SWD pads,"Pads, not a connector. Pin 4 is the rail, so a programmer can see target voltage."
+J3,2,SWCLK,SWD pads,"Pads, not a connector. Pin 4 is the rail, so a programmer can see target voltage."
+J3,3,RESET,SWD pads,"Pads, not a connector. Pin 4 is the rail, so a programmer can see target voltage."
+J3,4,VSTOR,SWD pads,"Pads, not a connector. Pin 4 is the rail, so a programmer can see target voltage."
+J3,5,GND,SWD pads,"Pads, not a connector. Pin 4 is the rail, so a programmer can see target voltage."
+J4,1,NC,"Keyboard slot, 6-pin pogo block (LEFT)",J4-1/3/4 must stay unconnected: loading them in knob mode generated volume/mute events (session 3).
+J4,2,NC,"Keyboard slot, 6-pin pogo block (LEFT)",J4-1/3/4 must stay unconnected: loading them in knob mode generated volume/mute events (session 3).
+J4,3,NC,"Keyboard slot, 6-pin pogo block (LEFT)",J4-1/3/4 must stay unconnected: loading them in knob mode generated volume/mute events (session 3).
+J4,4,NC,"Keyboard slot, 6-pin pogo block (LEFT)",J4-1/3/4 must stay unconnected: loading them in knob mode generated volume/mute events (session 3).
+J4,5,GND,"Keyboard slot, 6-pin pogo block (LEFT)",J4-1/3/4 must stay unconnected: loading them in knob mode generated volume/mute events (session 3).
+J4,6,NC,"Keyboard slot, 6-pin pogo block (LEFT)",J4-1/3/4 must stay unconnected: loading them in knob mode generated volume/mute events (session 3).
+J11,1,HARV_1,"Keyboard slot, 4-pin pogo block (RIGHT)",1/2/3 are the RGB LED anodes. 4 is the LED common return.
+J11,2,HARV_2,"Keyboard slot, 4-pin pogo block (RIGHT)",1/2/3 are the RGB LED anodes. 4 is the LED common return.
+J11,3,HARV_3,"Keyboard slot, 4-pin pogo block (RIGHT)",1/2/3 are the RGB LED anodes. 4 is the LED common return.
+J11,4,BL_RETURN,"Keyboard slot, 4-pin pogo block (RIGHT)",1/2/3 are the RGB LED anodes. 4 is the LED common return.
+L1,1,LX,22uH,LBOOST -> VIN_DC. Package NOT verified.
+L1,2,VIN_DC,22uH,LBOOST -> VIN_DC. Package NOT verified.
+R1,1,HARV_1,1k 0402,caps awake draw to ~1.1 mA/pin
+R1,2,VIN_DC,1k 0402,caps awake draw to ~1.1 mA/pin
+R2,1,HARV_2,1k 0402,
+R2,2,VIN_DC,1k 0402,
+R3,1,HARV_3,1k 0402,
+R3,2,VIN_DC,1k 0402,
+R4,1,VSTOR,4.7M 0402,
+R4,2,VBAT_SENSE,4.7M 0402,
+R5,1,VBAT_SENSE,1M 0402,
+R5,2,GND,1M 0402,
+R6,1,BL_RETURN,100k 0402,series protection only
+R6,2,BL_FLAG,100k 0402,series protection only
+ROK1,1,OK_PROG,4.53M 0402,VBAT_OK falling = 3.12 V
+ROK1,2,GND,4.53M 0402,VBAT_OK falling = 3.12 V
+ROK2,1,OK_HYST,7.15M 0402,
+ROK2,2,OK_PROG,7.15M 0402,
+ROK3,1,VRDIV,1.33M 0402,VBAT_OK rising = 3.47 V
+ROK3,2,OK_HYST,1.33M 0402,VBAT_OK rising = 3.47 V
+ROV1,1,VBAT_OV_SET,5.6M 0402,VBAT_OV = 1.5*1.21*13.1/5.6 = 4.246 V
+ROV1,2,GND,5.6M 0402,VBAT_OV = 1.5*1.21*13.1/5.6 = 4.246 V
+ROV2,1,VRDIV,7.5M 0402,
+ROV2,2,VBAT_OV_SET,7.5M 0402,
+TP1,1,VIN_DC,"test point, B.Cu",keep on the -Y half — the +Y half is the antenna keep-out
+TP2,1,VSTOR,"test point, B.Cu",keep on the -Y half — the +Y half is the antenna keep-out
+TP3,1,VBAT,"test point, B.Cu",keep on the -Y half — the +Y half is the antenna keep-out
+TP4,1,VBAT_OK,"test point, B.Cu",keep on the -Y half — the +Y half is the antenna keep-out
+TP5,1,SENSOR_3V3,"test point, B.Cu",keep on the -Y half — the +Y half is the antenna keep-out
+TP6,1,SENSOR_MCU_3V3,"test point, B.Cu",keep on the -Y half — the +Y half is the antenna keep-out
+TP7,1,BL_RETURN,"test point, B.Cu",keep on the -Y half — the +Y half is the antenna keep-out
+TP8,1,GND,"test point, B.Cu",keep on the -Y half — the +Y half is the antenna keep-out
+TP9,1,GND,"test point, B.Cu",keep on the -Y half — the +Y half is the antenna keep-out
+TP10,1,GND,"test point, B.Cu",keep on the -Y half — the +Y half is the antenna keep-out
+U1,1,GND,Raytac MDBT50Q-1MV2 (nRF52840),"17/18 = XL1/XL2 left NC: internal LFRC, no 32.768 kHz crystal. Saves a 3215 crystal + 2 caps; costs ~2 uA of the 6 uA sleep budget."
+U1,2,GND,Raytac MDBT50Q-1MV2 (nRF52840),"17/18 = XL1/XL2 left NC: internal LFRC, no 32.768 kHz crystal. Saves a 3215 crystal + 2 caps; costs ~2 uA of the 6 uA sleep budget."
+U1,3,NC,Raytac MDBT50Q-1MV2 (nRF52840),"17/18 = XL1/XL2 left NC: internal LFRC, no 32.768 kHz crystal. Saves a 3215 crystal + 2 caps; costs ~2 uA of the 6 uA sleep budget."
+U1,4,NC,Raytac MDBT50Q-1MV2 (nRF52840),"17/18 = XL1/XL2 left NC: internal LFRC, no 32.768 kHz crystal. Saves a 3215 crystal + 2 caps; costs ~2 uA of the 6 uA sleep budget."
+U1,5,NC,Raytac MDBT50Q-1MV2 (nRF52840),"17/18 = XL1/XL2 left NC: internal LFRC, no 32.768 kHz crystal. Saves a 3215 crystal + 2 caps; costs ~2 uA of the 6 uA sleep budget."
+U1,6,NC,Raytac MDBT50Q-1MV2 (nRF52840),"17/18 = XL1/XL2 left NC: internal LFRC, no 32.768 kHz crystal. Saves a 3215 crystal + 2 caps; costs ~2 uA of the 6 uA sleep budget."
+U1,7,NC,Raytac MDBT50Q-1MV2 (nRF52840),"17/18 = XL1/XL2 left NC: internal LFRC, no 32.768 kHz crystal. Saves a 3215 crystal + 2 caps; costs ~2 uA of the 6 uA sleep budget."
+U1,8,NC,Raytac MDBT50Q-1MV2 (nRF52840),"17/18 = XL1/XL2 left NC: internal LFRC, no 32.768 kHz crystal. Saves a 3215 crystal + 2 caps; costs ~2 uA of the 6 uA sleep budget."
+U1,9,VBAT_SENSE,Raytac MDBT50Q-1MV2 (nRF52840),"17/18 = XL1/XL2 left NC: internal LFRC, no 32.768 kHz crystal. Saves a 3215 crystal + 2 caps; costs ~2 uA of the 6 uA sleep budget."
+U1,10,NC,Raytac MDBT50Q-1MV2 (nRF52840),"17/18 = XL1/XL2 left NC: internal LFRC, no 32.768 kHz crystal. Saves a 3215 crystal + 2 caps; costs ~2 uA of the 6 uA sleep budget."
+U1,11,BL_FLAG,Raytac MDBT50Q-1MV2 (nRF52840),"17/18 = XL1/XL2 left NC: internal LFRC, no 32.768 kHz crystal. Saves a 3215 crystal + 2 caps; costs ~2 uA of the 6 uA sleep budget."
+U1,12,NC,Raytac MDBT50Q-1MV2 (nRF52840),"17/18 = XL1/XL2 left NC: internal LFRC, no 32.768 kHz crystal. Saves a 3215 crystal + 2 caps; costs ~2 uA of the 6 uA sleep budget."
+U1,13,NC,Raytac MDBT50Q-1MV2 (nRF52840),"17/18 = XL1/XL2 left NC: internal LFRC, no 32.768 kHz crystal. Saves a 3215 crystal + 2 caps; costs ~2 uA of the 6 uA sleep budget."
+U1,14,NC,Raytac MDBT50Q-1MV2 (nRF52840),"17/18 = XL1/XL2 left NC: internal LFRC, no 32.768 kHz crystal. Saves a 3215 crystal + 2 caps; costs ~2 uA of the 6 uA sleep budget."
+U1,15,GND,Raytac MDBT50Q-1MV2 (nRF52840),"17/18 = XL1/XL2 left NC: internal LFRC, no 32.768 kHz crystal. Saves a 3215 crystal + 2 caps; costs ~2 uA of the 6 uA sleep budget."
+U1,16,VBAT_OK,Raytac MDBT50Q-1MV2 (nRF52840),"17/18 = XL1/XL2 left NC: internal LFRC, no 32.768 kHz crystal. Saves a 3215 crystal + 2 caps; costs ~2 uA of the 6 uA sleep budget."
+U1,17,NC,Raytac MDBT50Q-1MV2 (nRF52840),"17/18 = XL1/XL2 left NC: internal LFRC, no 32.768 kHz crystal. Saves a 3215 crystal + 2 caps; costs ~2 uA of the 6 uA sleep budget."
+U1,18,NC,Raytac MDBT50Q-1MV2 (nRF52840),"17/18 = XL1/XL2 left NC: internal LFRC, no 32.768 kHz crystal. Saves a 3215 crystal + 2 caps; costs ~2 uA of the 6 uA sleep budget."
+U1,19,SENSOR_SW_EN,Raytac MDBT50Q-1MV2 (nRF52840),"17/18 = XL1/XL2 left NC: internal LFRC, no 32.768 kHz crystal. Saves a 3215 crystal + 2 caps; costs ~2 uA of the 6 uA sleep budget."
+U1,20,NC,Raytac MDBT50Q-1MV2 (nRF52840),"17/18 = XL1/XL2 left NC: internal LFRC, no 32.768 kHz crystal. Saves a 3215 crystal + 2 caps; costs ~2 uA of the 6 uA sleep budget."
+U1,21,NC,Raytac MDBT50Q-1MV2 (nRF52840),"17/18 = XL1/XL2 left NC: internal LFRC, no 32.768 kHz crystal. Saves a 3215 crystal + 2 caps; costs ~2 uA of the 6 uA sleep budget."
+U1,22,SENSOR_TX,Raytac MDBT50Q-1MV2 (nRF52840),"17/18 = XL1/XL2 left NC: internal LFRC, no 32.768 kHz crystal. Saves a 3215 crystal + 2 caps; costs ~2 uA of the 6 uA sleep budget."
+U1,23,SENSOR_WAKEUP,Raytac MDBT50Q-1MV2 (nRF52840),"17/18 = XL1/XL2 left NC: internal LFRC, no 32.768 kHz crystal. Saves a 3215 crystal + 2 caps; costs ~2 uA of the 6 uA sleep budget."
+U1,24,SENSOR_RX,Raytac MDBT50Q-1MV2 (nRF52840),"17/18 = XL1/XL2 left NC: internal LFRC, no 32.768 kHz crystal. Saves a 3215 crystal + 2 caps; costs ~2 uA of the 6 uA sleep budget."
+U1,25,NC,Raytac MDBT50Q-1MV2 (nRF52840),"17/18 = XL1/XL2 left NC: internal LFRC, no 32.768 kHz crystal. Saves a 3215 crystal + 2 caps; costs ~2 uA of the 6 uA sleep budget."
+U1,26,NC,Raytac MDBT50Q-1MV2 (nRF52840),"17/18 = XL1/XL2 left NC: internal LFRC, no 32.768 kHz crystal. Saves a 3215 crystal + 2 caps; costs ~2 uA of the 6 uA sleep budget."
+U1,27,NC,Raytac MDBT50Q-1MV2 (nRF52840),"17/18 = XL1/XL2 left NC: internal LFRC, no 32.768 kHz crystal. Saves a 3215 crystal + 2 caps; costs ~2 uA of the 6 uA sleep budget."
+U1,28,NRF_VDD,Raytac MDBT50Q-1MV2 (nRF52840),"17/18 = XL1/XL2 left NC: internal LFRC, no 32.768 kHz crystal. Saves a 3215 crystal + 2 caps; costs ~2 uA of the 6 uA sleep budget."
+U1,29,NC,Raytac MDBT50Q-1MV2 (nRF52840),"17/18 = XL1/XL2 left NC: internal LFRC, no 32.768 kHz crystal. Saves a 3215 crystal + 2 caps; costs ~2 uA of the 6 uA sleep budget."
+U1,30,VSTOR,Raytac MDBT50Q-1MV2 (nRF52840),"17/18 = XL1/XL2 left NC: internal LFRC, no 32.768 kHz crystal. Saves a 3215 crystal + 2 caps; costs ~2 uA of the 6 uA sleep budget."
+U1,31,NRF_DCCH,Raytac MDBT50Q-1MV2 (nRF52840),"17/18 = XL1/XL2 left NC: internal LFRC, no 32.768 kHz crystal. Saves a 3215 crystal + 2 caps; costs ~2 uA of the 6 uA sleep budget."
+U1,32,GND,Raytac MDBT50Q-1MV2 (nRF52840),"17/18 = XL1/XL2 left NC: internal LFRC, no 32.768 kHz crystal. Saves a 3215 crystal + 2 caps; costs ~2 uA of the 6 uA sleep budget."
+U1,33,GND,Raytac MDBT50Q-1MV2 (nRF52840),"17/18 = XL1/XL2 left NC: internal LFRC, no 32.768 kHz crystal. Saves a 3215 crystal + 2 caps; costs ~2 uA of the 6 uA sleep budget."
+U1,34,NC,Raytac MDBT50Q-1MV2 (nRF52840),"17/18 = XL1/XL2 left NC: internal LFRC, no 32.768 kHz crystal. Saves a 3215 crystal + 2 caps; costs ~2 uA of the 6 uA sleep budget."
+U1,35,NC,Raytac MDBT50Q-1MV2 (nRF52840),"17/18 = XL1/XL2 left NC: internal LFRC, no 32.768 kHz crystal. Saves a 3215 crystal + 2 caps; costs ~2 uA of the 6 uA sleep budget."
+U1,36,NC,Raytac MDBT50Q-1MV2 (nRF52840),"17/18 = XL1/XL2 left NC: internal LFRC, no 32.768 kHz crystal. Saves a 3215 crystal + 2 caps; costs ~2 uA of the 6 uA sleep budget."
+U1,37,NC,Raytac MDBT50Q-1MV2 (nRF52840),"17/18 = XL1/XL2 left NC: internal LFRC, no 32.768 kHz crystal. Saves a 3215 crystal + 2 caps; costs ~2 uA of the 6 uA sleep budget."
+U1,38,NC,Raytac MDBT50Q-1MV2 (nRF52840),"17/18 = XL1/XL2 left NC: internal LFRC, no 32.768 kHz crystal. Saves a 3215 crystal + 2 caps; costs ~2 uA of the 6 uA sleep budget."
+U1,39,NC,Raytac MDBT50Q-1MV2 (nRF52840),"17/18 = XL1/XL2 left NC: internal LFRC, no 32.768 kHz crystal. Saves a 3215 crystal + 2 caps; costs ~2 uA of the 6 uA sleep budget."
+U1,40,RESET,Raytac MDBT50Q-1MV2 (nRF52840),"17/18 = XL1/XL2 left NC: internal LFRC, no 32.768 kHz crystal. Saves a 3215 crystal + 2 caps; costs ~2 uA of the 6 uA sleep budget."
+U1,41,NC,Raytac MDBT50Q-1MV2 (nRF52840),"17/18 = XL1/XL2 left NC: internal LFRC, no 32.768 kHz crystal. Saves a 3215 crystal + 2 caps; costs ~2 uA of the 6 uA sleep budget."
+U1,42,NC,Raytac MDBT50Q-1MV2 (nRF52840),"17/18 = XL1/XL2 left NC: internal LFRC, no 32.768 kHz crystal. Saves a 3215 crystal + 2 caps; costs ~2 uA of the 6 uA sleep budget."
+U1,43,NC,Raytac MDBT50Q-1MV2 (nRF52840),"17/18 = XL1/XL2 left NC: internal LFRC, no 32.768 kHz crystal. Saves a 3215 crystal + 2 caps; costs ~2 uA of the 6 uA sleep budget."
+U1,44,NC,Raytac MDBT50Q-1MV2 (nRF52840),"17/18 = XL1/XL2 left NC: internal LFRC, no 32.768 kHz crystal. Saves a 3215 crystal + 2 caps; costs ~2 uA of the 6 uA sleep budget."
+U1,45,NC,Raytac MDBT50Q-1MV2 (nRF52840),"17/18 = XL1/XL2 left NC: internal LFRC, no 32.768 kHz crystal. Saves a 3215 crystal + 2 caps; costs ~2 uA of the 6 uA sleep budget."
+U1,46,NC,Raytac MDBT50Q-1MV2 (nRF52840),"17/18 = XL1/XL2 left NC: internal LFRC, no 32.768 kHz crystal. Saves a 3215 crystal + 2 caps; costs ~2 uA of the 6 uA sleep budget."
+U1,47,NC,Raytac MDBT50Q-1MV2 (nRF52840),"17/18 = XL1/XL2 left NC: internal LFRC, no 32.768 kHz crystal. Saves a 3215 crystal + 2 caps; costs ~2 uA of the 6 uA sleep budget."
+U1,48,NC,Raytac MDBT50Q-1MV2 (nRF52840),"17/18 = XL1/XL2 left NC: internal LFRC, no 32.768 kHz crystal. Saves a 3215 crystal + 2 caps; costs ~2 uA of the 6 uA sleep budget."
+U1,49,NC,Raytac MDBT50Q-1MV2 (nRF52840),"17/18 = XL1/XL2 left NC: internal LFRC, no 32.768 kHz crystal. Saves a 3215 crystal + 2 caps; costs ~2 uA of the 6 uA sleep budget."
+U1,50,NC,Raytac MDBT50Q-1MV2 (nRF52840),"17/18 = XL1/XL2 left NC: internal LFRC, no 32.768 kHz crystal. Saves a 3215 crystal + 2 caps; costs ~2 uA of the 6 uA sleep budget."
+U1,51,SWDIO,Raytac MDBT50Q-1MV2 (nRF52840),"17/18 = XL1/XL2 left NC: internal LFRC, no 32.768 kHz crystal. Saves a 3215 crystal + 2 caps; costs ~2 uA of the 6 uA sleep budget."
+U1,52,NC,Raytac MDBT50Q-1MV2 (nRF52840),"17/18 = XL1/XL2 left NC: internal LFRC, no 32.768 kHz crystal. Saves a 3215 crystal + 2 caps; costs ~2 uA of the 6 uA sleep budget."
+U1,53,SWCLK,Raytac MDBT50Q-1MV2 (nRF52840),"17/18 = XL1/XL2 left NC: internal LFRC, no 32.768 kHz crystal. Saves a 3215 crystal + 2 caps; costs ~2 uA of the 6 uA sleep budget."
+U1,54,NC,Raytac MDBT50Q-1MV2 (nRF52840),"17/18 = XL1/XL2 left NC: internal LFRC, no 32.768 kHz crystal. Saves a 3215 crystal + 2 caps; costs ~2 uA of the 6 uA sleep budget."
+U1,55,GND,Raytac MDBT50Q-1MV2 (nRF52840),"17/18 = XL1/XL2 left NC: internal LFRC, no 32.768 kHz crystal. Saves a 3215 crystal + 2 caps; costs ~2 uA of the 6 uA sleep budget."
+U1,56,NC,Raytac MDBT50Q-1MV2 (nRF52840),"17/18 = XL1/XL2 left NC: internal LFRC, no 32.768 kHz crystal. Saves a 3215 crystal + 2 caps; costs ~2 uA of the 6 uA sleep budget."
+U1,57,NC,Raytac MDBT50Q-1MV2 (nRF52840),"17/18 = XL1/XL2 left NC: internal LFRC, no 32.768 kHz crystal. Saves a 3215 crystal + 2 caps; costs ~2 uA of the 6 uA sleep budget."
+U1,58,NC,Raytac MDBT50Q-1MV2 (nRF52840),"17/18 = XL1/XL2 left NC: internal LFRC, no 32.768 kHz crystal. Saves a 3215 crystal + 2 caps; costs ~2 uA of the 6 uA sleep budget."
+U1,59,NC,Raytac MDBT50Q-1MV2 (nRF52840),"17/18 = XL1/XL2 left NC: internal LFRC, no 32.768 kHz crystal. Saves a 3215 crystal + 2 caps; costs ~2 uA of the 6 uA sleep budget."
+U1,60,NC,Raytac MDBT50Q-1MV2 (nRF52840),"17/18 = XL1/XL2 left NC: internal LFRC, no 32.768 kHz crystal. Saves a 3215 crystal + 2 caps; costs ~2 uA of the 6 uA sleep budget."
+U1,61,NC,Raytac MDBT50Q-1MV2 (nRF52840),"17/18 = XL1/XL2 left NC: internal LFRC, no 32.768 kHz crystal. Saves a 3215 crystal + 2 caps; costs ~2 uA of the 6 uA sleep budget."
+U2,1,GND,TI BQ25505,"VSTOR (19) is the load rail; the cell sits on VBAT_SEC (18). The brief says 'BQ25505 VBAT <-> cell' but the part has no pin called VBAT — this is TI's own topology, Figure 16."
+U2,2,VIN_DC,TI BQ25505,"VSTOR (19) is the load rail; the cell sits on VBAT_SEC (18). The brief says 'BQ25505 VBAT <-> cell' but the part has no pin called VBAT — this is TI's own topology, Figure 16."
+U2,3,GND,TI BQ25505,"VSTOR (19) is the load rail; the cell sits on VBAT_SEC (18). The brief says 'BQ25505 VBAT <-> cell' but the part has no pin called VBAT — this is TI's own topology, Figure 16."
+U2,4,VREF_SAMP,TI BQ25505,"VSTOR (19) is the load rail; the cell sits on VBAT_SEC (18). The brief says 'BQ25505 VBAT <-> cell' but the part has no pin called VBAT — this is TI's own topology, Figure 16."
+U2,5,GND,TI BQ25505,"VSTOR (19) is the load rail; the cell sits on VBAT_SEC (18). The brief says 'BQ25505 VBAT <-> cell' but the part has no pin called VBAT — this is TI's own topology, Figure 16."
+U2,6,GND,TI BQ25505,"VSTOR (19) is the load rail; the cell sits on VBAT_SEC (18). The brief says 'BQ25505 VBAT <-> cell' but the part has no pin called VBAT — this is TI's own topology, Figure 16."
+U2,7,VBAT_OV_SET,TI BQ25505,"VSTOR (19) is the load rail; the cell sits on VBAT_SEC (18). The brief says 'BQ25505 VBAT <-> cell' but the part has no pin called VBAT — this is TI's own topology, Figure 16."
+U2,8,VRDIV,TI BQ25505,"VSTOR (19) is the load rail; the cell sits on VBAT_SEC (18). The brief says 'BQ25505 VBAT <-> cell' but the part has no pin called VBAT — this is TI's own topology, Figure 16."
+U2,9,NC,TI BQ25505,"VSTOR (19) is the load rail; the cell sits on VBAT_SEC (18). The brief says 'BQ25505 VBAT <-> cell' but the part has no pin called VBAT — this is TI's own topology, Figure 16."
+U2,10,NC,TI BQ25505,"VSTOR (19) is the load rail; the cell sits on VBAT_SEC (18). The brief says 'BQ25505 VBAT <-> cell' but the part has no pin called VBAT — this is TI's own topology, Figure 16."
+U2,11,OK_HYST,TI BQ25505,"VSTOR (19) is the load rail; the cell sits on VBAT_SEC (18). The brief says 'BQ25505 VBAT <-> cell' but the part has no pin called VBAT — this is TI's own topology, Figure 16."
+U2,12,OK_PROG,TI BQ25505,"VSTOR (19) is the load rail; the cell sits on VBAT_SEC (18). The brief says 'BQ25505 VBAT <-> cell' but the part has no pin called VBAT — this is TI's own topology, Figure 16."
+U2,13,VBAT_OK,TI BQ25505,"VSTOR (19) is the load rail; the cell sits on VBAT_SEC (18). The brief says 'BQ25505 VBAT <-> cell' but the part has no pin called VBAT — this is TI's own topology, Figure 16."
+U2,14,NC,TI BQ25505,"VSTOR (19) is the load rail; the cell sits on VBAT_SEC (18). The brief says 'BQ25505 VBAT <-> cell' but the part has no pin called VBAT — this is TI's own topology, Figure 16."
+U2,15,GND,TI BQ25505,"VSTOR (19) is the load rail; the cell sits on VBAT_SEC (18). The brief says 'BQ25505 VBAT <-> cell' but the part has no pin called VBAT — this is TI's own topology, Figure 16."
+U2,16,GND,TI BQ25505,"VSTOR (19) is the load rail; the cell sits on VBAT_SEC (18). The brief says 'BQ25505 VBAT <-> cell' but the part has no pin called VBAT — this is TI's own topology, Figure 16."
+U2,17,GND,TI BQ25505,"VSTOR (19) is the load rail; the cell sits on VBAT_SEC (18). The brief says 'BQ25505 VBAT <-> cell' but the part has no pin called VBAT — this is TI's own topology, Figure 16."
+U2,18,VBAT,TI BQ25505,"VSTOR (19) is the load rail; the cell sits on VBAT_SEC (18). The brief says 'BQ25505 VBAT <-> cell' but the part has no pin called VBAT — this is TI's own topology, Figure 16."
+U2,19,VSTOR,TI BQ25505,"VSTOR (19) is the load rail; the cell sits on VBAT_SEC (18). The brief says 'BQ25505 VBAT <-> cell' but the part has no pin called VBAT — this is TI's own topology, Figure 16."
+U2,20,LX,TI BQ25505,"VSTOR (19) is the load rail; the cell sits on VBAT_SEC (18). The brief says 'BQ25505 VBAT <-> cell' but the part has no pin called VBAT — this is TI's own topology, Figure 16."
+U2,21,GND,TI BQ25505,"VSTOR (19) is the load rail; the cell sits on VBAT_SEC (18). The brief says 'BQ25505 VBAT <-> cell' but the part has no pin called VBAT — this is TI's own topology, Figure 16."
+U3,1,SENSOR_3V3,TI TPS7A2033 3.3 V LDO (sensor rail),Always on. Feeds the ZW0905's 10 uA standby rail.
+U3,2,GND,TI TPS7A2033 3.3 V LDO (sensor rail),Always on. Feeds the ZW0905's 10 uA standby rail.
+U3,3,VSTOR,TI TPS7A2033 3.3 V LDO (sensor rail),Always on. Feeds the ZW0905's 10 uA standby rail.
+U3,4,VSTOR,TI TPS7A2033 3.3 V LDO (sensor rail),Always on. Feeds the ZW0905's 10 uA standby rail.
+U3,5,GND,TI TPS7A2033 3.3 V LDO (sensor rail),Always on. Feeds the ZW0905's 10 uA standby rail.
+U4,1,SENSOR_3V3,TI LM66100 load switch (sensor MCU rail),Wired exactly as NEXT-SESSION specifies. See FLAGS — the datasheet says a GPIO cannot switch this off.
+U4,2,GND,TI LM66100 load switch (sensor MCU rail),Wired exactly as NEXT-SESSION specifies. See FLAGS — the datasheet says a GPIO cannot switch this off.
+U4,3,SENSOR_SW_EN,TI LM66100 load switch (sensor MCU rail),Wired exactly as NEXT-SESSION specifies. See FLAGS — the datasheet says a GPIO cannot switch this off.
+U4,4,GND,TI LM66100 load switch (sensor MCU rail),Wired exactly as NEXT-SESSION specifies. See FLAGS — the datasheet says a GPIO cannot switch this off.
+U4,5,GND,TI LM66100 load switch (sensor MCU rail),Wired exactly as NEXT-SESSION specifies. See FLAGS — the datasheet says a GPIO cannot switch this off.
+U4,6,SENSOR_MCU_3V3,TI LM66100 load switch (sensor MCU rail),Wired exactly as NEXT-SESSION specifies. See FLAGS — the datasheet says a GPIO cannot switch this off.
