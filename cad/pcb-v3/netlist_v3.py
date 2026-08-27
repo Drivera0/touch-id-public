@@ -33,7 +33,9 @@ for p in (1, 2, 15, 33, 55):
     _u1[p] = "GND"
 _u1[28] = "NRF_VDD"        # REG0 output — decouple only, never drive
 _u1[30] = "VSTOR"          # VDDH.  2.5-5.5 V.  <-- the cell rail
-_u1[31] = "NRF_DCCH"       # REG0 DC/DC node — see FLAGS
+_u1[31] = "NC"             # DCCH — REG0 in LDO mode leaves this unconnected
+                           # (Raytac Ver.K §8.2 block diagram, p.41). DC/DC
+                           # would need a 10 uH 0603 to VDDH; not fitted.
 _u1[32] = "GND"            # VBUS: USB unused, tie to GND
 _u1[34] = "NC"             # D-  (USB disabled, Raytac §8.5: leave NC)
 _u1[35] = "NC"             # D+
@@ -90,16 +92,22 @@ part("U3", "TI TPS7A2033 3.3 V LDO (sensor rail)", 5, {
     5: "GND",            # thermal
 }, "Always on. Feeds the ZW0905's 10 uA standby rail.")
 
-# ---- U4: TI LM66100, SC-70-6 (SLVSEZ8A §5) ----
-part("U4", "TI LM66100 load switch (sensor MCU rail)", 6, {
-    1: "SENSOR_3V3",     # VIN
+# ---- U4: TI TPS7A2033DQNR — SWITCHED sensor-MCU rail ----
+# Was an LM66100. Changed 2026-08-27: the LM66100's CE is a comparator
+# referenced to VIN and needs V_CE > V_IN + 80 mV = 3.38 V to switch OFF,
+# which an nRF52840 GPIO (3.3 V max) cannot reach. See B3 in NEXT-SESSION.
+# The TPS7A2033 has a LOGIC-LEVEL enable, is the same part as U3 with a
+# footprint already traced to TI drawing DQN0004A, and draws 0.07 uA typ
+# when disabled (vs the LM66100's 0.12 uA) — so the swap costs nothing.
+part("U4", "TI TPS7A2033 3.3 V LDO (switched sensor-MCU rail)", 5, {
+    1: "SENSOR_MCU_3V3", # OUT
     2: "GND",
-    3: "SENSOR_SW_EN",   # CE — see FLAGS, this does not work as drawn
-    4: "GND",            # N/C pin: "tie to GND or leave floating"
-    5: "GND",            # ST unused: "connect to GND if not required"
-    6: "SENSOR_MCU_3V3", # VOUT
-}, "Wired exactly as NEXT-SESSION specifies. See FLAGS — the datasheet says "
-   "a GPIO cannot switch this off.")
+    3: "SENSOR_SW_EN",   # EN — logic level, driven by an nRF GPIO
+    4: "VSTOR",          # IN — from the cell rail, NOT cascaded off U3
+    5: "GND",            # thermal
+}, "Fed from VSTOR rather than cascaded off SENSOR_3V3: cascading would "
+   "leave no headroom, and this also keeps the sensor's 25 mA scan current "
+   "off the always-on standby rail.")
 
 # ---- connectors ----
 part("J11", "Keyboard slot, 4-pin pogo block (RIGHT)", 4, {
@@ -174,7 +182,16 @@ rc("C8", "1uF 0402", "SENSOR_MCU_3V3", "GND")
 
 rc("C9", "1uF 0402", "NRF_VDD", "GND", "REG0 output decoupling")
 rc("C10", "0.1uF 0402", "VSTOR", "GND", "VDDH decoupling, at the module")
-rc("C11", "1uF 0402", "NRF_DCCH", "GND", "see FLAGS — mode not settled")
+# C11 deleted 2026-08-27: REG0 runs in LDO mode, so DCCH is left unconnected
+# and needs no capacitor (Raytac Ver.K §8.2).
+
+# VDDH cold-start hold-off. VBAT_OK is push-pull and referenced to VSTOR, so
+# it sits low until storage is good and then rises with the rail the nRF is
+# on. Wiring it to nRESET holds the CPU in reset through the slow ramp and
+# releases it once the rail is up — the standard supervisor trick, using a
+# signal the BQ25505 already provides. See B2.
+rc("R7", "1k 0402", "VBAT_OK", "RESET",
+   "1k so an SWD programmer can still override RESET")
 
 # cell voltage sense. 4.7M/1M from a 4.25 V rail -> 0.745 V at the tap,
 # inside the SAADC's 0-0.6 V internal-reference range only at gain 1/2.
@@ -187,23 +204,37 @@ rc("R6", "100k 0402", "BL_RETURN", "BL_FLAG", "series protection only")
 rc("C13", "10nF 0402", "BL_FLAG", "GND")
 
 # ------------------------------------------------------------- the check ----
+RESOLVED = [
+    ("B3  U4 / SENSOR_SW_EN — FIXED",
+     "The LM66100 is gone. Its CE is a comparator referenced to VIN and "
+     "needs 3.38 V to switch off; an nRF GPIO reaches 3.3 V. U4 is now a "
+     "second TPS7A2033 with a logic-level EN, fed from VSTOR."),
+    ("B2  U1 pin 30 / VDDH cold start — MITIGATED",
+     "Raytac t_R VDDH = 100 ms max; a harvest-charged cell ramps over hours. "
+     "R7 ties BQ25505 VBAT_OK to nRESET, holding the CPU in reset until "
+     "storage passes 3.47 V and releasing it on a clean rail. Zero new parts. "
+     "VALIDATE ON THE FIRST BOARD — this is the standard supervisor trick but "
+     "it has not been proven on this hardware."),
+    ("B7  U1 pin 31 / DCCH — SETTLED",
+     "REG0 runs in LDO mode: DCCH unconnected, no 10 uH inductor, VDD "
+     "decoupled by C9. Confirmed from Raytac Ver.K §8.2 block diagram p.41, "
+     "which shows DCCH with no connection. Costs ~29 % of the nRF's own "
+     "energy, which is under 5 % of the daily budget; board area wins."),
+    ("B5  SENSOR_3V3 headroom — QUANTIFIED",
+     "TPS7A20 dropout is specified only as 140 mV MAX at 300 mA (DQN, VOUT "
+     "2.5-5.5 V). At the sensor's 25 mA it is far lower, but the datasheet "
+     "gives that only as a curve. Taking the worst case, SENSOR_3V3 holds "
+     "3.0 V as long as VSTOR >= 3.14 V, so set the FIRMWARE FLOOR AT 3.15 V, "
+     "not the 3.0 V in the brief. The capacity between 3.15 and 3.0 V is a "
+     "small tail of the CP1254 curve."),
+    ("B8  L1 — IDENTIFIED",
+     "LCSC C2849435 = DMBJ PNLS252012-220M, 22 uH. The part code gives "
+     "2.5 x 2.0 x 1.2 mm, so it clears housing v5's 1.65 mm under-ledge "
+     "headroom. DCR and Isat still not traced — TI characterised the "
+     "BQ25505 with a Coilcraft LPS4018-223."),
+]
+
 FLAGS = [
-    ("U4 / SENSOR_SW_EN",
-     "LM66100 CE is a COMPARATOR input referenced to VIN, not a logic input. "
-     "Datasheet V_OFF: turning the switch OFF needs V_CE > V_IN + 80 mV = "
-     "3.38 V with V_IN = SENSOR_3V3. An nRF52840 GPIO reaches VDD, 3.3 V at "
-     "most. It can turn the switch ON and cannot turn it OFF. "
-     "Cheapest fix: a second TPS7A2033 from VSTOR with its logic-level EN on "
-     "the GPIO — same footprint as U3, already traced, deletes U4."),
-    ("U1 pin 30 / VSTOR",
-     "Raytac Ver. K §5.2 gives t_R VDDH = 100 ms MAX for 0 -> 3.7 V. A cell "
-     "charged from harvest rises over hours. Gate VDDH with a switch driven "
-     "by VBAT_OK so the module sees an edge, not a ramp."),
-    ("U1 pin 31 / NRF_DCCH",
-     "REG0 DC/DC vs LDO is not settled. DC/DC needs a 10 uH 0603 (IDC >= "
-     "80 mA) between DCCH and VDDH; LDO mode does not. Raytac §8.1-8.3 are "
-     "drawings that would not extract. C11 is a placeholder. Confirm before "
-     "layout."),
     ("BL_FLAG / R6",
      "NEXT-SESSION specifies '1M/220k' on J11-4. The MEASUREMENTS say that "
      "cannot work: J11-4 reads 0.316 V awake and 0.000 V asleep "
@@ -211,15 +242,19 @@ FLAGS = [
      "a GPIO cannot tell them apart, and a 1M/220k divider would shrink "
      "0.32 V to 0.06 V. This netlist uses a 100k series resistor into an "
      "SAADC pin and reads it as an ANALOG value, threshold ~0.15 V."),
-    ("SENSOR_3V3 headroom",
-     "U3 is a 3.3 V fixed LDO fed from VSTOR, which falls to 3.0 V at the "
-     "cell's discharge cut-off. Output then equals VSTOR minus dropout, "
-     "below the ZW0905's 3.0 V minimum. The firmware floor must be set from "
-     "U3's dropout at 25 mA, NOT at the 3.0 V the brief assumes. Dropout not "
-     "yet traced."),
-    ("BT1",
+    ("B6  BT1 — STILL OPEN, and it is the safety one",
      "VARTA: 'Cell must not be used without external safety electronics "
-     "(PCM).' There is no PCM in this netlist. PART-LIBRARY §9 item 4."),
+     "(PCM).' There is no PCM here. BQ25505 VBAT_OV covers overcharge and "
+     "firmware covers undervoltage, but neither covers a short. Source the "
+     "CP1254 as a tabbed assembly with a PCM fitted, or add a protection IC."),
+    ("Load budget grew — 3.3 -> 4.0 mWh/day",
+     "The always-on LDO's own quiescent current was never counted. TPS7A20 "
+     "IGND is 6.5 uA typ / 10 uA over -40..85 C, against the sensor's 10 uA "
+     "standby. Add the cell-sense divider (4.7M+1M across VSTOR = 0.75 uA). "
+     "New total ~4.0 mWh/day: scans 1.93, sensor standby 0.89, U3 quiescent "
+     "0.58, nRF sleep 0.53, divider 0.07. Harvest still covers it about 4.7x "
+     "on four hours of backlight, down from 6x. U4 disabled adds nothing "
+     "(0.07 uA)."),
 ]
 
 
@@ -253,7 +288,15 @@ def main():
         print(f"  {mark} {n:<16} {len(c):>2}  {', '.join(c)}")
 
     print("\n" + "=" * 74)
-    print("FLAGS — carried from PART-LIBRARY.md §9. Not cosmetic.")
+    print("RESOLVED since the first pass — the design changed, read these")
+    print("=" * 74)
+    for where, txt in RESOLVED:
+        print(f"\n  + {where}")
+        for line in [txt[i:i + 68] for i in range(0, len(txt), 68)]:
+            print(f"      {line}")
+
+    print("\n" + "=" * 74)
+    print("STILL OPEN. Not cosmetic.")
     print("=" * 74)
     for where, txt in FLAGS:
         print(f"\n  * {where}")
@@ -265,8 +308,9 @@ def main():
         print(f"  {bad} PROBLEM(S) — netlist is NOT complete")
         return 1
     print("  every pin accounted for; no single-pin nets")
-    print("  NOTE: 'complete' means structurally complete. Six FLAGS above "
-          "are\n        unresolved DESIGN questions, not wiring errors.")
+    print("  NOTE: structurally complete, and the two architecture faults are")
+    print("        fixed. The items under STILL OPEN are design/procurement")
+    print("        decisions, not wiring errors.")
     return 0
 
 

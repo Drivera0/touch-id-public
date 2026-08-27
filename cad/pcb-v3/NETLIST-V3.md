@@ -13,7 +13,7 @@ updated: 2026-08-27
 **Generated from `netlist_v3.py` by `export_netlist.py` — do not hand-edit.**
 Edit the Python and re-run, or the two will disagree.
 
-44 parts · 176 pins · 50 deliberate no-connects · 28 nets · no single-pin nets
+44 parts · 175 pins · 51 deliberate no-connects · 27 nets · no single-pin nets
 
 > [!warning] Structurally complete is not the same as settled
 > Every pin is accounted for and no net has fewer than two connections. The
@@ -25,27 +25,26 @@ Edit the Python and re-run, or the two will disagree.
 
 | Net | # | Connections |
 |---|---|---|
-| `GND` | 42 | U1-1, U1-2, U1-15, U1-33, U1-55, U1-32, U2-1, U2-3, U2-5, U2-6, U2-15, U2-16, U2-17, U2-21, U3-2, U3-5, U4-2, U4-4, U4-5, J4-5, J2-6, BT1-2, J3-5, TP8-1, TP9-1, TP10-1, ROV1-2, ROK1-2, C1-2, C2-2, C3-2, C4-2, C5-2, C6-2, C7-2, C8-2, C9-2, C10-2, C11-2, R5-2, C12-2, C13-2 |
-| `VSTOR` | 10 | U1-30, U2-19, U3-3, U3-4, J3-4, TP2-1, C2-1, C3-1, C10-1, R4-1 |
+| `GND` | 40 | U1-1, U1-2, U1-15, U1-33, U1-55, U1-32, U2-1, U2-3, U2-5, U2-6, U2-15, U2-16, U2-17, U2-21, U3-2, U3-5, U4-2, U4-5, J4-5, J2-6, BT1-2, J3-5, TP8-1, TP9-1, TP10-1, ROV1-2, ROK1-2, C1-2, C2-2, C3-2, C4-2, C5-2, C6-2, C7-2, C8-2, C9-2, C10-2, R5-2, C12-2, C13-2 |
+| `VSTOR` | 11 | U1-30, U2-19, U3-3, U3-4, U4-4, J3-4, TP2-1, C2-1, C3-1, C10-1, R4-1 |
 | `VIN_DC` | 7 | U2-2, TP1-1, R1-2, R2-2, R3-2, L1-2, C1-1 |
-| `SENSOR_3V3` | 6 | U3-1, U4-1, J2-1, TP5-1, C6-1, C7-1 |
-| `SENSOR_MCU_3V3` | 4 | U4-6, J2-3, TP6-1, C8-1 |
+| `SENSOR_3V3` | 5 | U3-1, J2-1, TP5-1, C6-1, C7-1 |
+| `SENSOR_MCU_3V3` | 4 | U4-1, J2-3, TP6-1, C8-1 |
 | `VBAT` | 4 | U2-18, BT1-1, TP3-1, C5-1 |
+| `VBAT_OK` | 4 | U1-16, U2-13, TP4-1, R7-1 |
 | `VBAT_SENSE` | 4 | U1-9, R4-2, R5-1, C12-1 |
 | `BL_FLAG` | 3 | U1-11, R6-2, C13-1 |
 | `BL_RETURN` | 3 | J11-4, TP7-1, R6-1 |
 | `OK_HYST` | 3 | U2-11, ROK2-1, ROK3-2 |
 | `OK_PROG` | 3 | U2-12, ROK1-1, ROK2-2 |
-| `VBAT_OK` | 3 | U1-16, U2-13, TP4-1 |
+| `RESET` | 3 | U1-40, J3-3, R7-2 |
 | `VBAT_OV_SET` | 3 | U2-7, ROV1-1, ROV2-2 |
 | `VRDIV` | 3 | U2-8, ROV2-1, ROK3-1 |
 | `HARV_1` | 2 | J11-1, R1-1 |
 | `HARV_2` | 2 | J11-2, R2-1 |
 | `HARV_3` | 2 | J11-3, R3-1 |
 | `LX` | 2 | U2-20, L1-1 |
-| `NRF_DCCH` | 2 | U1-31, C11-1 |
 | `NRF_VDD` | 2 | U1-28, C9-1 |
-| `RESET` | 2 | U1-40, J3-3 |
 | `SENSOR_RX` | 2 | U1-24, J2-5 |
 | `SENSOR_SW_EN` | 2 | U1-19, U4-3 |
 | `SENSOR_TX` | 2 | U1-22, J2-4 |
@@ -153,15 +152,6 @@ Edit the Python and re-run, or the two will disagree.
 | Pin | Net |
 |---|---|
 | 1 | `VSTOR` |
-| 2 | `GND` |
-
-### C11 — 1uF 0402
-
-> see FLAGS — mode not settled
-
-| Pin | Net |
-|---|---|
-| 1 | `NRF_DCCH` |
 | 2 | `GND` |
 
 ### C12 — 10nF 0402
@@ -283,6 +273,15 @@ Edit the Python and re-run, or the two will disagree.
 |---|---|
 | 1 | `BL_RETURN` |
 | 2 | `BL_FLAG` |
+
+### R7 — 1k 0402
+
+> 1k so an SWD programmer can still override RESET
+
+| Pin | Net |
+|---|---|
+| 1 | `VBAT_OK` |
+| 2 | `RESET` |
 
 ### ROK1 — 4.53M 0402
 
@@ -441,7 +440,7 @@ Edit the Python and re-run, or the two will disagree.
 | 28 | `NRF_VDD` |
 | 29 | *(no connect)* |
 | 30 | `VSTOR` |
-| 31 | `NRF_DCCH` |
+| 31 | *(no connect)* |
 | 32 | `GND` |
 | 33 | `GND` |
 | 34 | *(no connect)* |
@@ -513,18 +512,17 @@ Edit the Python and re-run, or the two will disagree.
 | 4 | `VSTOR` |
 | 5 | `GND` |
 
-### U4 — TI LM66100 load switch (sensor MCU rail)
+### U4 — TI TPS7A2033 3.3 V LDO (switched sensor-MCU rail)
 
-> Wired exactly as NEXT-SESSION specifies. See FLAGS — the datasheet says a GPIO cannot switch this off.
+> Fed from VSTOR rather than cascaded off SENSOR_3V3: cascading would leave no headroom, and this also keeps the sensor's 25 mA scan current off the always-on standby rail.
 
 | Pin | Net |
 |---|---|
-| 1 | `SENSOR_3V3` |
+| 1 | `SENSOR_MCU_3V3` |
 | 2 | `GND` |
 | 3 | `SENSOR_SW_EN` |
-| 4 | `GND` |
+| 4 | `VSTOR` |
 | 5 | `GND` |
-| 6 | `SENSOR_MCU_3V3` |
 
 ---
 
@@ -532,27 +530,15 @@ Edit the Python and re-run, or the two will disagree.
 
 These print on every run of `netlist_v3.py`. They are not cosmetic.
 
-### U4 / SENSOR_SW_EN
-
-LM66100 CE is a COMPARATOR input referenced to VIN, not a logic input. Datasheet V_OFF: turning the switch OFF needs V_CE > V_IN + 80 mV = 3.38 V with V_IN = SENSOR_3V3. An nRF52840 GPIO reaches VDD, 3.3 V at most. It can turn the switch ON and cannot turn it OFF. Cheapest fix: a second TPS7A2033 from VSTOR with its logic-level EN on the GPIO — same footprint as U3, already traced, deletes U4.
-
-### U1 pin 30 / VSTOR
-
-Raytac Ver. K §5.2 gives t_R VDDH = 100 ms MAX for 0 -> 3.7 V. A cell charged from harvest rises over hours. Gate VDDH with a switch driven by VBAT_OK so the module sees an edge, not a ramp.
-
-### U1 pin 31 / NRF_DCCH
-
-REG0 DC/DC vs LDO is not settled. DC/DC needs a 10 uH 0603 (IDC >= 80 mA) between DCCH and VDDH; LDO mode does not. Raytac §8.1-8.3 are drawings that would not extract. C11 is a placeholder. Confirm before layout.
-
 ### BL_FLAG / R6
 
 NEXT-SESSION specifies '1M/220k' on J11-4. The MEASUREMENTS say that cannot work: J11-4 reads 0.316 V awake and 0.000 V asleep (Pin Test Results, 3-6 ohm source). Both are below any digital V_IL, so a GPIO cannot tell them apart, and a 1M/220k divider would shrink 0.32 V to 0.06 V. This netlist uses a 100k series resistor into an SAADC pin and reads it as an ANALOG value, threshold ~0.15 V.
 
-### SENSOR_3V3 headroom
+### B6  BT1 — STILL OPEN, and it is the safety one
 
-U3 is a 3.3 V fixed LDO fed from VSTOR, which falls to 3.0 V at the cell's discharge cut-off. Output then equals VSTOR minus dropout, below the ZW0905's 3.0 V minimum. The firmware floor must be set from U3's dropout at 25 mA, NOT at the 3.0 V the brief assumes. Dropout not yet traced.
+VARTA: 'Cell must not be used without external safety electronics (PCM).' There is no PCM here. BQ25505 VBAT_OV covers overcharge and firmware covers undervoltage, but neither covers a short. Source the CP1254 as a tabbed assembly with a PCM fitted, or add a protection IC.
 
-### BT1
+### Load budget grew — 3.3 -> 4.0 mWh/day
 
-VARTA: 'Cell must not be used without external safety electronics (PCM).' There is no PCM in this netlist. PART-LIBRARY §9 item 4.
+The always-on LDO's own quiescent current was never counted. TPS7A20 IGND is 6.5 uA typ / 10 uA over -40..85 C, against the sensor's 10 uA standby. Add the cell-sense divider (4.7M+1M across VSTOR = 0.75 uA). New total ~4.0 mWh/day: scans 1.93, sensor standby 0.89, U3 quiescent 0.58, nRF sleep 0.53, divider 0.07. Harvest still covers it about 4.7x on four hours of backlight, down from 6x. U4 disabled adds nothing (0.07 uA).
 

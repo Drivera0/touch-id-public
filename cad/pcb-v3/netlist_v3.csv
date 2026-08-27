@@ -21,8 +21,6 @@ C9,1,NRF_VDD,1uF 0402,REG0 output decoupling
 C9,2,GND,1uF 0402,REG0 output decoupling
 C10,1,VSTOR,0.1uF 0402,"VDDH decoupling, at the module"
 C10,2,GND,0.1uF 0402,"VDDH decoupling, at the module"
-C11,1,NRF_DCCH,1uF 0402,see FLAGS — mode not settled
-C11,2,GND,1uF 0402,see FLAGS — mode not settled
 C12,1,VBAT_SENSE,10nF 0402,SAADC sampling reservoir
 C12,2,GND,10nF 0402,SAADC sampling reservoir
 C13,1,BL_FLAG,10nF 0402,
@@ -62,6 +60,8 @@ R5,1,VBAT_SENSE,1M 0402,
 R5,2,GND,1M 0402,
 R6,1,BL_RETURN,100k 0402,series protection only
 R6,2,BL_FLAG,100k 0402,series protection only
+R7,1,VBAT_OK,1k 0402,1k so an SWD programmer can still override RESET
+R7,2,RESET,1k 0402,1k so an SWD programmer can still override RESET
 ROK1,1,OK_PROG,4.53M 0402,VBAT_OK falling = 3.12 V
 ROK1,2,GND,4.53M 0402,VBAT_OK falling = 3.12 V
 ROK2,1,OK_HYST,7.15M 0402,
@@ -112,7 +112,7 @@ U1,27,NC,Raytac MDBT50Q-1MV2 (nRF52840),"17/18 = XL1/XL2 left NC: internal LFRC,
 U1,28,NRF_VDD,Raytac MDBT50Q-1MV2 (nRF52840),"17/18 = XL1/XL2 left NC: internal LFRC, no 32.768 kHz crystal. Saves a 3215 crystal + 2 caps; costs ~2 uA of the 6 uA sleep budget."
 U1,29,NC,Raytac MDBT50Q-1MV2 (nRF52840),"17/18 = XL1/XL2 left NC: internal LFRC, no 32.768 kHz crystal. Saves a 3215 crystal + 2 caps; costs ~2 uA of the 6 uA sleep budget."
 U1,30,VSTOR,Raytac MDBT50Q-1MV2 (nRF52840),"17/18 = XL1/XL2 left NC: internal LFRC, no 32.768 kHz crystal. Saves a 3215 crystal + 2 caps; costs ~2 uA of the 6 uA sleep budget."
-U1,31,NRF_DCCH,Raytac MDBT50Q-1MV2 (nRF52840),"17/18 = XL1/XL2 left NC: internal LFRC, no 32.768 kHz crystal. Saves a 3215 crystal + 2 caps; costs ~2 uA of the 6 uA sleep budget."
+U1,31,NC,Raytac MDBT50Q-1MV2 (nRF52840),"17/18 = XL1/XL2 left NC: internal LFRC, no 32.768 kHz crystal. Saves a 3215 crystal + 2 caps; costs ~2 uA of the 6 uA sleep budget."
 U1,32,GND,Raytac MDBT50Q-1MV2 (nRF52840),"17/18 = XL1/XL2 left NC: internal LFRC, no 32.768 kHz crystal. Saves a 3215 crystal + 2 caps; costs ~2 uA of the 6 uA sleep budget."
 U1,33,GND,Raytac MDBT50Q-1MV2 (nRF52840),"17/18 = XL1/XL2 left NC: internal LFRC, no 32.768 kHz crystal. Saves a 3215 crystal + 2 caps; costs ~2 uA of the 6 uA sleep budget."
 U1,34,NC,Raytac MDBT50Q-1MV2 (nRF52840),"17/18 = XL1/XL2 left NC: internal LFRC, no 32.768 kHz crystal. Saves a 3215 crystal + 2 caps; costs ~2 uA of the 6 uA sleep budget."
@@ -169,9 +169,8 @@ U3,2,GND,TI TPS7A2033 3.3 V LDO (sensor rail),Always on. Feeds the ZW0905's 10 u
 U3,3,VSTOR,TI TPS7A2033 3.3 V LDO (sensor rail),Always on. Feeds the ZW0905's 10 uA standby rail.
 U3,4,VSTOR,TI TPS7A2033 3.3 V LDO (sensor rail),Always on. Feeds the ZW0905's 10 uA standby rail.
 U3,5,GND,TI TPS7A2033 3.3 V LDO (sensor rail),Always on. Feeds the ZW0905's 10 uA standby rail.
-U4,1,SENSOR_3V3,TI LM66100 load switch (sensor MCU rail),Wired exactly as NEXT-SESSION specifies. See FLAGS — the datasheet says a GPIO cannot switch this off.
-U4,2,GND,TI LM66100 load switch (sensor MCU rail),Wired exactly as NEXT-SESSION specifies. See FLAGS — the datasheet says a GPIO cannot switch this off.
-U4,3,SENSOR_SW_EN,TI LM66100 load switch (sensor MCU rail),Wired exactly as NEXT-SESSION specifies. See FLAGS — the datasheet says a GPIO cannot switch this off.
-U4,4,GND,TI LM66100 load switch (sensor MCU rail),Wired exactly as NEXT-SESSION specifies. See FLAGS — the datasheet says a GPIO cannot switch this off.
-U4,5,GND,TI LM66100 load switch (sensor MCU rail),Wired exactly as NEXT-SESSION specifies. See FLAGS — the datasheet says a GPIO cannot switch this off.
-U4,6,SENSOR_MCU_3V3,TI LM66100 load switch (sensor MCU rail),Wired exactly as NEXT-SESSION specifies. See FLAGS — the datasheet says a GPIO cannot switch this off.
+U4,1,SENSOR_MCU_3V3,TI TPS7A2033 3.3 V LDO (switched sensor-MCU rail),"Fed from VSTOR rather than cascaded off SENSOR_3V3: cascading would leave no headroom, and this also keeps the sensor's 25 mA scan current off the always-on standby rail."
+U4,2,GND,TI TPS7A2033 3.3 V LDO (switched sensor-MCU rail),"Fed from VSTOR rather than cascaded off SENSOR_3V3: cascading would leave no headroom, and this also keeps the sensor's 25 mA scan current off the always-on standby rail."
+U4,3,SENSOR_SW_EN,TI TPS7A2033 3.3 V LDO (switched sensor-MCU rail),"Fed from VSTOR rather than cascaded off SENSOR_3V3: cascading would leave no headroom, and this also keeps the sensor's 25 mA scan current off the always-on standby rail."
+U4,4,VSTOR,TI TPS7A2033 3.3 V LDO (switched sensor-MCU rail),"Fed from VSTOR rather than cascaded off SENSOR_3V3: cascading would leave no headroom, and this also keeps the sensor's 25 mA scan current off the always-on standby rail."
+U4,5,GND,TI TPS7A2033 3.3 V LDO (switched sensor-MCU rail),"Fed from VSTOR rather than cascaded off SENSOR_3V3: cascading would leave no headroom, and this also keeps the sensor's 25 mA scan current off the always-on standby rail."
