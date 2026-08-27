@@ -17,21 +17,63 @@ Built by `build_pcb_v3.py`. **`pcb-v2.kicad_pcb` was not touched.**
 | Layers | **4** — F.Cu, In1.Cu, In2.Cu, B.Cu |
 | Nets | 27, from `netlist_v3.py` (single source of truth) |
 | Footprints | 46 · **177 pads** |
-| Zones | 7 — antenna keep-out ×4 layers, GND pour on F.Cu / In2.Cu / B.Cu |
+| Zones | 15 — antenna keep-out ×4, **screw-boss keep-outs ×2 ×4**, GND pour on F.Cu / In2.Cu / B.Cu |
 
 ## Checker results
 
 ```
-sexp_check   PARSE OK, 1901 CRLF, 0 bare LF          <- run first, always
-check_board  different-net pairs < 0.127 mm : 0
-check_connect  27 nets split                          <- EXPECTED, see below
+sexp_check    PARSE OK, 0 bare LF, 46 footprints, 177 pads, 15 zones
+check_board   different-net pairs < 0.127 mm : 0
+check_drc     NO DRC VIOLATIONS          (KiCadRoutingTools, graded at 0.20)
+check_connect 27 nets split                <- EXPECTED, see below
 ```
+
+Closest body to a screw boss: **C5, 0.770 mm clear** of the r1.40 keep-out.
+Closest copper to a screw hole: **J11-2, 0.200 mm clear** of the 0.850 keep-out.
 
 **It is not routed.** Placement is checked; tracks are not drawn. Scripting an
 autorouter in one sitting and trusting its output is a worse idea than routing
 it in KiCad, where you can see what it does. So `check_connect` reports every
 net as split — that is the unrouted state, not a defect. Route, then re-run all
 three.
+
+## The mounting screws — a constraint I had missed
+
+Daniel asked whether anything was sitting on the two corner screws. It was.
+
+The housing does not just want a hole there: it grows a **solid plastic boss of
+radius 1.20 mm** at each screw (`touchid_module_v5.py`, boss_r 1.20, 4 mm tall)
+standing directly on the board face. Each screw therefore costs a **r1.20 disc
+of board area**, not a Ø1.30 hole.
+
+The first placement put **ROK3 dead under the +X boss** — 0.000 mm — with R2 at
+0.25, ROK2 at 0.95 and R1 at 0.98 also inside it, and ROK3's copper 0.219 mm
+from a hole needing 0.850. My checker had tested the keep-out, the cavity,
+courtyard overlap and pad clearance, and never tested this.
+
+Three things changed as a result:
+
+1. **`BOSS_XY` / `BOSS_R` / `BOSS_KEEP` are now hard constraints applied at
+   placement time,** not a check run afterwards.
+2. **The keep-outs are drawn into the board** as real rule areas — a 24-sided
+   polygon of radius 1.40 at each screw, on **all four copper layers**, with
+   tracks, vias, pads, copper pour and footprints all disallowed. KiCad's own
+   DRC and any autorouter now enforce them; previously only this script knew.
+3. **The twenty 0402s are packed by search, not by a hand-written slot list.**
+   The hand list found 23 slots, lost 4 to the bosses and came up one part
+   short, which nearly cost C13. The packer masks every 0.05 mm position on the
+   board in both rotations, lays shelves from the bottom edge up, then mops up
+   the leftover pockets. **20/20 placed, 2 rotated, nothing dropped.**
+
+### And a 0.08 mm problem worth remembering
+
+With honest 0.20 mm clearance the bottom strip was **1.92 mm** tall and two rows
+of 0402 need **2.00**. Eight hundredths of a millimetre, and it cost a whole row
+of eight parts — which is what made the board look full.
+
+U1 had 0.32 mm of unused travel toward the spacebar before it fouls the lip
+wall, so **U1_CY went 0.90 → 1.00**. The strip became 2.02 mm, both rows fit,
+and there is still 0.22 mm against the wall. That is the entire fix.
 
 ## The constraint that set the layout
 
