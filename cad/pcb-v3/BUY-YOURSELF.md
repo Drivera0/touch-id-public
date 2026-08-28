@@ -138,6 +138,45 @@ If the VARTA route fails, the fallback is a **pack assembler** (EEMB and
 Grepow both do custom terminations) building to the envelope above — not a
 bare cell off a marketplace.
 
+### You are not allowed to attach the wires yourself
+
+CoinPower Technical Handbook **§8.7, Cell Connection**:
+
+> "Soldering or welding of wires or other types of connectors **directly to the
+> cell is strictly prohibited.** A proper cell connection **can only be done by
+> the cell manufacturer itself.** If soldering or welding … is performed by any
+> entity other than the cell manufacturer, **all claims regarding warranty,
+> performance and safety will be invalidated.**"
+
+This closes the obvious workaround. "Buy the bare Ø12.1 cell — which *does* fit
+the pocket — and add your own leads and PCM" is not an option. And §7.3 makes
+the PCM non-optional: *"This is mandatory for all lithium cells."*
+
+**So the bind is:** the bare cell fits but may not be connected; the wired
+assembly may be connected but is Ø12.9 and carries no PCM. **The housing was
+sized around a cell nobody is permitted to use.**
+
+### Diameter is not the hard part — the axial gap is
+
+The pocket has plenty of room to grow. Collar OD is 17.17, so:
+
+| pocket | collar wall left |
+|---|---|
+| Ø12.5 (now) | 2.335 mm |
+| Ø13.4 | 1.885 mm |
+| **Ø14.0** | **1.585 mm** |
+
+Bosses sit 10.255 mm from the axis and the filleted cavity corner 7.995 mm, so
+neither is reached. **Any of these is fine.**
+
+The tight dimension is the **1.61 mm axial gap** (cell top z 7.85 → barrel
+bottom z 9.46), and it has to swallow both the PCM *and* VARTA's venting
+allowance — the handbook says *"under abusive conditions the cell may vent; to
+ensure safe venting, up to __ mm of additional space in axial direction is
+necessary"*, and drawing note 3 repeats it as "cell deflection space". **The
+digit is dropped by this PDF's text encoding — get that number before
+committing to a stack-up.**
+
 ### Where an individual can actually buy one — checked 2026-08-28
 
 Nobody sells a **protected + wired CP1254** over a counter. Every authorised
