@@ -115,7 +115,7 @@ re-tick In2.Cu.
 | Stub layer swaps | ticked | Helps routability |
 | Move copper text to silkscreen | ticked | Harmless here — all reference text is hidden |
 | Add teardrops | unticked | JLC doesn't need them; complicates the file |
-| Fix DRC settings after routing | **ticked** | Safe: it only clamps net classes when the *Min Clearance* override is ticked, and yours isn't |
+| Fix DRC settings after routing | **UNTICKED** | **Correction (2026-08-27).** I previously said this was safe. It is not: it *loosened three Board Setup values to the routed floors*, i.e. it rewrites your design rules to match whatever the router did. Never leave it on. |
 | Follow User-layer guide path | unticked | |
 | Keep out of User-layer polygon(s) | **unticked** | Our keep-outs are native KiCad rule areas, which the router reads directly. This option is for polygons drawn on a User layer |
 | **Power Nets** | `VSTOR VBAT VIN_DC LX SENSOR_3V3 SENSOR_MCU_3V3` | |

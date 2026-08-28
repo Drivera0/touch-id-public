@@ -129,67 +129,17 @@
 			(layers "F.Cu" "F.Mask" "F.Paste")
 			(net 3 "GND")
 		)
-		(pad "3" smd rect
-			(at -4.65 1.85)
-			(size 0.6 0.4)
-			(layers "F.Cu" "F.Mask" "F.Paste")
-		)
-		(pad "4" smd rect
-			(at -4.65 0.25)
-			(size 0.6 0.4)
-			(layers "F.Cu" "F.Mask" "F.Paste")
-		)
-		(pad "5" smd rect
-			(at -3.75 -0.15)
-			(size 0.6 0.4)
-			(layers "F.Cu" "F.Mask" "F.Paste")
-		)
-		(pad "6" smd rect
-			(at -4.65 -0.55)
-			(size 0.6 0.4)
-			(layers "F.Cu" "F.Mask" "F.Paste")
-		)
-		(pad "7" smd rect
-			(at -3.75 -0.95)
-			(size 0.6 0.4)
-			(layers "F.Cu" "F.Mask" "F.Paste")
-		)
-		(pad "8" smd rect
-			(at -4.65 -1.35)
-			(size 0.6 0.4)
-			(layers "F.Cu" "F.Mask" "F.Paste")
-		)
 		(pad "9" smd rect
 			(at -3.75 -1.75)
 			(size 0.6 0.4)
 			(layers "F.Cu" "F.Mask" "F.Paste")
 			(net 23 "VBAT_SENSE")
 		)
-		(pad "10" smd rect
-			(at -4.65 -2.15)
-			(size 0.6 0.4)
-			(layers "F.Cu" "F.Mask" "F.Paste")
-		)
 		(pad "11" smd rect
 			(at -3.75 -2.55)
 			(size 0.6 0.4)
 			(layers "F.Cu" "F.Mask" "F.Paste")
 			(net 1 "BL_FLAG")
-		)
-		(pad "12" smd rect
-			(at -4.65 -2.95)
-			(size 0.6 0.4)
-			(layers "F.Cu" "F.Mask" "F.Paste")
-		)
-		(pad "13" smd rect
-			(at -3.75 -3.35)
-			(size 0.6 0.4)
-			(layers "F.Cu" "F.Mask" "F.Paste")
-		)
-		(pad "14" smd rect
-			(at -4.65 -3.75)
-			(size 0.6 0.4)
-			(layers "F.Cu" "F.Mask" "F.Paste")
 		)
 		(pad "15" smd rect
 			(at -4.8 -7.15)
@@ -203,31 +153,11 @@
 			(layers "F.Cu" "F.Mask" "F.Paste")
 			(net 21 "VBAT_OK")
 		)
-		(pad "17" smd rect
-			(at -3.2 -7.15)
-			(size 0.4 0.6)
-			(layers "F.Cu" "F.Mask" "F.Paste")
-		)
-		(pad "18" smd rect
-			(at -2.4 -7.15)
-			(size 0.4 0.6)
-			(layers "F.Cu" "F.Mask" "F.Paste")
-		)
 		(pad "19" smd rect
 			(at -2.0 -6.25)
 			(size 0.4 0.6)
 			(layers "F.Cu" "F.Mask" "F.Paste")
 			(net 15 "SENSOR_SW_EN")
-		)
-		(pad "20" smd rect
-			(at -1.6 -7.15)
-			(size 0.4 0.6)
-			(layers "F.Cu" "F.Mask" "F.Paste")
-		)
-		(pad "21" smd rect
-			(at -1.2 -6.25)
-			(size 0.4 0.6)
-			(layers "F.Cu" "F.Mask" "F.Paste")
 		)
 		(pad "22" smd rect
 			(at -0.8 -7.15)
@@ -247,42 +177,17 @@
 			(layers "F.Cu" "F.Mask" "F.Paste")
 			(net 14 "SENSOR_RX")
 		)
-		(pad "25" smd rect
-			(at 0.4 -6.25)
-			(size 0.4 0.6)
-			(layers "F.Cu" "F.Mask" "F.Paste")
-		)
-		(pad "26" smd rect
-			(at 0.8 -7.15)
-			(size 0.4 0.6)
-			(layers "F.Cu" "F.Mask" "F.Paste")
-		)
-		(pad "27" smd rect
-			(at 1.2 -6.25)
-			(size 0.4 0.6)
-			(layers "F.Cu" "F.Mask" "F.Paste")
-		)
 		(pad "28" smd rect
 			(at 1.6 -7.15)
 			(size 0.4 0.6)
 			(layers "F.Cu" "F.Mask" "F.Paste")
 			(net 8 "NRF_VDD")
 		)
-		(pad "29" smd rect
-			(at 2.0 -6.25)
-			(size 0.4 0.6)
-			(layers "F.Cu" "F.Mask" "F.Paste")
-		)
 		(pad "30" smd rect
 			(at 2.4 -7.15)
 			(size 0.4 0.6)
 			(layers "F.Cu" "F.Mask" "F.Paste")
 			(net 27 "VSTOR")
-		)
-		(pad "31" smd rect
-			(at 3.2 -7.15)
-			(size 0.4 0.6)
-			(layers "F.Cu" "F.Mask" "F.Paste")
 		)
 		(pad "32" smd rect
 			(at 4.0 -7.15)
@@ -296,91 +201,11 @@
 			(layers "F.Cu" "F.Mask" "F.Paste")
 			(net 3 "GND")
 		)
-		(pad "34" smd rect
-			(at 4.65 -6.15)
-			(size 0.6 0.4)
-			(layers "F.Cu" "F.Mask" "F.Paste")
-		)
-		(pad "35" smd rect
-			(at 4.65 -5.35)
-			(size 0.6 0.4)
-			(layers "F.Cu" "F.Mask" "F.Paste")
-		)
-		(pad "36" smd rect
-			(at 3.75 -4.95)
-			(size 0.6 0.4)
-			(layers "F.Cu" "F.Mask" "F.Paste")
-		)
-		(pad "37" smd rect
-			(at 4.65 -4.55)
-			(size 0.6 0.4)
-			(layers "F.Cu" "F.Mask" "F.Paste")
-		)
-		(pad "38" smd rect
-			(at 3.75 -4.15)
-			(size 0.6 0.4)
-			(layers "F.Cu" "F.Mask" "F.Paste")
-		)
-		(pad "39" smd rect
-			(at 4.65 -3.75)
-			(size 0.6 0.4)
-			(layers "F.Cu" "F.Mask" "F.Paste")
-		)
 		(pad "40" smd rect
 			(at 3.75 -3.35)
 			(size 0.6 0.4)
 			(layers "F.Cu" "F.Mask" "F.Paste")
 			(net 11 "RESET")
-		)
-		(pad "41" smd rect
-			(at 4.65 -2.95)
-			(size 0.6 0.4)
-			(layers "F.Cu" "F.Mask" "F.Paste")
-		)
-		(pad "42" smd rect
-			(at 3.75 -2.55)
-			(size 0.6 0.4)
-			(layers "F.Cu" "F.Mask" "F.Paste")
-		)
-		(pad "43" smd rect
-			(at 3.75 -1.75)
-			(size 0.6 0.4)
-			(layers "F.Cu" "F.Mask" "F.Paste")
-		)
-		(pad "44" smd rect
-			(at 4.65 -1.35)
-			(size 0.6 0.4)
-			(layers "F.Cu" "F.Mask" "F.Paste")
-		)
-		(pad "45" smd rect
-			(at 3.75 -0.95)
-			(size 0.6 0.4)
-			(layers "F.Cu" "F.Mask" "F.Paste")
-		)
-		(pad "46" smd rect
-			(at 4.65 -0.55)
-			(size 0.6 0.4)
-			(layers "F.Cu" "F.Mask" "F.Paste")
-		)
-		(pad "47" smd rect
-			(at 3.75 -0.15)
-			(size 0.6 0.4)
-			(layers "F.Cu" "F.Mask" "F.Paste")
-		)
-		(pad "48" smd rect
-			(at 4.65 0.25)
-			(size 0.6 0.4)
-			(layers "F.Cu" "F.Mask" "F.Paste")
-		)
-		(pad "49" smd rect
-			(at 3.75 0.65)
-			(size 0.6 0.4)
-			(layers "F.Cu" "F.Mask" "F.Paste")
-		)
-		(pad "50" smd rect
-			(at 3.75 1.45)
-			(size 0.6 0.4)
-			(layers "F.Cu" "F.Mask" "F.Paste")
 		)
 		(pad "51" smd rect
 			(at 4.65 1.85)
@@ -388,57 +213,17 @@
 			(layers "F.Cu" "F.Mask" "F.Paste")
 			(net 19 "SWDIO")
 		)
-		(pad "52" smd rect
-			(at 3.75 2.25)
-			(size 0.6 0.4)
-			(layers "F.Cu" "F.Mask" "F.Paste")
-		)
 		(pad "53" smd rect
 			(at 4.65 2.65)
 			(size 0.6 0.4)
 			(layers "F.Cu" "F.Mask" "F.Paste")
 			(net 18 "SWCLK")
 		)
-		(pad "54" smd rect
-			(at 3.75 3.05)
-			(size 0.6 0.4)
-			(layers "F.Cu" "F.Mask" "F.Paste")
-		)
 		(pad "55" smd rect
 			(at 4.65 3.75)
 			(size 0.6 0.4)
 			(layers "F.Cu" "F.Mask" "F.Paste")
 			(net 3 "GND")
-		)
-		(pad "56" smd rect
-			(at -2.0 -0.55)
-			(size 0.4 0.6)
-			(layers "F.Cu" "F.Mask" "F.Paste")
-		)
-		(pad "57" smd rect
-			(at -1.2 -0.55)
-			(size 0.4 0.6)
-			(layers "F.Cu" "F.Mask" "F.Paste")
-		)
-		(pad "58" smd rect
-			(at -0.4 -0.55)
-			(size 0.4 0.6)
-			(layers "F.Cu" "F.Mask" "F.Paste")
-		)
-		(pad "59" smd rect
-			(at 0.4 -0.55)
-			(size 0.4 0.6)
-			(layers "F.Cu" "F.Mask" "F.Paste")
-		)
-		(pad "60" smd rect
-			(at 1.2 -0.55)
-			(size 0.4 0.6)
-			(layers "F.Cu" "F.Mask" "F.Paste")
-		)
-		(pad "61" smd rect
-			(at 2.0 -0.55)
-			(size 0.4 0.6)
-			(layers "F.Cu" "F.Mask" "F.Paste")
 		)
 	)
 	(footprint "touchid:J2"
@@ -1228,7 +1013,7 @@
 	)
 	(footprint "touchid:C3"
 		(layer "F.Cu")
-		(at -8.1 -8.52)
+		(at -2.9 -7.9 90)
 		(property "Reference" "C3"
 			(at 0 0 0)
 			(layer "F.SilkS")
@@ -1253,7 +1038,7 @@
 	)
 	(footprint "touchid:C4"
 		(layer "F.Cu")
-		(at -6.15 -8.52)
+		(at 5.5 2.9)
 		(property "Reference" "C4"
 			(at 0 0 0)
 			(layer "F.SilkS")
@@ -1278,7 +1063,7 @@
 	)
 	(footprint "touchid:C6"
 		(layer "F.Cu")
-		(at -4.25 -8.52)
+		(at 6.15 7.25 90)
 		(property "Reference" "C6"
 			(at 0 0 0)
 			(layer "F.SilkS")
@@ -1303,7 +1088,7 @@
 	)
 	(footprint "touchid:C8"
 		(layer "F.Cu")
-		(at -2.35 -8.52)
+		(at -6.9 3.3 90)
 		(property "Reference" "C8"
 			(at 0 0 0)
 			(layer "F.SilkS")
@@ -1328,7 +1113,7 @@
 	)
 	(footprint "touchid:C9"
 		(layer "F.Cu")
-		(at -0.45 -8.52)
+		(at 1.5 -7.9 90)
 		(property "Reference" "C9"
 			(at 0 0 0)
 			(layer "F.SilkS")
@@ -1353,7 +1138,7 @@
 	)
 	(footprint "touchid:C10"
 		(layer "F.Cu")
-		(at 1.45 -8.52)
+		(at -4.0 -7.9 90)
 		(property "Reference" "C10"
 			(at 0 0 0)
 			(layer "F.SilkS")
@@ -1378,7 +1163,7 @@
 	)
 	(footprint "touchid:C12"
 		(layer "F.Cu")
-		(at 3.35 -8.52)
+		(at -7.35 -7.9 90)
 		(property "Reference" "C12"
 			(at 0 0 0)
 			(layer "F.SilkS")
@@ -1403,7 +1188,7 @@
 	)
 	(footprint "touchid:C13"
 		(layer "F.Cu")
-		(at 5.25 -8.52)
+		(at -6.25 -7.9 90)
 		(property "Reference" "C13"
 			(at 0 0 0)
 			(layer "F.SilkS")
@@ -1428,7 +1213,7 @@
 	)
 	(footprint "touchid:R1"
 		(layer "F.Cu")
-		(at -8.1 -7.42)
+		(at -0.7 -7.9 90)
 		(property "Reference" "R1"
 			(at 0 0 0)
 			(layer "F.SilkS")
@@ -1453,7 +1238,7 @@
 	)
 	(footprint "touchid:R2"
 		(layer "F.Cu")
-		(at -6.15 -7.42)
+		(at 2.6 -7.9 90)
 		(property "Reference" "R2"
 			(at 0 0 0)
 			(layer "F.SilkS")
@@ -1478,7 +1263,7 @@
 	)
 	(footprint "touchid:R3"
 		(layer "F.Cu")
-		(at -4.25 -7.42)
+		(at -1.8 -7.9 90)
 		(property "Reference" "R3"
 			(at 0 0 0)
 			(layer "F.SilkS")
@@ -1503,7 +1288,7 @@
 	)
 	(footprint "touchid:R4"
 		(layer "F.Cu")
-		(at -2.35 -7.42)
+		(at -5.1 -7.9 90)
 		(property "Reference" "R4"
 			(at 0 0 0)
 			(layer "F.SilkS")
@@ -1528,7 +1313,7 @@
 	)
 	(footprint "touchid:R5"
 		(layer "F.Cu")
-		(at -0.45 -7.42)
+		(at -8.5 -7.9 90)
 		(property "Reference" "R5"
 			(at 0 0 0)
 			(layer "F.SilkS")
@@ -1553,7 +1338,7 @@
 	)
 	(footprint "touchid:R6"
 		(layer "F.Cu")
-		(at 1.45 -7.42)
+		(at 3.7 -7.9 90)
 		(property "Reference" "R6"
 			(at 0 0 0)
 			(layer "F.SilkS")
@@ -1578,7 +1363,7 @@
 	)
 	(footprint "touchid:R7"
 		(layer "F.Cu")
-		(at 3.35 -7.42)
+		(at 0.4 -7.9 90)
 		(property "Reference" "R7"
 			(at 0 0 0)
 			(layer "F.SilkS")
@@ -1603,7 +1388,7 @@
 	)
 	(footprint "touchid:ROV1"
 		(layer "F.Cu")
-		(at 5.25 -7.42)
+		(at 4.85 -7.9 90)
 		(property "Reference" "ROV1"
 			(at 0 0 0)
 			(layer "F.SilkS")
@@ -1628,7 +1413,7 @@
 	)
 	(footprint "touchid:ROV2"
 		(layer "F.Cu")
-		(at 5.5 3.58)
+		(at 6.0 -7.9 90)
 		(property "Reference" "ROV2"
 			(at 0 0 0)
 			(layer "F.SilkS")
@@ -1653,7 +1438,7 @@
 	)
 	(footprint "touchid:ROK1"
 		(layer "F.Cu")
-		(at 6.5 7.98)
+		(at 8.4 7.95 90)
 		(property "Reference" "ROK1"
 			(at 0 0 0)
 			(layer "F.SilkS")
@@ -1678,7 +1463,7 @@
 	)
 	(footprint "touchid:ROK2"
 		(layer "F.Cu")
-		(at -6.9 3.3 90)
+		(at 7.3 7.95 90)
 		(property "Reference" "ROK2"
 			(at 0 0 0)
 			(layer "F.SilkS")
@@ -1703,7 +1488,7 @@
 	)
 	(footprint "touchid:ROK3"
 		(layer "F.Cu")
-		(at 6.15 5.1 90)
+		(at 6.15 5.06 90)
 		(property "Reference" "ROK3"
 			(at 0 0 0)
 			(layer "F.SilkS")

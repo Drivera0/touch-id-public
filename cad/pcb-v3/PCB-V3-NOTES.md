@@ -176,3 +176,71 @@ confident summary is not evidence.
 - Vias must avoid the pogo pads: the ten of them own B.Cu below y = −1.12.
 - In1.Cu is currently an empty signal layer. It is there for routing; In2.Cu
   carries the solid ground plane.
+
+## 2026-08-27 — the routing failure, its two root causes, and the fix
+
+The first autoroute left **23 of 58 pad pairs open**. The cause was placement,
+not router settings, and there were two of them.
+
+### Root cause 1 — 43 dead pads sealed the module
+
+`fp_mdbt50q()` emitted all 61 pads from Raytac's drawing. **Only 18 are
+connected**; the other 43 are unused GPIO with no net. Measured on the built
+board, the ring's neighbour gaps are **uniformly 0.40 mm** — every one of the
+12 gaps along the bottom edge. A 0.20 mm track at 0.20 mm clearance needs
+**0.60 mm** to pass. So the ring was a sealed wall:
+
+- inner-ring signals could not escape outward
+- **78.7 mm2 of empty board and 26.7 mm2 of legal via sites inside the ring
+  were unreachable**
+
+Fix: emit only the 18 connected pads. Omitting land under an unused module pin
+is normal practice — the pin sits over solder mask. Cost: 18 solder joints
+instead of 61, of which 6 are the large GND pads.
+
+Measured effect: F.Cu routable area **135 -> 171 mm2 (+27%)**, legal via-site
+area **56 -> 69 mm2 (+23%)**, largest single via region 20.4 -> 27.6 mm2.
+
+### Root cause 2 — the packer optimised area, not routability
+
+`_CLR = 0.20` was body-to-body and the courtyard only adds 0.14, so parts sat
+**0.34 mm apart pad-to-pad** in two solid rows of eight. Nothing could enter or
+leave that strip: 0.60 mm is needed for one track, 1.00 mm for a via.
+
+Two changes:
+
+1. **Directional spacing.** An 0402's pads face along its long axis. That is
+   the gap that must be a channel (0.60); the perpendicular gap only needs
+   clearance (0.20). The bottom row is now 14 parts rotated 90 deg with
+   **0.67 mm channels above and below**, so every pad exits into open board.
+2. **Slots and assignment are now separate problems.** Geometry generates the
+   legal slots; a Hungarian assignment then decides which part goes in which,
+   against the centroid of the pins it actually connects to. The old packer was
+   netlist-blind and put ROK1/ROK2/ROK3 — one divider chain on U2's right-hand
+   pins — on three different edges of the board.
+
+Board capacity is **exactly 20 routable slots for 20 parts**. There is no spare.
+
+### The result, and what is still wrong
+
+Nets fully connected went **14/27 -> 23/27**. But the router bought that with
+copper we did not ask for:
+
+| | |
+|---|---|
+| segments below the 0.127 fab floor | **285 of 447**, at 0.0889 mm |
+| vias | **all 55 at 0.25/0.15**, not the 0.6/0.3 netclass |
+| tightest clearance | **0.1156 mm** (U2 pad 8 to a VBAT_OV_SET track) |
+| still open | VRDIV, and parts of VSTOR / VIN_DC / SENSOR_MCU_3V3 |
+
+This is KiCadRoutingTools' "terminal geometry escalation", which prefers
+shipping thin copper to reporting an open. It is a reasonable default and the
+wrong one for us. **The connectivity number is not trustworthy until escalation
+is forbidden** — `--fab-overrides` pins the floor and disables it.
+
+### A correction to ROUTING-SETTINGS.md
+
+I said "Fix DRC settings after routing" was safe because it only clamps net
+classes when the Min Clearance override is ticked. That is wrong. It **loosened
+three Board Setup values to the routed floors** — it rewrites your design rules
+to match whatever the router did. Leave it **unticked**.

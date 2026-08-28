@@ -124,7 +124,7 @@ for lay, key in (("F.Cu", 'F'), ("B.Cu", 'B')):
                 viol.append((d, lay, na, la, nb, lb))
 
 print(f"\n  different-net pairs closer than {MIN_CU} mm: {len(viol)}")
-for d, lay, na, la, nb, lb in sorted(viol):
+for d, lay, na, la, nb, lb in sorted(viol, key=lambda v: (v[0], str(v[1]), str(v[2]), str(v[3]), str(v[4]), str(v[5]))):
     tag = "SHORT" if d <= 0.0 else "tight"
     print(f"    {tag}  {lay}  {d:.4f}  [{na}] {la}  <->  [{nb}] {lb}")
 sys.exit(1 if viol else 0)
