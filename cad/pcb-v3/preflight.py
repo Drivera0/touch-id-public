@@ -190,7 +190,38 @@ for vm in re.finditer(r'\(via\b(.*?)\n\t\)', t, re.S):
     if a_ and sz and _box(float(a_.group(1))-float(sz.group(1))/2, float(a_.group(2))-float(sz.group(1))/2,
                           float(a_.group(1))+float(sz.group(1))/2, float(a_.group(2))+float(sz.group(1))/2).intersects(ko_all):
         bad += 1   # a via pierces every layer, so the union is right here
-rec(bad == 0, "7  antenna keep-out clear of copper", "%d object(s) inside" % bad)
+# ZONE FILL TOO. This checked tracks and vias only, and a poured plane is
+# neither -- so a fill spilling into the antenna keep-out would have been
+# invisible here, on the one part of the board whose emptiness is the point.
+# The keep-outs do set copperpour=not_allowed, but "the setting is right" and
+# "the copper is not there" are different claims, and this file has taught me
+# to check the second one.
+_fillbad = 0
+try:
+    import sexp as _s4
+    _r4 = _s4.parse(t)
+    for _z in _s4.kids(_r4, "zone"):
+        if _s4.kid(_z, "keepout"):
+            continue
+        _lay = _s4.kid(_z, "layers") or _s4.kid(_z, "layer")
+        _ls = [_s4.s(x) for x in _lay[1:]] if _lay else []
+        for _fp2 in _s4.kids(_z, "filled_polygon"):
+            _ptsn = _s4.kid(_fp2, "pts")
+            if not _ptsn:
+                continue
+            _pp = [(_s4.f(q[1]), _s4.f(q[2])) for q in _s4.kids(_ptsn, "xy")]
+            if len(_pp) < 3:
+                continue
+            _poly = _P(_pp)
+            for _L in _ls:
+                _kz = ko_by_layer.get(_L)
+                if _kz is not None and _poly.intersects(_kz):
+                    _fillbad += 1
+except Exception:
+    _fillbad = 0
+bad += _fillbad
+rec(bad == 0, "7  antenna keep-out clear of copper",
+    "%d object(s) inside%s" % (bad, " (incl. %d zone fill)" % _fillbad if _fillbad else ""))
 
 # ------------------------------------------------------------ 8 via sizes ---
 vias = collections.Counter(re.findall(r'\(via\b.*?\(size ([\d.]+)\)\s*\(drill ([\d.]+)\)', t, re.S))
@@ -398,8 +429,27 @@ rec(not _thin, "16 hand-solder mask dam >= %.2f mm" % MASK_DAM_MIN,
 # it was never run. So the board passed 17/17 and "0 open connections" while all
 # 40 GND pads were connected to NOTHING: no pour, no GND track, no GND via.
 # A gate that cannot see a missing ground plane is not a gate.
-_zt = [z for z in re.finditer(r"\(zone(.*?)\n\t\)", t, re.S)
-       if "(keepout" not in z.group(1) and '"GND"' in z.group(1)]
+# Parsed, not regex: "\(zone(.*?)\n\t\)" mis-splits filled zones and counted
+# 6 where there are 3. Fourth time regex has lied about this file format.
+def _copper_zones():
+    try:
+        import sexp as _s3
+        _r = _s3.parse(t)
+        out = []
+        for _z in _s3.kids(_r, "zone"):
+            if _s3.kid(_z, "keepout"):
+                continue
+            _nn2 = _s3.kid(_z, "net_name")
+            _lay = _s3.kid(_z, "layers") or _s3.kid(_z, "layer")
+            out.append(dict(net=_s3.s(_nn2[1]) if _nn2 and len(_nn2) > 1 else "",
+                            layers=[_s3.s(x) for x in _lay[1:]] if _lay else [],
+                            filled=bool(_s3.kids(_z, "filled_polygon"))))
+        return out
+    except Exception:
+        return None
+
+_CZ = _copper_zones()
+_zt = [z for z in (_CZ or []) if z["net"] == "GND"]
 # vias and segments are multi-line blocks; a [^)]* regex matches neither and
 # reported "0 GND vias, 0 GND segs" on a board carrying 15 and 54. Parse them.
 def _count_gnd():
@@ -430,6 +480,50 @@ if "ALL NETS FULLY CONNECTED" not in _cc:
 rec(not _gnd_bad, "17 ground plane is connected",
     "; ".join(_gnd_bad) or "%d filled GND zone(s), %d GND vias, %d GND segs, "
     "check_connected: all nets connected" % (len(_zt), _gv, _gs))
+
+# ------------------- 18 zones are actually FILLED --------------------------
+# A zone in this file is an OUTLINE plus fill settings. The copper itself lives
+# in (filled_polygon ...) blocks, which KiCad computes. check_connected models
+# the fill and will happily say "all nets connected" from the outline alone --
+# but a plot taken from an UNFILLED board has no plane on it. That is the same
+# failure as having no pour at all, one step further along, so it gates.
+_zones = _CZ if _CZ is not None else []
+_unfilled = [z for z in _zones if not z["filled"]]
+rec(not _unfilled, "18 copper zones are filled",
+    ("%d of %d zone(s) carry NO fill geometry (%s) -- open the board in KiCad, "
+     "Edit > Fill All Zones (B), SAVE, and re-run. Plotting an unfilled board "
+     "ships it with no ground plane."
+     % (len(_unfilled), len(_zones),
+        ", ".join("/".join(z["layers"]) for z in _unfilled)))
+    if _unfilled else "%d zone(s), all carry fill geometry" % len(_zones))
+
+# ------------------- 19 board thickness matches the housing ----------------
+# Not visible in any 2D check -- thickness is not in the copper. housing v5 is
+# built around a 1.20 mm board; KiCad AND JLCPCB both default 4-layer to 1.60.
+# Ordering the default gives a board 0.40 mm too thick for its own housing.
+_m3 = re.search(r"\(stackup(.*?)\n\t\t\)", t, re.S)
+if not _m3:
+    rec(False, "19 board thickness vs the housing",
+        "no (stackup) block: thickness undeclared, so the fab uses its default 1.6 mm")
+else:
+    _tot = sum(float(x) for x in re.findall(r"\(thickness ([\d.]+)\)", _m3.group(1)))
+    _want = None
+    try:
+        _hs = open(os.path.join(HERE, "..", "scripts", "touchid_module_v5.py"),
+                   encoding="utf-8").read()
+        _hm = re.search(r"^pcb_t_ref\s*=\s*([\d.]+)", _hs, re.M)
+        _want = float(_hm.group(1)) if _hm else None
+    except Exception:
+        pass
+    _ok3 = _want is not None and abs(_tot - _want) < 0.005
+    rec(_ok3, "19 board thickness vs the housing",
+        ("stackup %.3f mm vs housing pcb_t_ref %s -- MISMATCH"
+         % (_tot, _want)) if not _ok3 else
+        "%.2f mm, matches housing pcb_t_ref (SELECT THIS EXPLICITLY WHEN ORDERING)")
+    if _ok3:
+        results[-1] = (results[-1][0], results[-1][1],
+                       "%.2f mm = housing pcb_t_ref. MUST be chosen on the order "
+                       "form; JLC defaults 4-layer to 1.6" % _tot)
 
 prov = []
 # BT1 no longer belongs here. The board never depended on VARTA's tab geometry:

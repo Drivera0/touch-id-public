@@ -363,3 +363,55 @@ its own pad.
 (conductive debris, a dropped module, a metal slot floor). If that ever needs
 closing, the fix is to tent everything except J4/J11 in solder mask and accept
 losing probe access — not to delete pads and re-route.
+
+## Full sweep, 2026-08-28 — three more found in the same blind spot
+
+The missing ground plane was not a one-off. It got through because **zones were
+a category the gate could not see at all**, and once I looked there properly,
+two more were sitting in the same place.
+
+**1. The zones are not filled.** A zone in this file is an outline plus fill
+settings; the copper itself lives in `(filled_polygon ...)` blocks that KiCad
+computes. `check_connected` models the fill and reports "all nets connected"
+from the outline alone — but **a plot taken from an unfilled board has no plane
+on it**. That is the original bug again, one step further along.
+→ **check 18** blocks until the fill is materialised. This is the one manual
+step left: open in KiCad, `Edit > Fill All Zones` (B), **save**, re-run.
+
+**2. Board thickness was never declared.** No `(stackup)` block at all, and
+thickness is not visible to any 2D check because it is not in the copper.
+housing v5 is built around a **1.20 mm** board ("the PCB forms the bottom 1.2 of
+the assembled 8.36 stack") — and **KiCad and JLCPCB both default 4-layer to
+1.60 mm.** Ordering the default gives a board 0.40 mm too thick for its own
+housing. A stackup summing to exactly 1.200 mm is now emitted, ENIG specified.
+→ **check 19** cross-checks the stackup total against the housing's
+`pcb_t_ref`, the same way check 12 guards `mcu_center`.
+> Copper weights are the standard JLC build (1 oz outer, 0.5 oz inner). The
+> dielectric split is nominal and only makes the total come out right — JLC's
+> actual prepreg/core split governs. **The total is the requirement, and it must
+> still be chosen by hand on the order form.**
+
+**3. Check 7 could not see a pour either.** It tested tracks and vias, and a
+plane is neither — so a fill spilling into the antenna keep-out would have been
+invisible, on the one region of this board whose emptiness is the whole point.
+The keep-outs do set `copperpour=not_allowed` on all four layers (verified), but
+"the setting is right" and "the copper is not there" are different claims.
+→ check 7 now tests fill polygons per layer as well.
+
+**Also fixed:** the three GND pads a human actually solders a wire to (BT1-2,
+J2-6, J3-5) were connected **solid** into three copper planes. A plane that size
+sinks heat faster than an iron delivers it — cold joints and lifted pads. They
+now get thermal relief (`zone_connect 1`). J4-5 stays solid deliberately: it is
+a pogo *contact*, never soldered, and wants the lowest resistance available.
+The test points stay solid too — probe pads, never soldered.
+
+**And the recurring one:** checks 17/18 first counted **6** copper zones where
+there are **3**, because `\(zone(.*?)\n\t\)` mis-splits a filled zone. That is
+the fourth time regex has lied about this file format. Both now go through
+`sexp.py`.
+
+### State
+
+18 checks. **One blocker, and it is a step you have to take, not a defect:**
+fill the zones in KiCad and save. Everything else passes — DRC clean,
+all nets connected, placement identical to the generator.
