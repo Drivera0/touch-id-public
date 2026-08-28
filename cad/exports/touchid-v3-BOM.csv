@@ -1,5 +1,5 @@
 Comment,Designator,Footprint,JLCPCB Part # (LCSC Part #),JLC library,JLC stock,Part fitted,NOTE
-4.7uF 0402,"C1,C2",0402,C2858031,extended,184764,Murata GRM155R61E475ME15D 4.7uF 25V X5R 0402,VERIFY C_eff at 4.3 V on Murata's DC-bias curve; BQ25505 wants >=4.7 uF.  VERIFY C_eff at 4.3 V on Murata's DC-bias curve; BQ25505 wants >=4.7 uF.
+4.7uF 0402,"C1,C2",0402,C2858031,extended,184764,Murata GRM155R61E475ME15D 4.7uF 25V X5R 0402,VERIFY C_eff at 4.3 V on Murata's DC-bias curve; BQ25505 wants >=4.7 uF.
 0.1uF 0402,"C3,C10",0402,C1525,BASIC,35834447,Samsung CL05B104KO5NNNC 100nF 16V X7R 0402,
 10nF 0402 low-leak,C4,0402,C22400107,extended,72632,Murata GRM1555C1H103JE01D 10nF 50V C0G 0402,C0G on purpose - CREF leakage sets the BQ25505's reference droop.
 10uF 0603,C5,0603,C18164635,extended,1128075,CCTC TCC0603X5R106K160CT 10uF 16V X5R 0603,

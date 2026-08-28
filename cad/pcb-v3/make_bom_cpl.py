@@ -185,7 +185,8 @@ def main():
             if lib != "BASIC":
                 extended.add(lc)
             need = len(refs)
-            note = "  ".join(WARN[r] for r in refs if r in WARN)
+            # dedupe: C1 and C2 share one warning, print it once
+            note = "  ".join(dict.fromkeys(WARN[r] for r in refs if r in WARN))
             if stock < need:
                 zero_stock.append((v, refs, stock, need))
                 note = ("*** JLC ASSEMBLY STOCK %d, NEED %d PER BOARD *** "
