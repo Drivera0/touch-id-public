@@ -1,17 +1,20 @@
-# TouchID fab floor — pins the router to OUR design rule and DISABLES the
-# automatic standard->advanced escalation.
+# TouchID fab floor. Pins the router to ONE hard rung and DISABLES the
+# automatic standard->advanced escalation (see py_router/fab_tiers.py).
 #
-# Why this file exists: with only --fab-tier standard, the router quietly
-# routed 285 of 447 segments at 0.0889 mm and put all 55 vias at 0.25/0.15
-# (the "advanced", more-costly rung). 0.0889 is legal for JLC 4-layer standard,
-# but it is not what pcb-v3.kicad_pro specifies and it is not what we want to
-# order. Supplying overrides pins one hard rung — see fab_tiers.py.
+# 0.127, not the 0.20 originally chosen. 0.20 was MY rule, and it is stricter
+# than the fab: JLCPCB standard 4-layer is 0.0889 track / 0.10 clearance.
+# It was also unachievable with these parts --
+#   U3/U4 (TPS7A2033, X2SON-4): pads 0.34-0.40 mm apart
+#   U2    (BQ25505,  VQFN-20) : pads 0.26 mm apart
+# A 0.20 track needs 0.60 mm to pass between pads; a 0.127 track needs 0.381.
+# Measured effect on open connections: 0.20 -> 13, 0.15 -> 6, 0.127 -> 5.
 #
-# These are the netclass values from pcb-v3.kicad_pro.
+# 0.127 is 1.4x JLC's 4-layer minimum, so there is still real margin.
+# Vias stay at the netclass 0.6/0.3, NOT the 0.25/0.15 advanced rung.
 
-track_width  = 0.20     # our signal width; power nets are 0.40 via --power-nets
-clearance    = 0.20     # our design clearance (fab could do 0.10 on 4 layers)
-via_diameter = 0.60     # netclass via, NOT the 0.25 advanced rung
-via_drill    = 0.30     # netclass drill, NOT the 0.15 advanced rung
+track_width  = 0.127
+clearance    = 0.127
+via_diameter = 0.60
+via_drill    = 0.30
 hole_to_hole = 0.20
 board_edge   = 0.30

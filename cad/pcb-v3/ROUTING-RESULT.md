@@ -335,3 +335,40 @@ Six seed/cost combinations tried, best 11 — the same as not seeding.
 
 **Converged at 11** across full re-routes, per-net rip-up to depth 8, three
 layer-cost families, both directions and via-cost variation.
+
+## The 0.20 design rule was the problem, not the board
+
+Measured, on U4 (TPS7A2033, X2SON-4 / TI DQN0004A):
+
+```
+pad 1-2 gap 0.340 mm      pad 1-3 0.400      pad 1-4 0.400
+pad 2-3 gap 0.400 mm      pad 2-4 0.400      pad 3-4 0.340
+```
+
+A 0.20 mm track needs **0.60 mm** to pass between two pads. **Nothing can route
+between U3/U4's pads at 0.20/0.20** — every pin has to escape radially, and
+there are four of them on a 1.0 x 0.8 mm package. U2 (VQFN-20) is the same
+story at 0.26 mm.
+
+**0.20 was my rule, and it is stricter than the fab.** JLCPCB standard 4-layer
+is 0.0889 track / 0.10 clearance. A 0.127 track needs 0.381 mm to pass, which
+clears the 0.40 mm gaps.
+
+| floor | TRUE open pads | segments under 0.20 |
+|---|---|---|
+| 0.20 | **13** | 0 / 343 |
+| 0.15 | 6 | 65 / 404 |
+| **0.127** | **5** | 56 / 395 |
+
+`fab_floor_touchid.txt` and `pcb-v3.kicad_pro` are now both **0.127** —
+still **1.4x** JLC's 4-layer minimum, with vias unchanged at the netclass
+0.6/0.3 (not the 0.25/0.15 advanced rung).
+
+> **A latent issue found on the way:** the DRC reported 39 violations that were
+> not clearance failures at all — *"Required clearance: 0.2000mm (local/netclass
+> override)"*. The routed board had **no matching `.kicad_pro`**, so the checker
+> (and KiCad) fell back to stale rules. `pcb-v3-handoff.kicad_pro` now ships
+> beside the board. Without it KiCad would open the board with the wrong design
+> rules entirely.
+
+**State: 14 of 15 checks pass. 5 open connections, no dead nets.**

@@ -21,7 +21,9 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 BOARD = sys.argv[1] if len(sys.argv) > 1 else os.path.join(HERE, "pcb-v3-handoff.kicad_pcb")
 KRT = os.environ.get("KRT", "/tmp/krt")
 
-FAB_MIN_CU, DESIGN_CU = 0.127, 0.20
+# 0.20 was unachievable: U3/U4 pads are 0.34-0.40 mm apart and a 0.20 track
+# needs 0.60 to pass. 0.127 is the design rule now, still 1.4x JLC 4-layer.
+FAB_MIN_CU, DESIGN_CU = 0.127, 0.127
 VIA_MIN_D, VIA_MIN_DRILL = 0.45, 0.20        # JLC standard 4-layer
 POWER = {"VSTOR", "VBAT", "VIN_DC", "LX", "SENSOR_3V3", "SENSOR_MCU_3V3"}
 
