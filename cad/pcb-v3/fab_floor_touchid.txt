@@ -1,0 +1,17 @@
+# TouchID fab floor — pins the router to OUR design rule and DISABLES the
+# automatic standard->advanced escalation.
+#
+# Why this file exists: with only --fab-tier standard, the router quietly
+# routed 285 of 447 segments at 0.0889 mm and put all 55 vias at 0.25/0.15
+# (the "advanced", more-costly rung). 0.0889 is legal for JLC 4-layer standard,
+# but it is not what pcb-v3.kicad_pro specifies and it is not what we want to
+# order. Supplying overrides pins one hard rung — see fab_tiers.py.
+#
+# These are the netclass values from pcb-v3.kicad_pro.
+
+track_width  = 0.20     # our signal width; power nets are 0.40 via --power-nets
+clearance    = 0.20     # our design clearance (fab could do 0.10 on 4 layers)
+via_diameter = 0.60     # netclass via, NOT the 0.25 advanced rung
+via_drill    = 0.30     # netclass drill, NOT the 0.15 advanced rung
+hole_to_hole = 0.20
+board_edge   = 0.30
