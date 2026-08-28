@@ -680,6 +680,116 @@ else:
                        "%.2f mm = housing pcb_t_ref. MUST be chosen on the order "
                        "form; JLC defaults 4-layer to 1.6" % _tot)
 
+# ------------------- 20 no dangling track ends (net antennae) --------------
+# ALTIUM FOUND THIS AND I COULD NOT. Its Net Antennae rule flagged a GND stub
+# at (+7.400,+6.900)-(+7.550,+7.050): far end on a via, near end touching
+# NOTHING. gnd_taps' endpoint-snapping had detached a tap from its pad. Every
+# one of the other 19 checks passed the board with that on it, because none of
+# them had any concept of a free track end.
+#
+# A track end must land on: its own net's copper (another track, a via, or a
+# pad). Pads use the CIRCUMSCRIBED circle for rotated and custom shapes -- an
+# axis-aligned box under-covers them and invents dangling ends that are not
+# there (12 reported, 1 real).
+DANGLE_TOL = 0.01
+_dsegs = []
+for _sg in re.finditer(r'\(segment\b(.*?)\n\t\)', t, re.S):
+    _b = _sg.group(1)
+    _s1 = re.search(r'\(start ([-\d.]+) ([-\d.]+)\)', _b)
+    _e1 = re.search(r'\(end ([-\d.]+) ([-\d.]+)\)', _b)
+    _w1 = re.search(r'\(width ([\d.]+)\)', _b)
+    _l1 = re.search(r'\(layer "([^"]+)"\)', _b)
+    if _s1 and _e1 and _w1 and _l1:
+        _dsegs.append((_seg_net(_b), _l1.group(1), float(_s1.group(1)), float(_s1.group(2)),
+                       float(_e1.group(1)), float(_e1.group(2)), float(_w1.group(1))))
+_dvias = []
+for _vm in re.finditer(r'\(via\b(.*?)\n\t\)', t, re.S):
+    _b = _vm.group(1)
+    _a1 = re.search(r'\(at ([-\d.]+) ([-\d.]+)\)', _b)
+    _z1 = re.search(r'\(size ([\d.]+)\)', _b)
+    if _a1 and _z1:
+        _dvias.append((_seg_net(_b), float(_a1.group(1)), float(_a1.group(2)), float(_z1.group(1))))
+
+def _pad_reach(pd):
+    """conservative radius: circumscribed circle for rotated/custom shapes"""
+    if pd["shape"] == "circle":
+        return pd["w"] / 2
+    if pd["shape"] == "custom" or abs(pd["rot"] % 90.0) > 1e-6:
+        return math.hypot(pd["w"], pd["h"]) / 2 + 0.35
+    return None
+
+# A POURED ZONE IS COPPER. An end sitting inside its own net's fill is
+# connected, and ignoring that turned 1 real antenna into 6 reported ones --
+# a gate that cries wolf gets ignored, which is worse than no gate.
+_FILL = collections.defaultdict(list)
+try:
+    import sexp as _s5
+    _r5 = _s5.parse(t)
+    for _z5 in _s5.kids(_r5, "zone"):
+        if _s5.kid(_z5, "keepout"):
+            continue
+        _n5 = _s5.kid(_z5, "net_name") or _s5.kid(_z5, "net")
+        _nm5 = _s5.s(_n5[-1]) if _n5 and len(_n5) > 1 else ""
+        for _fp5 in _s5.kids(_z5, "filled_polygon"):
+            _l5 = _s5.kid(_fp5, "layer")
+            _pt5 = _s5.kid(_fp5, "pts")
+            if not (_l5 and _pt5):
+                continue
+            _pp5 = [(_s5.f(q[1]), _s5.f(q[2])) for q in _s5.kids(_pt5, "xy")]
+            if len(_pp5) >= 3:
+                _FILL[(_nm5, _s5.s(_l5[1]))].append(_P(_pp5).buffer(0))
+except Exception:
+    pass
+
+
+def _in_fill(net, lay, ex, ey):
+    from shapely.geometry import Point as _Pt2
+    for _poly5 in _FILL.get((net, lay), []):
+        if _poly5.contains(_Pt2(ex, ey)):
+            return True
+    return False
+
+
+def _end_supported(net, lay, ex, ey, self_i, half=0.0):
+    """`half` is THIS track's half-width: a track end is supported when its
+    COPPER touches, not when its centre point lands inside. VREF_SAMP's trace
+    ends 0.010 mm outside U2.4's pad rectangle while its 0.2 mm-wide copper
+    overlaps that pad by 0.09 mm -- testing the point called it dangling."""
+    if _in_fill(net, lay, ex, ey):
+        return True
+    for _i, (n, l, x1, y1, x2, y2, w) in enumerate(_dsegs):
+        if _i == self_i or n != net or l != lay:
+            continue
+        _dx, _dy = x2 - x1, y2 - y1
+        _L2 = _dx * _dx + _dy * _dy
+        _tt = 0.0 if _L2 == 0 else max(0.0, min(1.0, ((ex - x1) * _dx + (ey - y1) * _dy) / _L2))
+        if math.hypot(ex - (x1 + _tt * _dx), ey - (y1 + _tt * _dy)) <= w / 2 + half + DANGLE_TOL:
+            return True
+    for n, vx, vy, vd in _dvias:
+        if n == net and math.hypot(vx - ex, vy - ey) <= vd / 2 + half + DANGLE_TOL:
+            return True
+    for pd in _PADS:
+        if pd["net"] != net or lay not in pd["layers"]:
+            continue
+        r = _pad_reach(pd)
+        if r is not None:
+            if math.hypot(pd["x"] - ex, pd["y"] - ey) <= r + half + DANGLE_TOL:
+                return True
+        elif (abs(pd["x"] - ex) <= pd["w"] / 2 + half + DANGLE_TOL
+              and abs(pd["y"] - ey) <= pd["h"] / 2 + half + DANGLE_TOL):
+            return True
+    return False
+
+_dangle = []
+for _i, (net, lay, x1, y1, x2, y2, w) in enumerate(_dsegs):
+    for (ex, ey) in ((x1, y1), (x2, y2)):
+        if not _end_supported(net, lay, ex, ey, _i, w / 2):
+            _dangle.append("%s %s (%+.3f,%+.3f)" % (net, lay, ex, ey))
+rec(not _dangle, "20 no dangling track ends",
+    ("%d free end(s): %s" % (len(_dangle), "; ".join(_dangle[:4])))
+    if _dangle else "%d track ends, all land on copper of their own net"
+                    % (2 * len(_dsegs)))
+
 prov = []
 # BT1 no longer belongs here. The board never depended on VARTA's tab geometry:
 # it presents two Phi1.4 wire pads and the cell is wired down from above. The
