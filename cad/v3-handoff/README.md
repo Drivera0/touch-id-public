@@ -114,6 +114,26 @@ and the defaults are wrong for this board.
 Quoted on the web form 2026-08-28: **C$32.68**, or **C$25.76** in the JLCONE
 desktop app — the same order is about C$7 cheaper there, so it is worth using.
 
+**Filled in and left ready in JLCONE, 2026-08-28** (not ordered): 5 boards,
+**US$18.61** + US$25.92 shipping, 3–4 day build. Uploading the zip made JLC's
+own parser read **4 layers and 19.3 × 19.3 mm** straight off the gerbers, which
+is the best independent confirmation the export is right — those two fields set
+themselves. Only thickness and finish had to be chosen by hand.
+
+Everything else was already correct at JLC's 4-layer defaults: 1 oz outer /
+0.5 oz inner, min via 0.3 mm/(0.4/0.45), plugged vias, flying-probe fully
+tested, order mark removed, and every exotic option (gold fingers, castellated
+holes, edge plating, backdrill…) off.
+
+### Board outline tolerance: ±0.2 mm is deliberate, do not "improve" it
+
+JLC quotes ±0.2 mm (Regular) on the outline. That was designed for: the board
+is **19.30** so the worst case is **19.50**, and the housing lip is **19.54** —
+0.04 mm of margin at the extreme. Paying for ±0.1 mm (Precision) buys nothing
+the housing needs, and it is worth knowing that `touchid_module_v5.py` has no
+housing-∩-PCB boolean check, so this fit rests on that arithmetic rather than
+on an intersection test like the other five clearances.
+
 ### Defaults that turned out to be right — confirm, don't change
 
 Two 4-layer defaults happen to match what was verified, which is luck worth
