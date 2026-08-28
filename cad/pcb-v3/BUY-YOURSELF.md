@@ -42,47 +42,74 @@ DESIGN-SPEC §5 as corrected on 2026-08-27.
 
 ---
 
-## 2. The cell — and there is a catalogue part for it
+## 2. The cell — and the "catalogue part" was WRONG on both counts
 
-B6 said "buy the CP1254 as a protected, tabbed assembly" and left it as an
-open procurement item. **That assembly exists as a stocked part number:**
+> ### CORRECTION 2026-08-28 — read this before buying anything
+>
+> An earlier version of this file said **VARTA CP1254 A4X IP Wires**
+> (`63125201334-VAR`) was the protected, wired assembly B6 asked for, and that
+> its drawing was an unreadable scan. **Both claims were wrong.** The drawing
+> parses fine, and it says the part is **not protected and does not fit.**
 
-> ### VARTA CoinPower **CP1254 A4X IP Wires**, 74 mAh
-> **Texim Europe `63125201334-VAR`** — [product page](https://www.texim-europe.com/product/battery-and-power-supplies/batteries/rechargeable-batteries/lithium/varta-coinpower/detail/63125201334-var)
-> **"IP" = integrated protection. It ships with wires.** That is precisely the
-> B6 item: the PCM on the cell, leads defined by the builder.
-> **In stock. Price on request** — this is an RFQ, not a checkout button.
+**The drawing is machine-readable.** `getfile.ashx?id=134488` = VARTA dwg
+**805999 rev 0**, *"CP1254 A4 IP W SOC 30% **with kapton and crimping tags**"*.
+Its text extracts cleanly. The earlier "16 image objects, no extractable text"
+finding was about a different fetch path, and it stopped the check that would
+have caught this.
 
-The other two CP1254 variants Texim list, for context:
+### There is no PCM in it
 
-| part | what it is | stock |
+Nothing in the drawing's parts list is a protection circuit — it is kapton
+tape, insulation tapes, crimping tags, Sumitube F34 sleeving and two AWG 30
+UL 1571 wires. And **note 4 is explicit**:
+
+> "BATTERY VALIDATION INCLUDING SAFETY ELECTRONICS MUST BE DONE BY CUSTOMER
+> ACCORDING TO UL 2054."
+
+The dimensions settle it independently. Bare cell **5.4** mm; finished assembly
+**5.6 mm including tags thickness** — a **0.2 mm** delta. That is kapton plus
+crimped tags. **No PCM fits in 0.2 mm.** So "IP" is insulation, not integrated
+protection.
+
+### And it does not fit the pocket
+
+The drawing gives the FINISHED envelope, which Texim's spec block does not:
+
+| | drawing (finished) | housing has | verdict |
+|---|---|---|---|
+| diameter incl. kapton overlap | **Ø12.8 +0.10/−0.30** → **12.9 max** | Ø12.50 pocket | **FAILS by 0.40 mm** |
+| height incl. tags | **5.6 ±0.3** → **5.9 max** | 5.6 + 1.61 above | fits, eats 0.30 of the 1.61 |
+| leads | AWG 30 UL 1571, red +, black −, **42 ±3 mm**, twisted, lead-free tinned | ±X wire windows | fine |
+| weight | 2.0 g | — | — |
+| shipped state | **SOC 30 %** | — | arrives part-charged |
+
+Ø12.1 was always the **bare cell**. The model's `cell_d_max = 12.1` never
+accounted for the kapton wrap, so the pocket was sized against the wrong
+number. **A wrapped assembly needs the pocket at Ø13.0+, not Ø12.50.**
+
+### Both Texim CP1254 A4X parts are now NRND
+
+`63125201334-VAR` *and* `63125501513-VAR` both carry **"This product is not
+intended for new designs."** Still "In Stock", still **Price on Request**, and
+both flagged **dangerous goods** for shipping.
+
+| part | what it actually is | status |
 |---|---|---|
-| `63125201334-VAR` | A4X **IP Wires** — protected + leads | **In stock** ← this one |
-| `63125501513-VAR` | A4X bare cell, no protection | In stock |
-| `63125201331-VAR` | A4X **PCBS** | No stock |
+| `63125201334-VAR` | A4X + kapton + tags + wires — **no PCM** | In stock, **NRND**, RFQ |
+| `63125501513-VAR` | A4X bare cell | In stock, **NRND**, RFQ |
+| `63125201331-VAR` | A4X PCBS | No stock |
 
 [Avnet Abacus](https://www.avnet.com/wps/portal/abacus/manufacturers/m/varta-microbattery/products/varta-coinpower/)
 is the other authorised VARTA distributor if Texim will not quote a single unit.
 
-### Two things to settle in the RFQ, and they are not formalities
+### What this leaves open
 
-**1. The finished envelope — Texim quotes the bare CELL.** Their spec block
-says Ø12.1 × 5.4 mm, which is the cell, not the assembly. The housing gives:
+The PCM still has nowhere to live. It is not on the board (measured — 9.1 % of
+the top layer is free and none of it can take a via), and it is **not on the
+cell** either. That is now the open item, and it is a design decision, not a
+purchase.
 
-| | available | note |
-|---|---|---|
-| pocket diameter | **Ø12.50** | 0.20 mm radial slop over a Ø12.1 cell |
-| cell height allowance | 5.6 mm | worst-case A4, not the nominal 5.4 |
-| **clear space above the cell** | **1.61 mm** | cell top z 7.85 → sensor barrel z 9.46 |
-| lead exit | ±X wire windows | the collar is open on those sides |
-
-So: **the PCM and its wrap must fit inside 1.61 mm above the cell, and the
-whole thing must stay under Ø12.5.** Ask for the assembly drawing and check
-those two numbers. VARTA's own drawing (`getfile.ashx?id=134488`) is a
-**scanned image** — 16 image objects, no extractable text — so it has to be
-read by eye, not parsed.
-
-**2. Does A4X still cap at 4.00 V?** `preflight.py` check 15 hard-codes
+**Does A4X still cap at 4.00 V?** `preflight.py` check 15 hard-codes
 `CELL_V_CHARGE_MAX = 4.00` from the **A4** datasheet (2020-02-18). The part in
 stock is **A4X** (2023-06-26). If A4X moved that number, check 15 is grading
 against a stale limit — get the A4X figure and update the constant.
@@ -110,3 +137,32 @@ no CID to fall back on.
 If the VARTA route fails, the fallback is a **pack assembler** (EEMB and
 Grepow both do custom terminations) building to the envelope above — not a
 bare cell off a marketplace.
+
+### Where an individual can actually buy one — checked 2026-08-28
+
+Nobody sells a **protected + wired CP1254** over a counter. Every authorised
+VARTA channel is RFQ, MOQ and dangerous-goods paperwork, and the assembly they
+would quote has no PCM anyway. These are the real single-unit options:
+
+| source | what you get | price | protected? | notes |
+|---|---|---|---|---|
+| [patareid.ee — A4X with wires](https://www.patareid.ee/en/products/varta-cp1254-a4x-77mah-li-ion-battery-37v-with-wires/) | genuine VARTA A4X, wires | **€15.00** | **No** | **Out of stock, 1 month**. Retail checkout, EE → CA |
+| [patareid.ee — A4X with tabs](https://www.patareid.ee/en/products/varta-cp1254-a4x-coinpower-li-ion-77mah-battery-37v-with-tabs/) | genuine VARTA A4X, solder tabs | ~€15 | No | tabs, not wires |
+| [AliExpress — LIR1254 *with protection circuit board*](https://www.aliexpress.com/item/1005006538533778.html) | clone cell + PCM + wires | **C$7.09** | **Claims yes** | 71 sold. **Verify Ø and PCM chip.** LIR1254 is Ø12.5 nominal — bigger than the VARTA's Ø12.1 before the PCB |
+| [CentralSound — CP1254 A3 w/ wires](https://centralsound.co/products/varta-cp1254-a3-3-7v-li-ion-rechargeable-battery-new-w-wires) | A3, not A4X, wires | ~US$15/2 | No | US shipper, earbud-repair trade |
+| [Amazon — STRENG-CELL 2-pack](https://www.amazon.com/STRENG-CELL-Replacement-Battery-Wf1000X-Bluetooth/dp/B0975WF9MD) | CP1254-compatible, wires | ~US$15 | No | ships to CA |
+| eBay ([A3](https://www.ebay.com/itm/146278466951), [A4](https://www.ebay.com/itm/145283672753)) | 2 pcs + tools | ~US$12 | No | earbud repair stock |
+
+**Why they are all unprotected:** these are earbud service parts. In a
+Powerbeats or a Galaxy Bud the PCM sits on the earbud's mainboard, not on the
+cell — so the aftermarket never puts one on the cell either. Same reason
+VARTA's own "IP W" assembly has none.
+
+**The AliExpress protected LIR1254 is the only candidate that ships with a
+PCM**, and it is the one that needs measuring before it is trusted: confirm
+the finished diameter, the PCM's protection IC, and its over-charge trip. Its
+product page is behind a bot check, so open it yourself.
+
+**Shipping:** every one of these is a lithium cell — dangerous goods. Expect
+surface-only shipping and longer transit into Vancouver, and expect some
+sellers to refuse the route outright.
