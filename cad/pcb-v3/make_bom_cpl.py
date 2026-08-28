@@ -46,11 +46,67 @@ HALF = 9.65                      # board is 19.30 square, centred on the origin
 SKIP_PREFIX = ("TP", "J", "MH")
 SKIP_EXACT = {"BT1", "", "Un0", "Un1"}
 
-# LCSC numbers we have actually traced (PART-LIBRARY.md). NOTHING is invented:
-# a blank cell below means "we do not know", and that is the honest answer.
-LCSC = {
-    "U1": "C5118826",            # Raytac MDBT50Q-1MV2, land cross-checked
+# ---------------------------------------------------------------- sourcing --
+# Every line below was read from JLCPCB's OWN assembly library on 2026-08-28
+# (POST /api/overseas-pcb-order/v1/shoppingCart/smtGood/selectSmtComponentList
+# /v2), not from LCSC's shop and not from a datasheet. That distinction matters:
+# LCSC SELLS parts JLCPCB cannot PLACE, and the two stock figures are different
+# numbers drawn from different warehouses. A part with LCSC stock and no JLC
+# assembly stock will silently come back as "cannot be assembled" after you pay.
+#
+# ref -> (LCSC code, JLC library type, JLC assembly stock at time of check,
+#         what it actually is)
+#
+# NOTHING here is invented. Values were matched against the JLC record's own
+# "describe" string, and every package was compared to the land on this board.
+SRC = {
+    "U1":   ("C5118826",  "extended",       0, "Raytac MDBT50Q-1MV2, SMD-61P"),
+    "U2":   ("C882746",   "extended",     829, "TI BQ25505RGRR, VQFN-20-EP 3.5x3.5"),
+    "U3":   ("C46459900", "extended",    4371, "TI TPS7A2033DQNR, X2SON-4 1x1"),
+    "U4":   ("C46459900", "extended",    4371, "TI TPS7A2033DQNR, X2SON-4 1x1"),
+    "L1":   ("C2849435",  "extended",    2288, "DMBJ PNLS252012-220M 22uH, 1008, 1.02R, 500mA"),
+
+    "C1":   ("C2858031",  "extended",  184764, "Murata GRM155R61E475ME15D 4.7uF 25V X5R 0402"),
+    "C2":   ("C2858031",  "extended",  184764, "Murata GRM155R61E475ME15D 4.7uF 25V X5R 0402"),
+    "C3":   ("C1525",     "BASIC",   35834447, "Samsung CL05B104KO5NNNC 100nF 16V X7R 0402"),
+    "C10":  ("C1525",     "BASIC",   35834447, "Samsung CL05B104KO5NNNC 100nF 16V X7R 0402"),
+    "C4":   ("C22400107", "extended",   72632, "Murata GRM1555C1H103JE01D 10nF 50V C0G 0402"),
+    "C5":   ("C18164635", "extended", 1128075, "CCTC TCC0603X5R106K160CT 10uF 16V X5R 0603"),
+    "C6":   ("C52923",    "BASIC",   11865003, "Samsung CL05A105KA5NQNC 1uF 25V X5R 0402"),
+    "C8":   ("C52923",    "BASIC",   11865003, "Samsung CL05A105KA5NQNC 1uF 25V X5R 0402"),
+    "C9":   ("C52923",    "BASIC",   11865003, "Samsung CL05A105KA5NQNC 1uF 25V X5R 0402"),
+    "C7":   ("C20416425", "extended", 1168621, "CCTC TCC0603X5R226M100CT 22uF 10V X5R 0603"),
+    "C12":  ("C15195",    "BASIC",    8405016, "Samsung CL05B103KB5NNNC 10nF 50V X7R 0402"),
+    "C13":  ("C15195",    "BASIC",    8405016, "Samsung CL05B103KB5NNNC 10nF 50V X7R 0402"),
+
+    "R1":   ("C11702",    "BASIC",   13920787, "UNI-ROYAL 0402WGF1001TCE 1k 1% 0402"),
+    "R2":   ("C11702",    "BASIC",   13920787, "UNI-ROYAL 0402WGF1001TCE 1k 1% 0402"),
+    "R3":   ("C11702",    "BASIC",   13920787, "UNI-ROYAL 0402WGF1001TCE 1k 1% 0402"),
+    "R7":   ("C11702",    "BASIC",   13920787, "UNI-ROYAL 0402WGF1001TCE 1k 1% 0402"),
+    "R4":   ("C3013173",  "extended",  263891, "FOJAN FRC0402F4704TS 4.7M 1% 0402"),
+    "R5":   ("C26083",    "BASIC",    3470670, "UNI-ROYAL 0402WGF1004TCE 1M 1% 0402"),
+    "R6":   ("C25741",    "BASIC",   14849306, "UNI-ROYAL 0402WGF1003TCE 100k 1% 0402"),
+    "ROK1": ("C137964",   "extended",    9229, "YAGEO RC0402FR-074M53L 4.53M 1% 0402"),
+    "ROK2": ("C477783",   "extended",    4637, "YAGEO RC0402FR-077M15L 7.15M 1% 0402"),
+    "ROK3": ("C5713265",  "extended",  103945, "FOJAN FRC0402F1334TS 1.33M 1% 0402"),
+    "ROV1": ("C172106",   "extended",    2040, "Walsin WR04W6044FTL 6.04M 1% 0402"),
+    "ROV2": ("C137942",   "extended",    2674, "YAGEO RC0402FR-076M98L 6.98M 1% 0402"),
 }
+LCSC = {r: v[0] for r, v in SRC.items()}
+
+# Per-line warnings that survive into the BOM so they cannot be forgotten.
+WARN = {
+    "U1": "JLC ASSEMBLY STOCK 0 - backorder ~11 days, backlog -75. CHECK BEFORE ORDERING.",
+    "C1": "VERIFY C_eff at 4.3 V on Murata's DC-bias curve; BQ25505 wants >=4.7 uF.",
+    "C2": "VERIFY C_eff at 4.3 V on Murata's DC-bias curve; BQ25505 wants >=4.7 uF.",
+    "C7": "10 V rating is REQUIRED, not a preference. Do not substitute 6.3 V.",
+    "C4": "C0G on purpose - CREF leakage sets the BQ25505's reference droop.",
+    "ROV1": "Sets VBAT_OV. Only 2040 in stock, single source. Do not substitute blind.",
+    "ROV2": "Sets VBAT_OV. Only 2674 in stock, single source. Do not substitute blind.",
+    "ROK2": "Only 4637 in stock, single source.",
+    "ROK1": "Only 9229 in stock, single source.",
+}
+
 # Footprint-derivation references. These prove the LAND is right; they are NOT
 # a claim that this exact part is the one to fit for that value.
 LAND_REF = {
@@ -103,28 +159,58 @@ def main():
     for r in rows:
         groups.setdefault(r["value"], []).append(r["ref"])
     bom = os.path.join(OUT, "touchid-v3-BOM.csv")
+    unsourced, zero_stock, extended = [], [], set()
     with open(bom, "w", newline="", encoding="utf-8") as fh:
         w = csv.writer(fh)
         w.writerow(["Comment", "Designator", "Footprint",
-                    "JLCPCB Part # (LCSC Part #)", "NOTE"])
+                    "JLCPCB Part # (LCSC Part #)",
+                    "JLC library", "JLC stock", "Part fitted", "NOTE"])
         for v, refs in groups.items():
             pkg = ""
             m = re.search(r"\b(0402|0603|0805|X2SON-4|VQFN-20)\b", v)
             if m:
                 pkg = m.group(1)
-            lc = ""
-            for rf in refs:
-                if rf in LCSC:
-                    lc = LCSC[rf]
-            note = "" if lc else "*** SOURCE THIS -- no LCSC number known ***"
-            if pkg in LAND_REF and not lc:
-                note += "  (" + LAND_REF[pkg] + ")"
-            w.writerow([v, ",".join(refs), pkg, lc, note])
+            # every designator on a line must resolve to the SAME LCSC code,
+            # otherwise the line is not one purchasable item
+            codes = {SRC[r][0] for r in refs if r in SRC}
+            missing = [r for r in refs if r not in SRC]
+            if missing or len(codes) != 1:
+                unsourced.append((v, refs, missing))
+                w.writerow([v, ",".join(refs), pkg, "", "", "", "",
+                            "*** SOURCE THIS -- no LCSC number known ***"
+                            + (("  (" + LAND_REF[pkg] + ")")
+                               if pkg in LAND_REF else "")])
+                continue
+            lc, lib, stock, desc = SRC[refs[0]]
+            if lib != "BASIC":
+                extended.add(lc)
+            need = len(refs)
+            note = "  ".join(WARN[r] for r in refs if r in WARN)
+            if stock < need:
+                zero_stock.append((v, refs, stock, need))
+                note = ("*** JLC ASSEMBLY STOCK %d, NEED %d PER BOARD *** "
+                        % (stock, need)) + note
+            w.writerow([v, ",".join(refs), pkg, lc, lib, stock, desc, note])
 
     print("wrote %s   (%d parts placed)" % (cpl, len(rows)))
-    print("wrote %s   (%d BOM lines, %d still need an LCSC number)"
-          % (bom, len(groups), sum(1 for v, r in groups.items()
-                                   if not any(x in LCSC for x in r))))
+    print("wrote %s   (%d BOM lines)" % (bom, len(groups)))
+    print()
+    print("SOURCING")
+    print("  lines fully sourced : %d / %d" % (len(groups) - len(unsourced),
+                                               len(groups)))
+    print("  distinct JLC extended part types : %d  (JLC charges a one-off"
+          " setup fee per type)" % len(extended))
+    if unsourced:
+        print("  *** UNSOURCED ***")
+        for v, refs, missing in unsourced:
+            print("      %-34s %s   missing=%s" % (v, ",".join(refs), missing))
+    if zero_stock:
+        print("  *** INSUFFICIENT JLC ASSEMBLY STOCK ***")
+        for v, refs, stock, need in zero_stock:
+            print("      %-34s %s   stock=%d need=%d/board"
+                  % (v, ",".join(refs), stock, need))
+    if not unsourced and not zero_stock:
+        print("  every line sourced and in stock.")
     print()
     print("placement extents: X %.3f..%.3f   Y %.3f..%.3f   (board is 0..19.30)"
           % (min(r["X"] for r in rows), max(r["X"] for r in rows),

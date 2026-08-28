@@ -1,22 +1,22 @@
-Comment,Designator,Footprint,JLCPCB Part # (LCSC Part #),NOTE
-4.7uF 0402,"C1,C2",0402,,*** SOURCE THIS -- no LCSC number known ***  (land traced from C1525)
-0.1uF 0402,"C3,C10",0402,,*** SOURCE THIS -- no LCSC number known ***  (land traced from C1525)
-10nF 0402 low-leak,C4,0402,,*** SOURCE THIS -- no LCSC number known ***  (land traced from C1525)
-10uF 0603,C5,0603,,*** SOURCE THIS -- no LCSC number known ***  (land traced from C19666)
-1uF 0402,"C6,C8,C9",0402,,*** SOURCE THIS -- no LCSC number known ***  (land traced from C1525)
-22uF 10V X5R 0603,C7,0603,,*** SOURCE THIS -- no LCSC number known ***  (land traced from C19666)
-10nF 0402,"C12,C13",0402,,*** SOURCE THIS -- no LCSC number known ***  (land traced from C1525)
-22uH,L1,,,*** SOURCE THIS -- no LCSC number known ***
-1k 0402,"R1,R2,R3,R7",0402,,*** SOURCE THIS -- no LCSC number known ***  (land traced from C1525)
-4.7M 0402,R4,0402,,*** SOURCE THIS -- no LCSC number known ***  (land traced from C1525)
-1M 0402,R5,0402,,*** SOURCE THIS -- no LCSC number known ***  (land traced from C1525)
-100k 0402,R6,0402,,*** SOURCE THIS -- no LCSC number known ***  (land traced from C1525)
-4.53M 0402,ROK1,0402,,*** SOURCE THIS -- no LCSC number known ***  (land traced from C1525)
-7.15M 0402,ROK2,0402,,*** SOURCE THIS -- no LCSC number known ***  (land traced from C1525)
-1.33M 0402,ROK3,0402,,*** SOURCE THIS -- no LCSC number known ***  (land traced from C1525)
-6.04M 0402 1%,ROV1,0402,,*** SOURCE THIS -- no LCSC number known ***  (land traced from C1525)
-6.98M 0402 1%,ROV2,0402,,*** SOURCE THIS -- no LCSC number known ***  (land traced from C1525)
-Raytac MDBT50Q-1MV2 (nRF52840),U1,,C5118826,
-TI BQ25505,U2,,,*** SOURCE THIS -- no LCSC number known ***
-TI TPS7A2033 3.3 V LDO (sensor rail),U3,,,*** SOURCE THIS -- no LCSC number known ***
-TI TPS7A2033 3.3 V LDO (switched sensor-MCU rail),U4,,,*** SOURCE THIS -- no LCSC number known ***
+Comment,Designator,Footprint,JLCPCB Part # (LCSC Part #),JLC library,JLC stock,Part fitted,NOTE
+4.7uF 0402,"C1,C2",0402,C2858031,extended,184764,Murata GRM155R61E475ME15D 4.7uF 25V X5R 0402,VERIFY C_eff at 4.3 V on Murata's DC-bias curve; BQ25505 wants >=4.7 uF.  VERIFY C_eff at 4.3 V on Murata's DC-bias curve; BQ25505 wants >=4.7 uF.
+0.1uF 0402,"C3,C10",0402,C1525,BASIC,35834447,Samsung CL05B104KO5NNNC 100nF 16V X7R 0402,
+10nF 0402 low-leak,C4,0402,C22400107,extended,72632,Murata GRM1555C1H103JE01D 10nF 50V C0G 0402,C0G on purpose - CREF leakage sets the BQ25505's reference droop.
+10uF 0603,C5,0603,C18164635,extended,1128075,CCTC TCC0603X5R106K160CT 10uF 16V X5R 0603,
+1uF 0402,"C6,C8,C9",0402,C52923,BASIC,11865003,Samsung CL05A105KA5NQNC 1uF 25V X5R 0402,
+22uF 10V X5R 0603,C7,0603,C20416425,extended,1168621,CCTC TCC0603X5R226M100CT 22uF 10V X5R 0603,"10 V rating is REQUIRED, not a preference. Do not substitute 6.3 V."
+10nF 0402,"C12,C13",0402,C15195,BASIC,8405016,Samsung CL05B103KB5NNNC 10nF 50V X7R 0402,
+22uH,L1,,C2849435,extended,2288,"DMBJ PNLS252012-220M 22uH, 1008, 1.02R, 500mA",
+1k 0402,"R1,R2,R3,R7",0402,C11702,BASIC,13920787,UNI-ROYAL 0402WGF1001TCE 1k 1% 0402,
+4.7M 0402,R4,0402,C3013173,extended,263891,FOJAN FRC0402F4704TS 4.7M 1% 0402,
+1M 0402,R5,0402,C26083,BASIC,3470670,UNI-ROYAL 0402WGF1004TCE 1M 1% 0402,
+100k 0402,R6,0402,C25741,BASIC,14849306,UNI-ROYAL 0402WGF1003TCE 100k 1% 0402,
+4.53M 0402,ROK1,0402,C137964,extended,9229,YAGEO RC0402FR-074M53L 4.53M 1% 0402,"Only 9229 in stock, single source."
+7.15M 0402,ROK2,0402,C477783,extended,4637,YAGEO RC0402FR-077M15L 7.15M 1% 0402,"Only 4637 in stock, single source."
+1.33M 0402,ROK3,0402,C5713265,extended,103945,FOJAN FRC0402F1334TS 1.33M 1% 0402,
+6.04M 0402 1%,ROV1,0402,C172106,extended,2040,Walsin WR04W6044FTL 6.04M 1% 0402,"Sets VBAT_OV. Only 2040 in stock, single source. Do not substitute blind."
+6.98M 0402 1%,ROV2,0402,C137942,extended,2674,YAGEO RC0402FR-076M98L 6.98M 1% 0402,"Sets VBAT_OV. Only 2674 in stock, single source. Do not substitute blind."
+Raytac MDBT50Q-1MV2 (nRF52840),U1,,C5118826,extended,0,"Raytac MDBT50Q-1MV2, SMD-61P","*** JLC ASSEMBLY STOCK 0, NEED 1 PER BOARD *** JLC ASSEMBLY STOCK 0 - backorder ~11 days, backlog -75. CHECK BEFORE ORDERING."
+TI BQ25505,U2,,C882746,extended,829,"TI BQ25505RGRR, VQFN-20-EP 3.5x3.5",
+TI TPS7A2033 3.3 V LDO (sensor rail),U3,,C46459900,extended,4371,"TI TPS7A2033DQNR, X2SON-4 1x1",
+TI TPS7A2033 3.3 V LDO (switched sensor-MCU rail),U4,,C46459900,extended,4371,"TI TPS7A2033DQNR, X2SON-4 1x1",

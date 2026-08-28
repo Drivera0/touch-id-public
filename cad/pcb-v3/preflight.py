@@ -790,6 +790,47 @@ rec(not _dangle, "20 no dangling track ends",
     if _dangle else "%d track ends, all land on copper of their own net"
                     % (2 * len(_dsegs)))
 
+# ---------------- 21 every placed part is actually buyable ------------------
+# The board can be perfect and the ORDER still fail. JLCPCB assembles from a
+# BOM of LCSC codes, and a designator with no code is a part they will not
+# fit. This is the last thing between a clean board and a half-populated one.
+#
+# Stock is deliberately NOT a blocker: it is a snapshot of someone else's
+# warehouse and it moves daily, so gating on it would be gating on stale data.
+# A missing part NUMBER is a blocker, because that is our omission, not theirs.
+_SRC_DATE = "2026-08-28"
+try:
+    sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+    from make_bom_cpl import SRC as _SRC, SKIP_PREFIX as _SKP, SKIP_EXACT as _SKE
+
+    # refs via the s-expression parser, never regex: regex reads of this file
+    # have produced three separate silent wrong answers in this project
+    _root21 = _sx.parse(t)
+    _REFS = []
+    for _fp21 in _sx.kids(_root21, "footprint"):
+        for _pr21 in _sx.kids(_fp21, "property"):
+            if _sx.s(_pr21[1]) == "Reference":
+                _REFS.append(_sx.s(_pr21[2]))
+    _placed = [r for r in _REFS
+               if r not in _SKE and not r.startswith(_SKP)]
+    _need = collections.Counter(_placed)
+    _unsourced = sorted({r for r in _placed if r not in _SRC})
+    _thin = sorted({(_SRC[r][0], _SRC[r][2], _need[r])
+                    for r in _placed if r in _SRC and _SRC[r][2] < _need[r]})
+    rec(not _unsourced and bool(_placed), "21 every placed part has an LCSC code",
+        ("%d designator(s) with no part number: %s"
+         % (len(_unsourced), ", ".join(_unsourced))) if _unsourced
+        else "%d placed designators, all sourced (%d distinct LCSC codes)"
+             % (len(_placed), len({_SRC[r][0] for r in _placed})))
+    if _thin:
+        rec(False, "21b JLC assembly stock (snapshot)",
+            "as of %s: %s -- RE-CHECK AT ORDER TIME"
+            % (_SRC_DATE, "; ".join("%s stock=%d need=%d/board" % t for t in _thin)),
+            blocker=False)
+except Exception as _e:                      # a check that cannot run must say so
+    rec(False, "21 every placed part has an LCSC code",
+        "COULD NOT RUN (%s) -- treat as unverified" % _e)
+
 prov = []
 # BT1 no longer belongs here. The board never depended on VARTA's tab geometry:
 # it presents two Phi1.4 wire pads and the cell is wired down from above. The
