@@ -109,6 +109,27 @@ and the defaults are wrong for this board.
 | **Board thickness** | **1.20 mm** | the housing is built around it; JLC defaults 4-layer to **1.60** |
 | Surface finish | **ENIG** | matches the stackup the board was checked against |
 | Layers | 4 | |
+| Dimensions | 19.3 × 19.3 mm | |
+
+Quoted on the web form 2026-08-28: **C$32.68**, or **C$25.76** in the JLCONE
+desktop app — the same order is about C$7 cheaper there, so it is worth using.
+
+### Defaults that turned out to be right — confirm, don't change
+
+Two 4-layer defaults happen to match what was verified, which is luck worth
+checking rather than assuming next time:
+
+* **Outer copper 1 oz, inner 0.5 oz.** The board's own stackup declares
+  0.035 mm outer and 0.0152 mm inner, which *is* 1 oz / 0.5 oz. So preflight
+  check 10's IR-drop numbers hold as quoted.
+* **Min via hole size 0.3 mm / (0.4/0.45 mm).** Every via on this board is
+  0.3 mm drill in a 0.6 mm pad, so this is the standard rung with no upcharge —
+  the finer rungs would cost more and buy nothing.
+
+**Deburring / edge rounding defaults to Yes** (C$0.14) and only appears once
+you pick 4 layers. Harmless, arguably wanted on a board that slides into a
+keyboard slot, but it is a real charge you did not choose — set it to No if you
+would rather not have it.
 
 ## Rotation risk is smaller than it looks
 
