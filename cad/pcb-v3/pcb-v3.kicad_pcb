@@ -108,12 +108,6 @@
 		(layer "Edge.Cuts")
 	)
 	(gr_text
-		"Daniel Rivera"
-		(at 0 4.8)
-		(layer "B.SilkS")
-		(effects (font (size 0.8 0.8) (thickness 0.12)) (justify mirror))
-	)
-	(gr_text
 		"driver0"
 		(at 0 6.0)
 		(layer "B.SilkS")
@@ -138,50 +132,216 @@
 		(effects (font (size 0.7 0.7) (thickness 0.1)))
 	)
 	(gr_text
-		"BT1 +"
-		(at -7.61 -3.3)
+		"3V3"
+		(at -6.9 3.3)
 		(layer "F.SilkS")
-		(effects (font (size 0.5 0.5) (thickness 0.1)))
+		(effects (font (size 0.6 0.6) (thickness 0.1)))
 	)
 	(gr_text
-		"J2"
-		(at -8.8 2.0)
-		(layer "F.SilkS")
-		(effects (font (size 0.5 0.5) (thickness 0.1)))
+		"3V3"
+		(at -6.9 3.3)
+		(layer "F.Fab")
+		(effects (font (size 0.4 0.4) (thickness 0.06)))
 	)
 	(gr_text
-		"J2"
-		(at 8.4 2.0)
+		"WAKE"
+		(at -6.8 4.8)
 		(layer "F.SilkS")
-		(effects (font (size 0.5 0.5) (thickness 0.1)))
+		(effects (font (size 0.6 0.6) (thickness 0.1)))
+	)
+	(gr_text
+		"WAKE"
+		(at -6.8 4.8)
+		(layer "F.Fab")
+		(effects (font (size 0.4 0.4) (thickness 0.06)))
+	)
+	(gr_text
+		"3V3M"
+		(at -6.75 6.3)
+		(layer "F.SilkS")
+		(effects (font (size 0.6 0.6) (thickness 0.1)))
+	)
+	(gr_text
+		"3V3M"
+		(at -6.75 6.3)
+		(layer "F.Fab")
+		(effects (font (size 0.4 0.4) (thickness 0.06)))
+	)
+	(gr_text
+		"TX"
+		(at 6.6 3.3)
+		(layer "F.SilkS")
+		(effects (font (size 0.6 0.6) (thickness 0.1)))
+	)
+	(gr_text
+		"TX"
+		(at 6.6 3.3)
+		(layer "F.Fab")
+		(effects (font (size 0.4 0.4) (thickness 0.06)))
+	)
+	(gr_text
+		"RX"
+		(at 6.6 4.8)
+		(layer "F.SilkS")
+		(effects (font (size 0.6 0.6) (thickness 0.1)))
+	)
+	(gr_text
+		"RX"
+		(at 6.6 4.8)
+		(layer "F.Fab")
+		(effects (font (size 0.4 0.4) (thickness 0.06)))
+	)
+	(gr_text
+		"GND"
+		(at 6.5 6.3)
+		(layer "F.SilkS")
+		(effects (font (size 0.6 0.6) (thickness 0.1)))
+	)
+	(gr_text
+		"GND"
+		(at 6.5 6.3)
+		(layer "F.Fab")
+		(effects (font (size 0.4 0.4) (thickness 0.06)))
+	)
+	(gr_text
+		"DIO"
+		(at -8.0 1.9)
+		(layer "B.SilkS")
+		(effects (font (size 0.6 0.6) (thickness 0.1)) (justify mirror))
+	)
+	(gr_text
+		"DIO"
+		(at -8.0 1.9)
+		(layer "F.Fab")
+		(effects (font (size 0.4 0.4) (thickness 0.06)))
+	)
+	(gr_text
+		"CLK"
+		(at -6.0 1.9)
+		(layer "B.SilkS")
+		(effects (font (size 0.6 0.6) (thickness 0.1)) (justify mirror))
+	)
+	(gr_text
+		"CLK"
+		(at -6.0 1.9)
+		(layer "F.Fab")
+		(effects (font (size 0.4 0.4) (thickness 0.06)))
+	)
+	(gr_text
+		"RST"
+		(at -4.0 1.9)
+		(layer "B.SilkS")
+		(effects (font (size 0.6 0.6) (thickness 0.1)) (justify mirror))
+	)
+	(gr_text
+		"RST"
+		(at -4.0 1.9)
+		(layer "F.Fab")
+		(effects (font (size 0.4 0.4) (thickness 0.06)))
+	)
+	(gr_text
+		"VDD"
+		(at -2.0 1.9)
+		(layer "B.SilkS")
+		(effects (font (size 0.6 0.6) (thickness 0.1)) (justify mirror))
+	)
+	(gr_text
+		"VDD"
+		(at -2.0 1.9)
+		(layer "F.Fab")
+		(effects (font (size 0.4 0.4) (thickness 0.06)))
+	)
+	(gr_text
+		"GND"
+		(at 0.0 1.9)
+		(layer "B.SilkS")
+		(effects (font (size 0.6 0.6) (thickness 0.1)) (justify mirror))
+	)
+	(gr_text
+		"GND"
+		(at 0.0 1.9)
+		(layer "F.Fab")
+		(effects (font (size 0.4 0.4) (thickness 0.06)))
+	)
+	(gr_text
+		"+"
+		(at -6.51 -4.3)
+		(layer "F.SilkS")
+		(effects (font (size 0.6 0.6) (thickness 0.1)))
+	)
+	(gr_text
+		"+"
+		(at -6.51 -4.3)
+		(layer "F.Fab")
+		(effects (font (size 0.4 0.4) (thickness 0.06)))
+	)
+	(gr_text
+		"-"
+		(at -6.51 -5.9)
+		(layer "F.SilkS")
+		(effects (font (size 0.6 0.6) (thickness 0.1)))
+	)
+	(gr_text
+		"-"
+		(at -6.51 -5.9)
+		(layer "F.Fab")
+		(effects (font (size 0.4 0.4) (thickness 0.06)))
 	)
 	(gr_circle
-		(center -6.01 4.19)
-		(end -5.83 4.19)
+		(center -6.0 4.2)
+		(end -5.82 4.2)
 		(stroke (width 0.12) (type solid))
 		(fill solid)
 		(layer "F.SilkS")
 	)
 	(gr_circle
-		(center 4.76 0.41)
-		(end 4.94 0.41)
+		(center 4.61 0.26)
+		(end 4.79 0.26)
 		(stroke (width 0.12) (type solid))
 		(fill solid)
 		(layer "F.SilkS")
 	)
 	(gr_circle
-		(center -8.44 0.825)
-		(end -8.26 0.825)
+		(center -8.59 0.675)
+		(end -8.41 0.675)
 		(stroke (width 0.12) (type solid))
 		(fill solid)
 		(layer "F.SilkS")
 	)
 	(gr_circle
-		(center -8.44 -1.475)
-		(end -8.26 -1.475)
+		(center -8.59 -1.125)
+		(end -8.41 -1.125)
 		(stroke (width 0.12) (type solid))
 		(fill solid)
 		(layer "F.SilkS")
+	)
+	(gr_circle
+		(center -9.1 2.4)
+		(end -8.92 2.4)
+		(stroke (width 0.12) (type solid))
+		(fill solid)
+		(layer "F.SilkS")
+	)
+	(gr_circle
+		(center -8.9 2.1)
+		(end -8.72 2.1)
+		(stroke (width 0.12) (type solid))
+		(fill solid)
+		(layer "B.SilkS")
+	)
+	(gr_circle
+		(center -8.1 -8.12)
+		(end -7.92 -8.12)
+		(stroke (width 0.12) (type solid))
+		(fill solid)
+		(layer "B.SilkS")
+	)
+	(gr_circle
+		(center 2.55 -8.1)
+		(end 2.73 -8.1)
+		(stroke (width 0.12) (type solid))
+		(fill solid)
+		(layer "B.SilkS")
 	)
 	(footprint "touchid:U1"
 		(layer "F.Cu")
@@ -831,7 +991,7 @@
 	)
 	(footprint "touchid:U4"
 		(layer "F.Cu")
-		(at -7.61 -0.75)
+		(at -7.61 -0.25)
 		(property "Reference" "U4"
 			(at 0 0 0)
 			(layer "F.SilkS")
@@ -916,6 +1076,36 @@
 			(net 3 "GND")
 			(solder_mask_margin -0.05)
 			(solder_paste_margin -0.065)
+		)
+	)
+	(footprint "touchid:C5"
+		(layer "F.Cu")
+		(at -7.61 -1.92)
+		(property "Reference" "C5"
+			(at 0 0 0)
+			(layer "F.SilkS")
+			(hide yes)
+			(effects (font (size 0.6 0.6) (thickness 0.1)))
+		)
+		(attr smd)
+		(fp_text user "C5"
+			(at 0 0 0)
+			(layer "F.Fab")
+			(effects (font (size 0.4 0.4) (thickness 0.06)))
+		)
+		(pad "1" smd roundrect
+			(at -0.7 0)
+			(size 0.8 0.9)
+			(layers "F.Cu" "F.Mask" "F.Paste")
+			(roundrect_rratio 0.25)
+			(net 20 "VBAT")
+		)
+		(pad "2" smd roundrect
+			(at 0.7 0)
+			(size 0.8 0.9)
+			(layers "F.Cu" "F.Mask" "F.Paste")
+			(roundrect_rratio 0.25)
+			(net 3 "GND")
 		)
 	)
 	(footprint "touchid:U2"
@@ -1059,7 +1249,7 @@
 	)
 	(footprint "touchid:C7"
 		(layer "F.Cu")
-		(at 6.8100000000000005 -2.905)
+		(at 6.8100000000000005 -2.85)
 		(property "Reference" "C7"
 			(at 0 0 0)
 			(layer "F.SilkS")
@@ -1073,15 +1263,15 @@
 			(effects (font (size 0.4 0.4) (thickness 0.06)))
 		)
 		(pad "1" smd roundrect
-			(at -0.75 0)
-			(size 0.9 0.85)
+			(at -0.7 0)
+			(size 0.8 0.9)
 			(layers "F.Cu" "F.Mask" "F.Paste")
 			(roundrect_rratio 0.25)
 			(net 12 "SENSOR_3V3")
 		)
 		(pad "2" smd roundrect
-			(at 0.75 0)
-			(size 0.9 0.85)
+			(at 0.7 0)
+			(size 0.8 0.9)
 			(layers "F.Cu" "F.Mask" "F.Paste")
 			(roundrect_rratio 0.25)
 			(net 3 "GND")
@@ -1089,7 +1279,7 @@
 	)
 	(footprint "touchid:L1"
 		(layer "F.Cu")
-		(at 6.8100000000000005 -4.28)
+		(at 6.8100000000000005 -4.79)
 		(property "Reference" "L1"
 			(at 0 0 0)
 			(layer "F.SilkS")
@@ -1102,54 +1292,22 @@
 			(layer "F.Fab")
 			(effects (font (size 0.4 0.4) (thickness 0.06)))
 		)
-		(pad "1" smd roundrect
-			(at -0.92 0)
-			(size 1.4 0.96)
+		(pad "2" smd rect
+			(at -1.0282 0)
+			(size 1.2 2.2)
 			(layers "F.Cu" "F.Mask" "F.Paste")
-			(roundrect_rratio 0.25)
-			(net 7 "LX")
-		)
-		(pad "2" smd roundrect
-			(at 0.92 0)
-			(size 1.4 0.96)
-			(layers "F.Cu" "F.Mask" "F.Paste")
-			(roundrect_rratio 0.25)
 			(net 24 "VIN_DC")
 		)
-	)
-	(footprint "touchid:C5"
-		(layer "F.Cu")
-		(at 6.8100000000000005 -5.655)
-		(property "Reference" "C5"
-			(at 0 0 0)
-			(layer "F.SilkS")
-			(hide yes)
-			(effects (font (size 0.6 0.6) (thickness 0.1)))
-		)
-		(attr smd)
-		(fp_text user "C5"
-			(at 0 0 0)
-			(layer "F.Fab")
-			(effects (font (size 0.4 0.4) (thickness 0.06)))
-		)
-		(pad "1" smd roundrect
-			(at -0.75 0)
-			(size 0.9 0.85)
+		(pad "1" smd rect
+			(at 1.0282 0)
+			(size 1.2 2.2)
 			(layers "F.Cu" "F.Mask" "F.Paste")
-			(roundrect_rratio 0.25)
-			(net 20 "VBAT")
-		)
-		(pad "2" smd roundrect
-			(at 0.75 0)
-			(size 0.9 0.85)
-			(layers "F.Cu" "F.Mask" "F.Paste")
-			(roundrect_rratio 0.25)
-			(net 3 "GND")
+			(net 7 "LX")
 		)
 	)
 	(footprint "touchid:C1"
 		(layer "F.Cu")
-		(at -0.7 -7.9 90)
+		(at -0.5 -7.9 90)
 		(property "Reference" "C1"
 			(at 0 0 0)
 			(layer "F.SilkS")
@@ -1163,15 +1321,15 @@
 			(effects (font (size 0.4 0.4) (thickness 0.06)))
 		)
 		(pad "1" smd roundrect
-			(at -0.48 0)
-			(size 0.6 0.55)
+			(at -0.42 0)
+			(size 0.5 0.54)
 			(layers "F.Cu" "F.Mask" "F.Paste")
 			(roundrect_rratio 0.25)
 			(net 24 "VIN_DC")
 		)
 		(pad "2" smd roundrect
-			(at 0.48 0)
-			(size 0.6 0.55)
+			(at 0.42 0)
+			(size 0.5 0.54)
 			(layers "F.Cu" "F.Mask" "F.Paste")
 			(roundrect_rratio 0.25)
 			(net 3 "GND")
@@ -1179,7 +1337,7 @@
 	)
 	(footprint "touchid:C2"
 		(layer "F.Cu")
-		(at -5.1 -7.9 90)
+		(at -3.2 -7.9 90)
 		(property "Reference" "C2"
 			(at 0 0 0)
 			(layer "F.SilkS")
@@ -1193,15 +1351,15 @@
 			(effects (font (size 0.4 0.4) (thickness 0.06)))
 		)
 		(pad "1" smd roundrect
-			(at -0.48 0)
-			(size 0.6 0.55)
+			(at -0.42 0)
+			(size 0.5 0.54)
 			(layers "F.Cu" "F.Mask" "F.Paste")
 			(roundrect_rratio 0.25)
 			(net 27 "VSTOR")
 		)
 		(pad "2" smd roundrect
-			(at 0.48 0)
-			(size 0.6 0.55)
+			(at 0.42 0)
+			(size 0.5 0.54)
 			(layers "F.Cu" "F.Mask" "F.Paste")
 			(roundrect_rratio 0.25)
 			(net 3 "GND")
@@ -1209,7 +1367,7 @@
 	)
 	(footprint "touchid:C3"
 		(layer "F.Cu")
-		(at -4.0 -7.9 90)
+		(at -4.1 -7.9 90)
 		(property "Reference" "C3"
 			(at 0 0 0)
 			(layer "F.SilkS")
@@ -1223,15 +1381,15 @@
 			(effects (font (size 0.4 0.4) (thickness 0.06)))
 		)
 		(pad "1" smd roundrect
-			(at -0.48 0)
-			(size 0.6 0.55)
+			(at -0.42 0)
+			(size 0.5 0.54)
 			(layers "F.Cu" "F.Mask" "F.Paste")
 			(roundrect_rratio 0.25)
 			(net 27 "VSTOR")
 		)
 		(pad "2" smd roundrect
-			(at 0.48 0)
-			(size 0.6 0.55)
+			(at 0.42 0)
+			(size 0.5 0.54)
 			(layers "F.Cu" "F.Mask" "F.Paste")
 			(roundrect_rratio 0.25)
 			(net 3 "GND")
@@ -1239,7 +1397,7 @@
 	)
 	(footprint "touchid:C4"
 		(layer "F.Cu")
-		(at 5.5 2.9)
+		(at 5.0 3.74 90)
 		(property "Reference" "C4"
 			(at 0 0 0)
 			(layer "F.SilkS")
@@ -1253,15 +1411,15 @@
 			(effects (font (size 0.4 0.4) (thickness 0.06)))
 		)
 		(pad "1" smd roundrect
-			(at -0.48 0)
-			(size 0.6 0.55)
+			(at -0.42 0)
+			(size 0.5 0.54)
 			(layers "F.Cu" "F.Mask" "F.Paste")
 			(roundrect_rratio 0.25)
 			(net 26 "VREF_SAMP")
 		)
 		(pad "2" smd roundrect
-			(at 0.48 0)
-			(size 0.6 0.55)
+			(at 0.42 0)
+			(size 0.5 0.54)
 			(layers "F.Cu" "F.Mask" "F.Paste")
 			(roundrect_rratio 0.25)
 			(net 3 "GND")
@@ -1269,7 +1427,7 @@
 	)
 	(footprint "touchid:C6"
 		(layer "F.Cu")
-		(at -2.9 -7.9 90)
+		(at -2.3 -7.9 90)
 		(property "Reference" "C6"
 			(at 0 0 0)
 			(layer "F.SilkS")
@@ -1283,15 +1441,15 @@
 			(effects (font (size 0.4 0.4) (thickness 0.06)))
 		)
 		(pad "1" smd roundrect
-			(at -0.48 0)
-			(size 0.6 0.55)
+			(at -0.42 0)
+			(size 0.5 0.54)
 			(layers "F.Cu" "F.Mask" "F.Paste")
 			(roundrect_rratio 0.25)
 			(net 12 "SENSOR_3V3")
 		)
 		(pad "2" smd roundrect
-			(at 0.48 0)
-			(size 0.6 0.55)
+			(at 0.42 0)
+			(size 0.5 0.54)
 			(layers "F.Cu" "F.Mask" "F.Paste")
 			(roundrect_rratio 0.25)
 			(net 3 "GND")
@@ -1299,7 +1457,7 @@
 	)
 	(footprint "touchid:C8"
 		(layer "F.Cu")
-		(at -6.9 3.3 90)
+		(at -7.05 3.74 90)
 		(property "Reference" "C8"
 			(at 0 0 0)
 			(layer "F.SilkS")
@@ -1313,15 +1471,15 @@
 			(effects (font (size 0.4 0.4) (thickness 0.06)))
 		)
 		(pad "1" smd roundrect
-			(at -0.48 0)
-			(size 0.6 0.55)
+			(at -0.42 0)
+			(size 0.5 0.54)
 			(layers "F.Cu" "F.Mask" "F.Paste")
 			(roundrect_rratio 0.25)
 			(net 13 "SENSOR_MCU_3V3")
 		)
 		(pad "2" smd roundrect
-			(at 0.48 0)
-			(size 0.6 0.55)
+			(at 0.42 0)
+			(size 0.5 0.54)
 			(layers "F.Cu" "F.Mask" "F.Paste")
 			(roundrect_rratio 0.25)
 			(net 3 "GND")
@@ -1343,15 +1501,15 @@
 			(effects (font (size 0.4 0.4) (thickness 0.06)))
 		)
 		(pad "1" smd roundrect
-			(at -0.48 0)
-			(size 0.6 0.55)
+			(at -0.42 0)
+			(size 0.5 0.54)
 			(layers "F.Cu" "F.Mask" "F.Paste")
 			(roundrect_rratio 0.25)
 			(net 8 "NRF_VDD")
 		)
 		(pad "2" smd roundrect
-			(at 0.48 0)
-			(size 0.6 0.55)
+			(at 0.42 0)
+			(size 0.5 0.54)
 			(layers "F.Cu" "F.Mask" "F.Paste")
 			(roundrect_rratio 0.25)
 			(net 3 "GND")
@@ -1359,7 +1517,7 @@
 	)
 	(footprint "touchid:C10"
 		(layer "F.Cu")
-		(at -6.25 -7.9 90)
+		(at -5.0 -7.9 90)
 		(property "Reference" "C10"
 			(at 0 0 0)
 			(layer "F.SilkS")
@@ -1373,15 +1531,15 @@
 			(effects (font (size 0.4 0.4) (thickness 0.06)))
 		)
 		(pad "1" smd roundrect
-			(at -0.48 0)
-			(size 0.6 0.55)
+			(at -0.42 0)
+			(size 0.5 0.54)
 			(layers "F.Cu" "F.Mask" "F.Paste")
 			(roundrect_rratio 0.25)
 			(net 27 "VSTOR")
 		)
 		(pad "2" smd roundrect
-			(at 0.48 0)
-			(size 0.6 0.55)
+			(at 0.42 0)
+			(size 0.5 0.54)
 			(layers "F.Cu" "F.Mask" "F.Paste")
 			(roundrect_rratio 0.25)
 			(net 3 "GND")
@@ -1389,7 +1547,7 @@
 	)
 	(footprint "touchid:C12"
 		(layer "F.Cu")
-		(at -8.5 -2.5 90)
+		(at -8.2 -3.05)
 		(property "Reference" "C12"
 			(at 0 0 0)
 			(layer "F.SilkS")
@@ -1403,15 +1561,15 @@
 			(effects (font (size 0.4 0.4) (thickness 0.06)))
 		)
 		(pad "1" smd roundrect
-			(at -0.48 0)
-			(size 0.6 0.55)
+			(at -0.42 0)
+			(size 0.5 0.54)
 			(layers "F.Cu" "F.Mask" "F.Paste")
 			(roundrect_rratio 0.25)
 			(net 23 "VBAT_SENSE")
 		)
 		(pad "2" smd roundrect
-			(at 0.48 0)
-			(size 0.6 0.55)
+			(at 0.42 0)
+			(size 0.5 0.54)
 			(layers "F.Cu" "F.Mask" "F.Paste")
 			(roundrect_rratio 0.25)
 			(net 3 "GND")
@@ -1419,7 +1577,7 @@
 	)
 	(footprint "touchid:C13"
 		(layer "F.Cu")
-		(at -8.5 -7.9 90)
+		(at -6.8 -7.9 90)
 		(property "Reference" "C13"
 			(at 0 0 0)
 			(layer "F.SilkS")
@@ -1433,15 +1591,15 @@
 			(effects (font (size 0.4 0.4) (thickness 0.06)))
 		)
 		(pad "1" smd roundrect
-			(at -0.48 0)
-			(size 0.6 0.55)
+			(at -0.42 0)
+			(size 0.5 0.54)
 			(layers "F.Cu" "F.Mask" "F.Paste")
 			(roundrect_rratio 0.25)
 			(net 1 "BL_FLAG")
 		)
 		(pad "2" smd roundrect
-			(at 0.48 0)
-			(size 0.6 0.55)
+			(at 0.42 0)
+			(size 0.5 0.54)
 			(layers "F.Cu" "F.Mask" "F.Paste")
 			(roundrect_rratio 0.25)
 			(net 3 "GND")
@@ -1449,7 +1607,7 @@
 	)
 	(footprint "touchid:R1"
 		(layer "F.Cu")
-		(at 2.6 -7.9 90)
+		(at 1.3 -7.9 90)
 		(property "Reference" "R1"
 			(at 0 0 0)
 			(layer "F.SilkS")
@@ -1463,15 +1621,15 @@
 			(effects (font (size 0.4 0.4) (thickness 0.06)))
 		)
 		(pad "1" smd roundrect
-			(at -0.48 0)
-			(size 0.6 0.55)
+			(at -0.42 0)
+			(size 0.5 0.54)
 			(layers "F.Cu" "F.Mask" "F.Paste")
 			(roundrect_rratio 0.25)
 			(net 4 "HARV_1")
 		)
 		(pad "2" smd roundrect
-			(at 0.48 0)
-			(size 0.6 0.55)
+			(at 0.42 0)
+			(size 0.5 0.54)
 			(layers "F.Cu" "F.Mask" "F.Paste")
 			(roundrect_rratio 0.25)
 			(net 24 "VIN_DC")
@@ -1479,7 +1637,7 @@
 	)
 	(footprint "touchid:R2"
 		(layer "F.Cu")
-		(at 4.85 -7.9 90)
+		(at 4.0 -7.9 90)
 		(property "Reference" "R2"
 			(at 0 0 0)
 			(layer "F.SilkS")
@@ -1493,15 +1651,15 @@
 			(effects (font (size 0.4 0.4) (thickness 0.06)))
 		)
 		(pad "1" smd roundrect
-			(at -0.48 0)
-			(size 0.6 0.55)
+			(at -0.42 0)
+			(size 0.5 0.54)
 			(layers "F.Cu" "F.Mask" "F.Paste")
 			(roundrect_rratio 0.25)
 			(net 5 "HARV_2")
 		)
 		(pad "2" smd roundrect
-			(at 0.48 0)
-			(size 0.6 0.55)
+			(at 0.42 0)
+			(size 0.5 0.54)
 			(layers "F.Cu" "F.Mask" "F.Paste")
 			(roundrect_rratio 0.25)
 			(net 24 "VIN_DC")
@@ -1509,7 +1667,7 @@
 	)
 	(footprint "touchid:R3"
 		(layer "F.Cu")
-		(at 3.7 -7.9 90)
+		(at 2.2 -7.9 90)
 		(property "Reference" "R3"
 			(at 0 0 0)
 			(layer "F.SilkS")
@@ -1523,15 +1681,15 @@
 			(effects (font (size 0.4 0.4) (thickness 0.06)))
 		)
 		(pad "1" smd roundrect
-			(at -0.48 0)
-			(size 0.6 0.55)
+			(at -0.42 0)
+			(size 0.5 0.54)
 			(layers "F.Cu" "F.Mask" "F.Paste")
 			(roundrect_rratio 0.25)
 			(net 6 "HARV_3")
 		)
 		(pad "2" smd roundrect
-			(at 0.48 0)
-			(size 0.6 0.55)
+			(at 0.42 0)
+			(size 0.5 0.54)
 			(layers "F.Cu" "F.Mask" "F.Paste")
 			(roundrect_rratio 0.25)
 			(net 24 "VIN_DC")
@@ -1539,7 +1697,7 @@
 	)
 	(footprint "touchid:R4"
 		(layer "F.Cu")
-		(at -7.35 -7.9 90)
+		(at -5.9 -7.9 90)
 		(property "Reference" "R4"
 			(at 0 0 0)
 			(layer "F.SilkS")
@@ -1553,15 +1711,15 @@
 			(effects (font (size 0.4 0.4) (thickness 0.06)))
 		)
 		(pad "1" smd roundrect
-			(at -0.48 0)
-			(size 0.6 0.55)
+			(at -0.42 0)
+			(size 0.5 0.54)
 			(layers "F.Cu" "F.Mask" "F.Paste")
 			(roundrect_rratio 0.25)
 			(net 27 "VSTOR")
 		)
 		(pad "2" smd roundrect
-			(at 0.48 0)
-			(size 0.6 0.55)
+			(at 0.42 0)
+			(size 0.5 0.54)
 			(layers "F.Cu" "F.Mask" "F.Paste")
 			(roundrect_rratio 0.25)
 			(net 23 "VBAT_SENSE")
@@ -1569,7 +1727,7 @@
 	)
 	(footprint "touchid:R5"
 		(layer "F.Cu")
-		(at -7.35 -2.5 90)
+		(at -7.7 -7.9 90)
 		(property "Reference" "R5"
 			(at 0 0 0)
 			(layer "F.SilkS")
@@ -1583,15 +1741,15 @@
 			(effects (font (size 0.4 0.4) (thickness 0.06)))
 		)
 		(pad "1" smd roundrect
-			(at -0.48 0)
-			(size 0.6 0.55)
+			(at -0.42 0)
+			(size 0.5 0.54)
 			(layers "F.Cu" "F.Mask" "F.Paste")
 			(roundrect_rratio 0.25)
 			(net 23 "VBAT_SENSE")
 		)
 		(pad "2" smd roundrect
-			(at 0.48 0)
-			(size 0.6 0.55)
+			(at 0.42 0)
+			(size 0.5 0.54)
 			(layers "F.Cu" "F.Mask" "F.Paste")
 			(roundrect_rratio 0.25)
 			(net 3 "GND")
@@ -1599,7 +1757,7 @@
 	)
 	(footprint "touchid:R6"
 		(layer "F.Cu")
-		(at 1.5 -7.9 90)
+		(at 3.1 -7.9 90)
 		(property "Reference" "R6"
 			(at 0 0 0)
 			(layer "F.SilkS")
@@ -1613,15 +1771,15 @@
 			(effects (font (size 0.4 0.4) (thickness 0.06)))
 		)
 		(pad "1" smd roundrect
-			(at -0.48 0)
-			(size 0.6 0.55)
+			(at -0.42 0)
+			(size 0.5 0.54)
 			(layers "F.Cu" "F.Mask" "F.Paste")
 			(roundrect_rratio 0.25)
 			(net 2 "BL_RETURN")
 		)
 		(pad "2" smd roundrect
-			(at 0.48 0)
-			(size 0.6 0.55)
+			(at 0.42 0)
+			(size 0.5 0.54)
 			(layers "F.Cu" "F.Mask" "F.Paste")
 			(roundrect_rratio 0.25)
 			(net 1 "BL_FLAG")
@@ -1629,7 +1787,7 @@
 	)
 	(footprint "touchid:R7"
 		(layer "F.Cu")
-		(at -1.8 -7.9 90)
+		(at -1.4 -7.9 90)
 		(property "Reference" "R7"
 			(at 0 0 0)
 			(layer "F.SilkS")
@@ -1643,15 +1801,15 @@
 			(effects (font (size 0.4 0.4) (thickness 0.06)))
 		)
 		(pad "1" smd roundrect
-			(at -0.48 0)
-			(size 0.6 0.55)
+			(at -0.42 0)
+			(size 0.5 0.54)
 			(layers "F.Cu" "F.Mask" "F.Paste")
 			(roundrect_rratio 0.25)
 			(net 21 "VBAT_OK")
 		)
 		(pad "2" smd roundrect
-			(at 0.48 0)
-			(size 0.6 0.55)
+			(at 0.42 0)
+			(size 0.5 0.54)
 			(layers "F.Cu" "F.Mask" "F.Paste")
 			(roundrect_rratio 0.25)
 			(net 11 "RESET")
@@ -1659,7 +1817,7 @@
 	)
 	(footprint "touchid:ROV1"
 		(layer "F.Cu")
-		(at 6.0 -7.9 90)
+		(at 4.9 -7.9 90)
 		(property "Reference" "ROV1"
 			(at 0 0 0)
 			(layer "F.SilkS")
@@ -1673,15 +1831,15 @@
 			(effects (font (size 0.4 0.4) (thickness 0.06)))
 		)
 		(pad "1" smd roundrect
-			(at -0.48 0)
-			(size 0.6 0.55)
+			(at -0.42 0)
+			(size 0.5 0.54)
 			(layers "F.Cu" "F.Mask" "F.Paste")
 			(roundrect_rratio 0.25)
 			(net 22 "VBAT_OV_SET")
 		)
 		(pad "2" smd roundrect
-			(at 0.48 0)
-			(size 0.6 0.55)
+			(at 0.42 0)
+			(size 0.5 0.54)
 			(layers "F.Cu" "F.Mask" "F.Paste")
 			(roundrect_rratio 0.25)
 			(net 3 "GND")
@@ -1689,7 +1847,7 @@
 	)
 	(footprint "touchid:ROV2"
 		(layer "F.Cu")
-		(at 6.15 5.06 90)
+		(at 5.8 -7.9 90)
 		(property "Reference" "ROV2"
 			(at 0 0 0)
 			(layer "F.SilkS")
@@ -1703,15 +1861,15 @@
 			(effects (font (size 0.4 0.4) (thickness 0.06)))
 		)
 		(pad "1" smd roundrect
-			(at -0.48 0)
-			(size 0.6 0.55)
+			(at -0.42 0)
+			(size 0.5 0.54)
 			(layers "F.Cu" "F.Mask" "F.Paste")
 			(roundrect_rratio 0.25)
 			(net 25 "VRDIV")
 		)
 		(pad "2" smd roundrect
-			(at 0.48 0)
-			(size 0.6 0.55)
+			(at 0.42 0)
+			(size 0.5 0.54)
 			(layers "F.Cu" "F.Mask" "F.Paste")
 			(roundrect_rratio 0.25)
 			(net 22 "VBAT_OV_SET")
@@ -1719,7 +1877,7 @@
 	)
 	(footprint "touchid:ROK1"
 		(layer "F.Cu")
-		(at 8.4 7.95 90)
+		(at 7.8 7.85 90)
 		(property "Reference" "ROK1"
 			(at 0 0 0)
 			(layer "F.SilkS")
@@ -1733,15 +1891,15 @@
 			(effects (font (size 0.4 0.4) (thickness 0.06)))
 		)
 		(pad "1" smd roundrect
-			(at -0.48 0)
-			(size 0.6 0.55)
+			(at -0.42 0)
+			(size 0.5 0.54)
 			(layers "F.Cu" "F.Mask" "F.Paste")
 			(roundrect_rratio 0.25)
 			(net 10 "OK_PROG")
 		)
 		(pad "2" smd roundrect
-			(at 0.48 0)
-			(size 0.6 0.55)
+			(at 0.42 0)
+			(size 0.5 0.54)
 			(layers "F.Cu" "F.Mask" "F.Paste")
 			(roundrect_rratio 0.25)
 			(net 3 "GND")
@@ -1749,7 +1907,7 @@
 	)
 	(footprint "touchid:ROK2"
 		(layer "F.Cu")
-		(at 7.3 7.95 90)
+		(at 6.0 5.68 90)
 		(property "Reference" "ROK2"
 			(at 0 0 0)
 			(layer "F.SilkS")
@@ -1763,15 +1921,15 @@
 			(effects (font (size 0.4 0.4) (thickness 0.06)))
 		)
 		(pad "1" smd roundrect
-			(at -0.48 0)
-			(size 0.6 0.55)
+			(at -0.42 0)
+			(size 0.5 0.54)
 			(layers "F.Cu" "F.Mask" "F.Paste")
 			(roundrect_rratio 0.25)
 			(net 9 "OK_HYST")
 		)
 		(pad "2" smd roundrect
-			(at 0.48 0)
-			(size 0.6 0.55)
+			(at 0.42 0)
+			(size 0.5 0.54)
 			(layers "F.Cu" "F.Mask" "F.Paste")
 			(roundrect_rratio 0.25)
 			(net 10 "OK_PROG")
@@ -1779,7 +1937,7 @@
 	)
 	(footprint "touchid:ROK3"
 		(layer "F.Cu")
-		(at 6.15 7.25 90)
+		(at 5.9 3.74 90)
 		(property "Reference" "ROK3"
 			(at 0 0 0)
 			(layer "F.SilkS")
@@ -1793,15 +1951,15 @@
 			(effects (font (size 0.4 0.4) (thickness 0.06)))
 		)
 		(pad "1" smd roundrect
-			(at -0.48 0)
-			(size 0.6 0.55)
+			(at -0.42 0)
+			(size 0.5 0.54)
 			(layers "F.Cu" "F.Mask" "F.Paste")
 			(roundrect_rratio 0.25)
 			(net 25 "VRDIV")
 		)
 		(pad "2" smd roundrect
-			(at 0.48 0)
-			(size 0.6 0.55)
+			(at 0.42 0)
+			(size 0.5 0.54)
 			(layers "F.Cu" "F.Mask" "F.Paste")
 			(roundrect_rratio 0.25)
 			(net 9 "OK_HYST")

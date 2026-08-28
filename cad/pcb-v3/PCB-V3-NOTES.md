@@ -244,3 +244,40 @@ I said "Fix DRC settings after routing" was safe because it only clamps net
 classes when the Min Clearance override is ticked. That is wrong. It **loosened
 three Board Setup values to the routed floors** — it rewrites your design rules
 to match whatever the router did. Leave it **unticked**.
+
+## 2026-08-27 — footprints re-sourced from JLCPCB, and where JLCPCB is wrong
+
+Fetched from `easyeda.com/api/products/<LCSC>/components` (1 unit = 10 mil).
+
+| part | mine | JLCPCB | taken |
+|---|---|---|---|
+| **L1** C2849435 | 3.24 x **0.96** (0805 stand-in) | 3.256 x **2.20** | **JLCPCB** |
+| **0402** C1525 | 1.56 x 0.55 (Samsung) | 1.34 x 0.54 | **JLCPCB** |
+| **0603** C19666 | 2.40 x 0.85 (IPC nominal) | 2.20 x 0.90 | **JLCPCB** |
+| **U2** C882746 | 3.90, pad 0.60 x 0.24 (TI) | 3.981, pad 0.665 x 0.28 | **TI — kept mine** |
+| **U1** C5118826 | 10 x 11.5, pitch 1.1 | same | already agreed |
+
+**L1 was simply wrong, and JLCPCB is not needed to prove it.** The DMBJ
+PNLS252012 body is **2.0 mm wide**; a land 0.96 mm tall cannot hold it — the
+part would overhang its own pads by 0.52 mm each side. JLC's 2.2 mm sits 0.1 mm
+proud of the body, which is what a land pattern is. The part's own datasheet
+dimension was in `PCB-V3-NOTES.md` the whole time.
+
+**U2 is the opposite case.** JLC's land is *larger* than TI's: 0.665 x 0.280
+against 0.60 x 0.24. At 0.5 mm pitch that closes the pad-to-pad gap from 0.26
+to **0.22 mm** — more solder, more bridging risk. TI is the authority on its own
+package and JLC's house library is tuned for their process, not for margin.
+**Kept TI's.**
+
+The lesson: neither source is automatically right. A vendor land pattern and a
+fab's house library answer different questions. The tie-breaker is the part's
+own body dimensions, and whichever number is conservative for the failure mode
+that matters — overhang for L1, solder bridging for U2.
+
+### Cost of getting it right
+
+Correct footprints made the board **harder**, which is the honest outcome:
+L1 went from 1.10 mm of courtyard to 2.34, forcing C5 out of the right column
+(it moved beside BT1 on the left, where CBAT belongs anyway). Open connections
+went 7 -> 9. The 0402 shrink gave back some room: **25 slots for 22 parts**,
+the first real spare capacity this board has had.
