@@ -227,3 +227,74 @@ in KiCad and not worth more batch attempts.
 C7's 22 uF is now 0603. It exists to hold the ZW0905's 200 mA / 4 us scan
 transient to 36 mV. **Check its DC-bias-derated capacitance, not just that the
 footprint fits** — a 0603 22 uF derates harder than the 0805 did.
+
+---
+
+## Two checker bugs found while verifying — both mine, one serious
+
+### 1. Rotation sign (SERIOUS)
+
+`check_board.py` reported **79 different-net pairs at 0.0000 mm — SHORTs** on a
+board the router and its own DRC both call clean. The checker was wrong.
+
+```
+def rot(px, py, a):                     # WRONG
+    return px*c - py*s, px*s + py*c     # textbook counter-clockwise
+```
+
+**KiCad's file format is Y-DOWN, so a positive footprint angle is
+mathematically CLOCKWISE.** The textbook matrix mirrors every rotated
+footprint's pads in Y — which swaps pad 1 and pad 2 on all 21 rotated 0402s,
+so every track landing correctly on pad 1 looked like a short to pad 2.
+
+Settled against the board itself. R6 sits at (1.5, -7.9) rot 90:
+
+| convention | pad 1 (BL_RETURN) | pad 2 (BL_FLAG) |
+|---|---|---|
+| CCW (was) | y -8.38 | y -7.42 |
+| **CW (correct)** | **y -7.42** | **y -8.38** |
+
+The router lands BL_RETURN at y **-7.40** and BL_FLAG at y **-8.40**. Only the
+CW reading makes those correct, and the router's `check_connected` agrees.
+
+Fixed in `check_board.py`, `check_escape.py`, and **twice in
+`build_pcb_v3.py`** — its own clearance self-check and the netlist-targeting
+centroids both used the wrong sign. After the fix: **0 violations.**
+
+### 2. Rule areas were treated as blanket obstacles
+
+`check_escape.py` counted the new full-board In2.Cu plane guard as blocking on
+every layer (keep-out area 41.5 -> 221.6 mm2), reporting **47 boxed-in pads**
+on a board carrying 485 routed segments. A rule area applies only to the layers
+it names and only to the item types it forbids — the plane guard bans *tracks*
+on In2.Cu and explicitly *allows* vias. Fixed: back to **2 boxed pads**, both
+the known U2 pins.
+
+Both bugs are the same lesson as DESIGN-SPEC §7 trap 3, again: a checker
+printing a confident number is not evidence until something independent agrees.
+
+## Silkscreen added
+
+pcb-v3 had **no silkscreen at all** — no designators, no text.
+
+- **All 44 designators on F.Fab.** A 19.3 mm board with 46 parts cannot
+  silkscreen 46 designators legibly; the fab/assembly layer carries them all.
+- **F.SilkS:** U1, U2, BT1 +, and J2 at both wire-pad columns — the labels that
+  stay readable — plus **pin-1 dots on U1/U2/U3/U4**, the one silkscreen
+  feature that actually prevents a build error.
+- **B.SilkS:** `Daniel Rivera` / `driver0` / `TouchID v3 2026`, following
+  pcb-v2's convention of `driver0` at (0, 4.20).
+
+## Final state
+
+| | |
+|---|---|
+| segments / vias | 485 / 51 |
+| track width | **0.200 min, 0.400 max** — netclass exactly |
+| vias | **all 0.6 / 0.3** — netclass exactly |
+| In2.Cu signal copper | **0 — plane intact** |
+| `sexp_check` | PARSE OK, 46 footprints, 134 pads, 13 zones |
+| `check_board` | **0 pairs under 0.127** |
+| `check_escape` | 67 escapable, 2 boxed (the known U2 pins) |
+| `check_drc` @0.20 | 1 (a 0.053 mm pad-corner clip on U3) |
+| open connections | 7 |

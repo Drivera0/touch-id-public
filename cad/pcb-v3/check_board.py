@@ -45,8 +45,18 @@ def blocks(tag):
         out.append(t[i:j + 1]); i = j
 
 def rot(px, py, a):
+    """Footprint-local -> board coordinates.
+
+    KiCad's file format is Y-DOWN, so a POSITIVE footprint angle is
+    mathematically CLOCKWISE. Using the textbook CCW matrix here mirrored every
+    rotated footprint's pads in Y -- which swapped pad 1 and pad 2 on all 21
+    rotated 0402s and made check_board report 79 phantom SHORTs on a board the
+    router and its own DRC both call clean. Verified against R6 (at 1.5,-7.9,
+    rot 90): the router lands BL_RETURN at y -7.40, which is pad 1 only under
+    this sign.
+    """
     r = math.radians(a); c, s = math.cos(r), math.sin(r)
-    return px * c - py * s, px * s + py * c
+    return px * c + py * s, -px * s + py * c
 
 def pad_shape(shape, x, y, w, h, rratio, angle):
     """Copper outline of one pad, honouring its shape."""

@@ -48,8 +48,10 @@ def blocks(tag):
         out.append(t[i:j+1]); i = j
 
 def rot(px, py, a):
+    # KiCad's file format is Y-DOWN: a positive footprint angle is CLOCKWISE.
+    # The textbook CCW matrix mirrors every rotated footprint's pads in Y.
     r = math.radians(a); c, s = math.cos(r), math.sin(r)
-    return px*c - py*s, px*s + py*c
+    return px*c + py*s, -px*s + py*c
 
 def pad_shape(shape, x, y, w, h, rratio, angle):
     if shape == 'circle':
@@ -88,24 +90,44 @@ for fp in blocks('footprint "'):
                                      float(rr.group(1)) if rr else None,
                                      (float(pa or 0) + fa) % 360)))
 
-# keep-out rule areas
-keepouts = []
-for z in blocks('zone'):
-    if 'keepout' not in z: continue
+# keep-out rule areas.  A rule area applies ONLY to the layers it names and
+# ONLY to the item types it forbids. The In2.Cu plane guard bans *tracks* on
+# In2.Cu and explicitly ALLOWS vias -- counting it as a blanket obstacle made
+# this checker report 47 boxed-in pads on a board the router had just laid 485
+# segments on. Honour the layer list and the flags.
+def _zone_polys(z):
+    out = []
     for poly in re.finditer(r'\(polygon\s*\(pts(.*?)\)\s*\)', z, re.S):
         pts = [(float(a), float(b)) for a, b in
                re.findall(r'\(xy ([-\d.]+) ([-\d.]+)\)', poly.group(1))]
         if len(pts) >= 3:
-            keepouts.append(Polygon(pts))
-keepouts = unary_union(keepouts) if keepouts else Polygon()
+            out.append(Polygon(pts))
+    return out
+
+ko_track_fcu, ko_via = [], []
+for z in blocks('zone'):
+    if 'keepout' not in z:
+        continue
+    lay = re.search(r'\(layers? ([^)]*)\)', z)
+    layers = lay.group(1).replace('"', '').split() if lay else []
+    no_tracks = '(tracks not_allowed)' in z
+    no_vias = '(vias not_allowed)' in z
+    polys = _zone_polys(z)
+    if no_tracks and ('F.Cu' in layers or '*.Cu' in layers):
+        ko_track_fcu += polys
+    if no_vias:                      # a via pierces every layer
+        ko_via += polys
+keepouts_track = unary_union(ko_track_fcu) if ko_track_fcu else Polygon()
+keepouts_via = unary_union(ko_via) if ko_via else Polygon()
+keepouts = keepouts_track          # back-compat for the summary print
 
 fcu = [p for p in pads if 'F.Cu' in p['layers']]
 bcu = [p for p in pads if 'B.Cu' in p['layers']]
 board = box(-BOARD/2, -BOARD/2, BOARD/2, BOARD/2)
 inner = board.buffer(-(EDGE + TRACK/2))
 
-print("pads: %d   F.Cu: %d   B.Cu: %d   keepout area: %.2f mm2"
-      % (len(pads), len(fcu), len(bcu), keepouts.area))
+print("pads: %d   F.Cu: %d   B.Cu: %d   keepout(track,F.Cu): %.2f  keepout(via): %.2f mm2"
+      % (len(pads), len(fcu), len(bcu), keepouts_track.area, keepouts_via.area))
 
 # ---- via sites: clear of ALL layers' foreign copper -------------------------
 def via_sites_for(net):
@@ -113,7 +135,7 @@ def via_sites_for(net):
            if p['net'] != net and (set(p['layers']) & {'F.Cu','B.Cu','In1.Cu','In2.Cu','*.Cu'} or '*.Cu' in p['layers'])]
     free = board.buffer(-(EDGE + VIA/2))
     if blk: free = free.difference(unary_union(blk))
-    if not keepouts.is_empty: free = free.difference(keepouts.buffer(VIA/2))
+    if not keepouts_via.is_empty: free = free.difference(keepouts_via.buffer(VIA/2))
     return free
 
 # ---- F.Cu free space for a track centre line of one net --------------------
@@ -121,7 +143,7 @@ def track_free_for(net):
     blk = [p['g'].buffer(CLR + TRACK/2) for p in fcu if p['net'] != net]
     free = inner
     if blk: free = free.difference(unary_union(blk))
-    if not keepouts.is_empty: free = free.difference(keepouts.buffer(TRACK/2))
+    if not keepouts_track.is_empty: free = free.difference(keepouts_track.buffer(TRACK/2))
     return free
 
 def parts(g):
