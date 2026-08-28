@@ -466,6 +466,11 @@
 			(layers "F.Cu" "F.Mask" "F.Paste")
 			(net 3 "GND")
 		)
+		(model "${KIPRJMOD}/3dmodels/mdbt50q.step"
+			(offset (xyz 0 0 0))
+			(scale (xyz 1 1 1))
+			(rotate (xyz 0 0 0))
+		)
 	)
 	(footprint "touchid:J2"
 		(layer "F.Cu")
@@ -988,6 +993,11 @@
 			(solder_mask_margin -0.05)
 			(solder_paste_margin -0.065)
 		)
+		(model "${KIPRJMOD}/3dmodels/x2son4.step"
+			(offset (xyz 0 0 0))
+			(scale (xyz 1 1 1))
+			(rotate (xyz 0 0 0))
+		)
 	)
 	(footprint "touchid:U4"
 		(layer "F.Cu")
@@ -1077,6 +1087,11 @@
 			(solder_mask_margin -0.05)
 			(solder_paste_margin -0.065)
 		)
+		(model "${KIPRJMOD}/3dmodels/x2son4.step"
+			(offset (xyz 0 0 0))
+			(scale (xyz 1 1 1))
+			(rotate (xyz 0 0 0))
+		)
 	)
 	(footprint "touchid:C5"
 		(layer "F.Cu")
@@ -1106,6 +1121,11 @@
 			(layers "F.Cu" "F.Mask" "F.Paste")
 			(roundrect_rratio 0.25)
 			(net 3 "GND")
+		)
+		(model "${KIPRJMOD}/3dmodels/chip_0603.step"
+			(offset (xyz 0 0 0))
+			(scale (xyz 1 1 1))
+			(rotate (xyz 0 0 0))
 		)
 	)
 	(footprint "touchid:U2"
@@ -1246,6 +1266,11 @@
 			(layers "F.Cu" "F.Mask" "F.Paste")
 			(net 3 "GND")
 		)
+		(model "${KIPRJMOD}/3dmodels/qfn20_3p5.step"
+			(offset (xyz 0 0 0))
+			(scale (xyz 1 1 1))
+			(rotate (xyz 0 0 0))
+		)
 	)
 	(footprint "touchid:C7"
 		(layer "F.Cu")
@@ -1276,6 +1301,11 @@
 			(roundrect_rratio 0.25)
 			(net 3 "GND")
 		)
+		(model "${KIPRJMOD}/3dmodels/chip_0603.step"
+			(offset (xyz 0 0 0))
+			(scale (xyz 1 1 1))
+			(rotate (xyz 0 0 0))
+		)
 	)
 	(footprint "touchid:L1"
 		(layer "F.Cu")
@@ -1303,6 +1333,11 @@
 			(size 1.2 2.2)
 			(layers "F.Cu" "F.Mask" "F.Paste")
 			(net 7 "LX")
+		)
+		(model "${KIPRJMOD}/3dmodels/ind_2520.step"
+			(offset (xyz 0 0 0))
+			(scale (xyz 1 1 1))
+			(rotate (xyz 0 0 0))
 		)
 	)
 	(footprint "touchid:C1"
@@ -1334,6 +1369,11 @@
 			(roundrect_rratio 0.25)
 			(net 3 "GND")
 		)
+		(model "${KIPRJMOD}/3dmodels/chip_0402.step"
+			(offset (xyz 0 0 0))
+			(scale (xyz 1 1 1))
+			(rotate (xyz 0 0 0))
+		)
 	)
 	(footprint "touchid:C2"
 		(layer "F.Cu")
@@ -1363,6 +1403,11 @@
 			(layers "F.Cu" "F.Mask" "F.Paste")
 			(roundrect_rratio 0.25)
 			(net 3 "GND")
+		)
+		(model "${KIPRJMOD}/3dmodels/chip_0402.step"
+			(offset (xyz 0 0 0))
+			(scale (xyz 1 1 1))
+			(rotate (xyz 0 0 0))
 		)
 	)
 	(footprint "touchid:C3"
@@ -1394,6 +1439,11 @@
 			(roundrect_rratio 0.25)
 			(net 3 "GND")
 		)
+		(model "${KIPRJMOD}/3dmodels/chip_0402.step"
+			(offset (xyz 0 0 0))
+			(scale (xyz 1 1 1))
+			(rotate (xyz 0 0 0))
+		)
 	)
 	(footprint "touchid:C4"
 		(layer "F.Cu")
@@ -1423,6 +1473,11 @@
 			(layers "F.Cu" "F.Mask" "F.Paste")
 			(roundrect_rratio 0.25)
 			(net 3 "GND")
+		)
+		(model "${KIPRJMOD}/3dmodels/chip_0402.step"
+			(offset (xyz 0 0 0))
+			(scale (xyz 1 1 1))
+			(rotate (xyz 0 0 0))
 		)
 	)
 	(footprint "touchid:C6"
@@ -1454,6 +1509,11 @@
 			(roundrect_rratio 0.25)
 			(net 3 "GND")
 		)
+		(model "${KIPRJMOD}/3dmodels/chip_0402.step"
+			(offset (xyz 0 0 0))
+			(scale (xyz 1 1 1))
+			(rotate (xyz 0 0 0))
+		)
 	)
 	(footprint "touchid:C8"
 		(layer "F.Cu")
@@ -1483,6 +1543,11 @@
 			(layers "F.Cu" "F.Mask" "F.Paste")
 			(roundrect_rratio 0.25)
 			(net 3 "GND")
+		)
+		(model "${KIPRJMOD}/3dmodels/chip_0402.step"
+			(offset (xyz 0 0 0))
+			(scale (xyz 1 1 1))
+			(rotate (xyz 0 0 0))
 		)
 	)
 	(footprint "touchid:C9"
@@ -1514,6 +1579,11 @@
 			(roundrect_rratio 0.25)
 			(net 3 "GND")
 		)
+		(model "${KIPRJMOD}/3dmodels/chip_0402.step"
+			(offset (xyz 0 0 0))
+			(scale (xyz 1 1 1))
+			(rotate (xyz 0 0 0))
+		)
 	)
 	(footprint "touchid:C10"
 		(layer "F.Cu")
@@ -1543,6 +1613,11 @@
 			(layers "F.Cu" "F.Mask" "F.Paste")
 			(roundrect_rratio 0.25)
 			(net 3 "GND")
+		)
+		(model "${KIPRJMOD}/3dmodels/chip_0402.step"
+			(offset (xyz 0 0 0))
+			(scale (xyz 1 1 1))
+			(rotate (xyz 0 0 0))
 		)
 	)
 	(footprint "touchid:C12"
@@ -1574,6 +1649,11 @@
 			(roundrect_rratio 0.25)
 			(net 3 "GND")
 		)
+		(model "${KIPRJMOD}/3dmodels/chip_0402.step"
+			(offset (xyz 0 0 0))
+			(scale (xyz 1 1 1))
+			(rotate (xyz 0 0 0))
+		)
 	)
 	(footprint "touchid:C13"
 		(layer "F.Cu")
@@ -1603,6 +1683,11 @@
 			(layers "F.Cu" "F.Mask" "F.Paste")
 			(roundrect_rratio 0.25)
 			(net 3 "GND")
+		)
+		(model "${KIPRJMOD}/3dmodels/chip_0402.step"
+			(offset (xyz 0 0 0))
+			(scale (xyz 1 1 1))
+			(rotate (xyz 0 0 0))
 		)
 	)
 	(footprint "touchid:R1"
@@ -1634,6 +1719,11 @@
 			(roundrect_rratio 0.25)
 			(net 24 "VIN_DC")
 		)
+		(model "${KIPRJMOD}/3dmodels/chip_0402.step"
+			(offset (xyz 0 0 0))
+			(scale (xyz 1 1 1))
+			(rotate (xyz 0 0 0))
+		)
 	)
 	(footprint "touchid:R2"
 		(layer "F.Cu")
@@ -1663,6 +1753,11 @@
 			(layers "F.Cu" "F.Mask" "F.Paste")
 			(roundrect_rratio 0.25)
 			(net 24 "VIN_DC")
+		)
+		(model "${KIPRJMOD}/3dmodels/chip_0402.step"
+			(offset (xyz 0 0 0))
+			(scale (xyz 1 1 1))
+			(rotate (xyz 0 0 0))
 		)
 	)
 	(footprint "touchid:R3"
@@ -1694,6 +1789,11 @@
 			(roundrect_rratio 0.25)
 			(net 24 "VIN_DC")
 		)
+		(model "${KIPRJMOD}/3dmodels/chip_0402.step"
+			(offset (xyz 0 0 0))
+			(scale (xyz 1 1 1))
+			(rotate (xyz 0 0 0))
+		)
 	)
 	(footprint "touchid:R4"
 		(layer "F.Cu")
@@ -1723,6 +1823,11 @@
 			(layers "F.Cu" "F.Mask" "F.Paste")
 			(roundrect_rratio 0.25)
 			(net 23 "VBAT_SENSE")
+		)
+		(model "${KIPRJMOD}/3dmodels/chip_0402.step"
+			(offset (xyz 0 0 0))
+			(scale (xyz 1 1 1))
+			(rotate (xyz 0 0 0))
 		)
 	)
 	(footprint "touchid:R5"
@@ -1754,6 +1859,11 @@
 			(roundrect_rratio 0.25)
 			(net 3 "GND")
 		)
+		(model "${KIPRJMOD}/3dmodels/chip_0402.step"
+			(offset (xyz 0 0 0))
+			(scale (xyz 1 1 1))
+			(rotate (xyz 0 0 0))
+		)
 	)
 	(footprint "touchid:R6"
 		(layer "F.Cu")
@@ -1783,6 +1893,11 @@
 			(layers "F.Cu" "F.Mask" "F.Paste")
 			(roundrect_rratio 0.25)
 			(net 1 "BL_FLAG")
+		)
+		(model "${KIPRJMOD}/3dmodels/chip_0402.step"
+			(offset (xyz 0 0 0))
+			(scale (xyz 1 1 1))
+			(rotate (xyz 0 0 0))
 		)
 	)
 	(footprint "touchid:R7"
@@ -1814,6 +1929,11 @@
 			(roundrect_rratio 0.25)
 			(net 11 "RESET")
 		)
+		(model "${KIPRJMOD}/3dmodels/chip_0402.step"
+			(offset (xyz 0 0 0))
+			(scale (xyz 1 1 1))
+			(rotate (xyz 0 0 0))
+		)
 	)
 	(footprint "touchid:ROV1"
 		(layer "F.Cu")
@@ -1843,6 +1963,11 @@
 			(layers "F.Cu" "F.Mask" "F.Paste")
 			(roundrect_rratio 0.25)
 			(net 3 "GND")
+		)
+		(model "${KIPRJMOD}/3dmodels/chip_0402.step"
+			(offset (xyz 0 0 0))
+			(scale (xyz 1 1 1))
+			(rotate (xyz 0 0 0))
 		)
 	)
 	(footprint "touchid:ROV2"
@@ -1874,6 +1999,11 @@
 			(roundrect_rratio 0.25)
 			(net 22 "VBAT_OV_SET")
 		)
+		(model "${KIPRJMOD}/3dmodels/chip_0402.step"
+			(offset (xyz 0 0 0))
+			(scale (xyz 1 1 1))
+			(rotate (xyz 0 0 0))
+		)
 	)
 	(footprint "touchid:ROK1"
 		(layer "F.Cu")
@@ -1903,6 +2033,11 @@
 			(layers "F.Cu" "F.Mask" "F.Paste")
 			(roundrect_rratio 0.25)
 			(net 3 "GND")
+		)
+		(model "${KIPRJMOD}/3dmodels/chip_0402.step"
+			(offset (xyz 0 0 0))
+			(scale (xyz 1 1 1))
+			(rotate (xyz 0 0 0))
 		)
 	)
 	(footprint "touchid:ROK2"
@@ -1934,6 +2069,11 @@
 			(roundrect_rratio 0.25)
 			(net 10 "OK_PROG")
 		)
+		(model "${KIPRJMOD}/3dmodels/chip_0402.step"
+			(offset (xyz 0 0 0))
+			(scale (xyz 1 1 1))
+			(rotate (xyz 0 0 0))
+		)
 	)
 	(footprint "touchid:ROK3"
 		(layer "F.Cu")
@@ -1963,6 +2103,11 @@
 			(layers "F.Cu" "F.Mask" "F.Paste")
 			(roundrect_rratio 0.25)
 			(net 9 "OK_HYST")
+		)
+		(model "${KIPRJMOD}/3dmodels/chip_0402.step"
+			(offset (xyz 0 0 0))
+			(scale (xyz 1 1 1))
+			(rotate (xyz 0 0 0))
 		)
 	)
 	(footprint "touchid:MH"
