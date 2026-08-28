@@ -1,0 +1,214 @@
+<title>TouchID Pogo Pad Datasheet</title>
+<style>
+:root{--bg:#fbfaf8;--fg:#1a1917;--mut:#6b665e;--line:#ddd8d0;--card:#fff;
+ --acc:#8a5a2b;--warn:#b4531a;--warnbg:#fdf3ec;--gnd:#3d6b46;--sig:#8a5a2b;--nc:#9a958c;--mono:ui-monospace,"SF Mono",Menlo,Consolas,monospace}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#161513;--fg:#eae7e1;--mut:#9d978c;
+ --line:#332f2a;--card:#1e1c19;--acc:#d99a5b;--warn:#e08a4e;--warnbg:#2a1e14;--gnd:#7fbb8c;--sig:#d99a5b;--nc:#726d64}}
+:root[data-theme="dark"]{--bg:#161513;--fg:#eae7e1;--mut:#9d978c;--line:#332f2a;--card:#1e1c19;
+ --acc:#d99a5b;--warn:#e08a4e;--warnbg:#2a1e14;--gnd:#7fbb8c;--sig:#d99a5b;--nc:#726d64}
+body{background:var(--bg);color:var(--fg);font:16px/1.6 ui-sans-serif,system-ui,-apple-system,sans-serif;
+ margin:0;padding:2.5rem 1.25rem 5rem}
+.wrap{max-width:60rem;margin:0 auto}
+h1{font-size:1.9rem;line-height:1.2;margin:0 0 .3rem;letter-spacing:-.02em}
+.sub{color:var(--mut);margin:0 0 2rem;font-size:1.02rem}
+h2{font-size:1.18rem;margin:2.6rem 0 .8rem;padding-top:1.1rem;border-top:1px solid var(--line);letter-spacing:-.01em}
+h3{font-size:1rem;margin:1.6rem 0 .5rem}
+p{margin:.7rem 0}
+.mono{font-family:var(--mono)}
+.card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:1.1rem 1.25rem;margin:1rem 0}
+.warn{background:var(--warnbg);border:1px solid var(--warn);border-radius:10px;padding:1rem 1.25rem;margin:1.2rem 0}
+.warn strong{color:var(--warn)}
+table{border-collapse:collapse;width:100%;font-size:.92rem;margin:.6rem 0}
+th,td{text-align:left;padding:.42rem .6rem;border-bottom:1px solid var(--line)}
+th{font-weight:600;font-size:.8rem;text-transform:uppercase;letter-spacing:.04em;color:var(--mut)}
+td.n,td.r{font-family:var(--mono)}
+td.n{text-align:right}
+.scroll{overflow-x:auto}
+figure{margin:1.4rem 0}
+svg{display:block;max-width:100%;height:auto;margin:0 auto}
+.brd{fill:none;stroke:var(--fg);stroke-width:1.6}
+.hole{fill:var(--bg);stroke:var(--mut);stroke-width:1.2}
+.grp{fill:none;stroke:var(--line);stroke-width:1;stroke-dasharray:4 3}
+.pad{stroke:var(--bg);stroke-width:.8}
+.pad.gnd{fill:var(--gnd)} .pad.sig{fill:var(--sig)} .pad.nc{fill:var(--nc)}
+.pn{fill:#fff;font:600 9px var(--mono);text-anchor:middle}
+.lbl{fill:var(--fg);font:600 11px ui-sans-serif;text-anchor:middle}
+.dim{fill:var(--mut);font:9px var(--mono);text-anchor:middle}
+.edge{fill:var(--mut);font:italic 10px ui-sans-serif;text-anchor:middle}
+.ax{stroke:var(--line);stroke-width:.8;stroke-dasharray:3 4}
+.org{fill:none;stroke:var(--acc);stroke-width:1.4}
+.key{display:flex;gap:1.4rem;flex-wrap:wrap;font-size:.86rem;color:var(--mut);justify-content:center;margin-top:.6rem}
+.key i{display:inline-block;width:.72rem;height:.72rem;border-radius:50%;margin-right:.35rem;vertical-align:-1px}
+ol,ul{padding-left:1.3rem} li{margin:.4rem 0}
+.blank{display:inline-block;min-width:5.5rem;border-bottom:1px solid var(--mut);margin:0 .2rem}
+@media print{body{background:#fff;color:#000;padding:0}.noprint{display:none}}
+</style>
+<div class="wrap">
+<h1>TouchID — pogo pad datasheet</h1>
+<p class="sub">Everything you need to check J4 and J11 against the real keyboard slot. These
+ten pads are the last unverified geometry on the board, and the only numbers here that
+came from a measurement rather than a datasheet.</p>
+
+<div class="warn">
+<p><strong>Why this matters.</strong> Every other dimension on this board is traced to a
+manufacturer drawing. These ten are not — they were measured off the keyboard and carried
+forward from <span class="mono">pcb-v2</span>. <strong>If they are wrong the module never makes
+contact, and the board is scrap.</strong> Nothing in software can check them.</p>
+</div>
+
+<h2>1. Datum — read this before measuring anything</h2>
+<div class="card">
+<p><strong>Origin is the centre of the board</strong>, not a corner. The board is
+<span class="mono">19.30 × 19.30 mm</span> square with <span class="mono">2.0 mm</span> corner
+radii, so the origin sits <span class="mono">9.65 mm</span> from each edge.</p>
+<p><strong>+X is right, +Y is the spacebar edge.</strong> Both pogo blocks are at
+<em>negative</em> Y, i.e. the edge <em>away</em> from the spacebar.</p>
+</div>
+
+<div class="warn">
+<p><strong>The pads are on the BOTTOM of the board, so the drawing is mirrored.</strong>
+The table below gives each pad in board coordinates (the KiCad numbers). The drawing shows
+the board <em>as you see it looking at the contact face</em> — which flips X left-to-right.
+The table has a separate column for that. Measuring against the wrong handedness is the
+easiest way to waste a board, so check the column heading before you trust a number.</p>
+</div>
+
+<h2>2. The pads</h2>
+<div class="scroll"><table>
+<thead><tr><th>Conn</th><th>Pad</th><th>X (board)</th><th>Y (board)</th>
+<th>X seen from below</th><th>Ø</th><th>Net</th></tr></thead>
+<tbody>
+<tr><td class="r">J4</td><td class="r">1</td><td class="n">-7.20</td><td class="n">-7.22</td><td class="n">+7.20</td><td class="n">2.2</td><td>— not connected</td></tr>
+<tr><td class="r">J4</td><td class="r">2</td><td class="n">-4.70</td><td class="n">-7.22</td><td class="n">+4.70</td><td class="n">2.2</td><td>— not connected</td></tr>
+<tr><td class="r">J4</td><td class="r">3</td><td class="n">-7.20</td><td class="n">-4.72</td><td class="n">+7.20</td><td class="n">2.2</td><td>— not connected</td></tr>
+<tr><td class="r">J4</td><td class="r">4</td><td class="n">-4.70</td><td class="n">-4.72</td><td class="n">+4.70</td><td class="n">2.2</td><td>— not connected</td></tr>
+<tr><td class="r">J4</td><td class="r">5</td><td class="n">-7.20</td><td class="n">-2.22</td><td class="n">+7.20</td><td class="n">2.2</td><td>GND</td></tr>
+<tr><td class="r">J4</td><td class="r">6</td><td class="n">-4.70</td><td class="n">-2.22</td><td class="n">+4.70</td><td class="n">2.2</td><td>— not connected</td></tr>
+<tr><td class="r">J11</td><td class="r">1</td><td class="n">+3.45</td><td class="n">-7.20</td><td class="n">-3.45</td><td class="n">2.2</td><td>HARV_1</td></tr>
+<tr><td class="r">J11</td><td class="r">2</td><td class="n">+5.95</td><td class="n">-7.20</td><td class="n">-5.95</td><td class="n">2.2</td><td>HARV_2</td></tr>
+<tr><td class="r">J11</td><td class="r">3</td><td class="n">+3.45</td><td class="n">-4.70</td><td class="n">-3.45</td><td class="n">2.2</td><td>HARV_3</td></tr>
+<tr><td class="r">J11</td><td class="r">4</td><td class="n">+5.95</td><td class="n">-4.70</td><td class="n">-5.95</td><td class="n">2.2</td><td>BL_RETURN</td></tr>
+</tbody></table></div>
+<p style="color:var(--mut);font-size:.9rem">All pads <span class="mono">Ø2.20 mm</span>, bare
+copper (solder-mask opened), on a <span class="mono">2.50 mm</span> grid in both axes — leaving
+<span class="mono">0.30 mm</span> between adjacent pad edges.</p>
+
+<div class="warn">
+<p><strong>Check this first: J4 and J11 do not share a Y datum.</strong>
+J4's rows are at <span class="mono">−7.22 / −4.72 / −2.22</span>; J11's are at
+<span class="mono">−7.20 / −4.70</span>. That is a <span class="mono">0.02 mm</span> offset
+between two connectors that presumably mate with the same pogo block.</p>
+<p>0.02 mm is far below anything you can measure with calipers and almost certainly harmless
+against a sprung pin. But it is <em>suspicious</em>: two connectors on one grid should share a
+datum exactly. It suggests one of the two was transcribed separately. <strong>If your
+measurement says both blocks sit on the same pitch, tell me and I will align them.</strong></p>
+</div>
+
+<h2>3. Contact face, viewed from below</h2>
+<figure>
+<svg viewBox="-70 -70 140 140" width="620" role="img"
+ aria-label="TouchID board contact face seen from below, showing J4's six pads on the right and J11's four on the left">
+<rect class="brd" x="-57.9" y="-57.9" width="115.8" height="115.8" rx="12.0"/>
+<circle class="hole" cx="-48.6" cy="-48.6" r="3.9"/>
+<text class="dim" x="-48.6" y="-54.6">Ø1.3</text>
+<circle class="hole" cx="48.6" cy="48.6" r="3.9"/>
+<text class="dim" x="48.6" y="42.6">Ø1.3</text>
+<rect class="grp" x="18.9" y="-52.6" width="33.6" height="48.6" rx="4"/>
+<text class="lbl" x="35.7" y="-56.6">J4</text>
+<circle class="pad nc" cx="43.2" cy="-43.32" r="6.6"/>
+<text class="pn" x="43.2" y="-39.9">1</text>
+<circle class="pad nc" cx="28.2" cy="-43.32" r="6.6"/>
+<text class="pn" x="28.2" y="-39.9">2</text>
+<circle class="pad nc" cx="43.2" cy="-28.32" r="6.6"/>
+<text class="pn" x="43.2" y="-24.9">3</text>
+<circle class="pad nc" cx="28.2" cy="-28.32" r="6.6"/>
+<text class="pn" x="28.2" y="-24.9">4</text>
+<circle class="pad gnd" cx="43.2" cy="-13.32" r="6.6"/>
+<text class="pn" x="43.2" y="-9.9">5</text>
+<circle class="pad nc" cx="28.2" cy="-13.32" r="6.6"/>
+<text class="pn" x="28.2" y="-9.9">6</text>
+<rect class="grp" x="-45.0" y="-52.5" width="33.6" height="33.6" rx="4"/>
+<text class="lbl" x="-28.2" y="-56.5">J11</text>
+<circle class="pad sig" cx="-20.7" cy="-43.2" r="6.6"/>
+<text class="pn" x="-20.7" y="-39.8">1</text>
+<circle class="pad sig" cx="-35.7" cy="-43.2" r="6.6"/>
+<text class="pn" x="-35.7" y="-39.8">2</text>
+<circle class="pad sig" cx="-20.7" cy="-28.2" r="6.6"/>
+<text class="pn" x="-20.7" y="-24.8">3</text>
+<circle class="pad sig" cx="-35.7" cy="-28.2" r="6.6"/>
+<text class="pn" x="-35.7" y="-24.8">4</text>
+<line class="ax" x1="-57.9" y1="0" x2="57.9" y2="0"/>
+<line class="ax" x1="0" y1="-57.9" x2="0" y2="57.9"/>
+<circle class="org" cx="0" cy="0" r="2.5"/>
+<text class="edge" x="0" y="52.9">spacebar edge  (board +Y)</text>
+<text class="edge" x="0" y="-46.9">pogo / contact edge  (board −Y)</text>
+</svg>
+<div class="key">
+<span><i style="background:var(--gnd)"></i>GND</span>
+<span><i style="background:var(--sig)"></i>signal</span>
+<span><i style="background:var(--nc)"></i>deliberately unconnected</span>
+</div>
+</figure>
+<p style="color:var(--mut);font-size:.9rem;text-align:center">Not to scale on screen — use the
+numbers, not the picture.</p>
+
+<h2>4. How to check it</h2>
+<ol>
+<li><strong>Measure the keyboard, not the board.</strong> The board is the thing that has to
+be right; the slot is the thing that <em>is</em> right. Measure the pogo pin positions in the
+slot and compare them to the table.</li>
+<li><strong>Get the pitch first.</strong> Pin-centre to pin-centre should be
+<span class="mono">2.50 mm</span> in both axes. Pitch is easier to measure accurately than
+absolute position, and an error here is fatal because it compounds across the block.</li>
+<li><strong>Then get one anchor.</strong> Measure from a board edge to the centre of one pin,
+on both axes. Everything else follows from the pitch. J4 pad 1 should sit
+<span class="mono">2.45 mm</span> from the left edge and <span class="mono">2.43 mm</span> from
+the bottom edge, in board coordinates.</li>
+<li><strong>Check the block separation.</strong> J4 pad 2 to J11 pad 1 is
+<span class="mono">8.15 mm</span> in X. If the two blocks are one moulded part this is the
+number most likely to be wrong.</li>
+<li><strong>Check the pin lands inside Ø2.2.</strong> A pogo tip that lands within about
+<span class="mono">0.6 mm</span> of a pad centre still makes contact. That is the real
+tolerance you are working to — not microns.</li>
+</ol>
+
+<h3>Report back</h3>
+<div class="card">
+<p class="mono" style="font-size:.9rem">
+pitch X <span class="blank"></span> mm &nbsp; pitch Y <span class="blank"></span> mm<br>
+left edge → J4 pad 1 centre <span class="blank"></span> mm<br>
+bottom edge → J4 pad 1 centre <span class="blank"></span> mm<br>
+J4 pad 2 → J11 pad 1, X <span class="blank"></span> mm<br>
+do both blocks share a Y datum? <span class="blank"></span>
+</p>
+</div>
+
+<h2>5. Fab notes for these pads</h2>
+<div class="card">
+<p><strong>Ask for ENIG, not HASL.</strong> These are sliding/pressing contacts with no solder
+on them. HASL leaves an uneven tin surface that oxidises and wears; ENIG gives a flat, hard,
+corrosion-resistant gold surface. It is the single cheapest thing you can do to make the
+contact reliable, and it costs a few dollars on a prototype order.</p>
+<p><strong>They are mask-opened bare copper by design</strong> — that is correct for a contact
+pad and is why the finish matters. Board is <span class="mono">1.2 mm</span> thick,
+<span class="mono">1 oz</span> copper, 4 layers.</p>
+<p><strong>Do not let anything else onto this face.</strong> No via may be placed over these
+pads — a through-hole via would exit through the contact surface. The build enforces this, and
+it is why the ground-plane stitching avoids the whole pogo area.</p>
+</div>
+
+<h2>6. Reference</h2>
+<div class="scroll"><table>
+<thead><tr><th>Item</th><th>Value</th></tr></thead><tbody>
+<tr><td>Board outline</td><td class="mono">19.30 × 19.30 mm, R2.0 corners</td></tr>
+<tr><td>Origin</td><td class="mono">board centre (±9.65 mm to each edge)</td></tr>
+<tr><td>Mounting holes</td><td class="mono">Ø1.30 NPTH at (+8.10, −8.10) and (−8.10, +8.10)</td></tr>
+<tr><td>Pogo pads</td><td class="mono">10 × Ø2.20, 2.50 mm grid, B.Cu, mask opened</td></tr>
+<tr><td>J4</td><td class="mono">6 pads — only pad 5 (GND) is connected, by design</td></tr>
+<tr><td>J11</td><td class="mono">4 pads — HARV_1/2/3 and BL_RETURN</td></tr>
+<tr><td>Source of truth</td><td class="mono">cad/pcb-v3/pcb-v3-handoff.kicad_pcb</td></tr>
+</tbody></table></div>
+<p style="color:var(--mut);font-size:.88rem">J4 pins 1, 2, 3, 4 and 6 are deliberately left
+unconnected: loading them in knob mode generated volume and mute events. Do not "fix" this by
+wiring them up.</p>
+</div>
