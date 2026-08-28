@@ -118,3 +118,37 @@ This is the point the original brief anticipated: *"routing it in KiCad, where
 you can see what it does."* Six connections and a plane cleanup is an hour of
 interactive routing, and a human can nudge neighbours in ways the batch router
 will not.
+
+## The plane cannot be protected — measured, not assumed
+
+A full-board **rule area on In2.Cu** (`tracks not_allowed`, vias and pour
+allowed) was added to `build_pcb_v3.py`. The router honours rule areas for the
+antenna and screw keep-outs, so this should have worked. It did not:
+41 -> 25 segments, and connectivity got *worse*.
+
+Strip-and-reroute was then iterated three times (delete In2.Cu copper, re-route
+only the nets that broke):
+
+| round | In2.Cu segments after | open pads |
+|---|---|---|
+| 1 | 42 | 8 |
+| 2 | 44 | 7 |
+| 3 | 30 | 7 |
+
+**It does not converge.** The router's rescue phase bypasses the layer
+restriction. Configuration cannot fix this.
+
+## Two end states, and the trade between them
+
+| file | plane | open connections |
+|---|---|---|
+| `pcb-v3-routed-best.kicad_pcb` | **carved** — 41 segs / 50 mm, incl. a 23.8 mm VIN_DC run across 16 of 19.3 mm | **4** |
+| `pcb-v3-handoff.kicad_pcb` | **intact** — In2.Cu signal copper removed | **16** |
+
+That copper was load-bearing, which is why removing it costs twelve more
+connections.
+
+**Recommendation: take `pcb-v3-handoff.kicad_pcb`.** The continuous return path
+is why this board is 4 layers; a plane cut by a 23.8 mm slot under the boost
+converter is a permanent defect that is hard to reason about later, whereas
+sixteen short hand-routes are an evening's work and most sit in open board.

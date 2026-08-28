@@ -1981,4 +1981,28 @@
 			)
 		)
 	)
+	(zone
+		(net 0)
+		(net_name "")
+		(layers "In2.Cu")
+		(name "IN2_PLANE_NO_TRACKS")
+		(hatch edge 0.5)
+		(connect_pads (clearance 0))
+		(min_thickness 0.25)
+		(keepout
+			(tracks not_allowed)
+			(vias allowed)
+			(pads allowed)
+			(copperpour allowed)
+			(footprints allowed)
+		)
+		(polygon
+			(pts
+				(xy -9.65 -9.65)
+				(xy 9.65 -9.65)
+				(xy 9.65 9.65)
+				(xy -9.65 9.65)
+			)
+		)
+	)
 )
