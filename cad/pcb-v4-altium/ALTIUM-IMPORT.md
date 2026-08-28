@@ -253,3 +253,35 @@ Altium's Manufacturer Part Search *can* supply real vendor STEP, but:
 So this does not replace `cad/pcb-v3/3dmodels/`. Those boxes are built from
 datasheet body dimensions and **circumscribe** the real parts, which is why the
 existing housing collision check is conservative and still stands.
+
+## Re-import after the fix — CLEAN
+
+The dangling GND stub was removed in KiCad (the master), both v4 files
+re-exported, and the corrected board re-imported from scratch: width rule set to
+0.127 mm on all four layers, polygons repoured, DRC re-run.
+
+**Warnings: 0   Rule Violations: 0.** Every rule reads zero, Net Antennae
+included, and the Messages panel is empty.
+
+So the two tools now agree completely:
+
+| | KiCad side | Altium |
+|---|---|---|
+| clearance / shorts / width / holes / mask | clean | **0** |
+| connectivity | all 27 nets whole | Un-Routed Net **0** |
+| free track ends | check 20: 916 ends, all on copper | Net Antennae **0** |
+
+`preflight.py` gained **check 20** from this exercise — the blind spot Altium
+exposed. It took three corrections to become trustworthy, and each was a
+different way of being wrong about copper:
+
+1. an axis-aligned pad test invented **12** free ends where **1** existed
+   (rotated and custom pads need the circumscribed circle);
+2. ignoring the **pour** left 6 of those standing — an end inside its own net's
+   fill is connected, and a gate that cries wolf gets ignored;
+3. testing the centre **point** rather than the **copper** flagged VREF_SAMP,
+   whose trace ends 0.010 mm outside U2.4's pad rectangle while its 0.2 mm-wide
+   copper overlaps that pad by 0.09 mm.
+
+Regression-tested both ways: re-inserting the stub makes check 20 block,
+removing it makes it pass.
