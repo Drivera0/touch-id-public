@@ -125,17 +125,40 @@ Everything else was already correct at JLC's 4-layer defaults: 1 oz outer /
 tested, order mark removed, and every exotic option (gold fingers, castellated
 holes, edge plating, backdrill…) off.
 
-## PAUSED at the assembly step, 2026-08-28 — waiting on U1
+## IN THE CART, NOT ORDERED — 2026-08-28
 
-A full **PCB + assembly** quote is built and auto-saved in JLCONE as project
-**`touchid-v3-jlcpcb`**. Nothing was ordered. Reopen it when the module is back.
+Both line items are **saved in the JLCPCB cart, unticked, subtotal $0.00**.
+Nothing was purchased. Project name in JLCONE: **`touchid-v3-jlcpcb`**.
 
-**Where it got to:** 20 BOM lines detected, **19 confirmed**, every one matched
-to exactly the LCSC part number in `assembly/touchid-v3-BOM.csv`. Only U1 is
-outstanding, and JLC's own parts search shows **all 19 MDBT50Q variants at 0
-stock and 0 idle parts, with no Select button on any of them** — there is no
-substitute to pick. That is the same answer the API gave, now from inside the
-order flow.
+| line | what | qty | build | price |
+|---|---|---|---|---|
+| `touchid-v3-jlcpcb_Y7` | PCB — green, 1.2 mm, ENIG | 5 | 3–4 d | **$24.13** |
+| `touchid-v3-jlcpcb_Y7` | Standard PCBA, assemble top side | 5 | 3–4 d | **$91.25** |
+| | | | **total** | **$115.38** |
+
+**The fixed costs dominate at this quantity.** Of the $91.25 assembly charge,
+only **$26.18 is components** — the rest is Setup $25.56, Feeders Loading
+$29.07 (charged per unique part, and there are 19), Stencil $8.21, with SMT
+Assembly itself just $1.29. So a bigger run costs very little more: the next
+25 boards would add roughly the component cost alone. **Decide the quantity
+before ordering, not after.** Confirm Parts Placement is $0.45 — keep it.
+
+### U1 is assembled by nobody, and is deliberately left off this quote
+
+JLC's own parts search shows **all 19 MDBT50Q variants at 0 stock and 0 idle
+parts, with no Select button on any** — there is no substitute to pick. So the
+quote uses **`assembly/touchid-v3-BOM-no-U1.csv`**, a 19-line file that is
+byte-identical to the main BOM minus the U1 row. JLC confirms the intent
+explicitly on upload: *"U1 designator don't exist in the BOM file"* → Continue.
+
+**When the module returns**, re-upload the full `touchid-v3-BOM.csv` instead
+and U1 comes back. Nothing else changes.
+
+> **Every re-upload drops C5 again.** `C18164635` is in the file with 1.1 M in
+> stock, but JLC pre-fills its part search from the *comment* as
+> `10uF0603 0603`, matches nothing, and marks it "No Part Selected". Click
+> Search on that row, type **`C18164635`**, Select. First hit. The file is not
+> wrong — this is a JLC-side matcher quirk and it recurs every single upload.
 
 Assembly settings already chosen: Standard process, **Top side only** (all 46
 footprints are front-side), qty 5, edge rails added by JLCPCB, and **Confirm
