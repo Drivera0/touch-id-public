@@ -64,6 +64,7 @@ def rec(ok, name, detail="", blocker=True):
 
 t = open(BOARD, encoding="utf-8", errors="replace").read()
 nn = dict(re.findall(r'\(net (\d+) "([^"]*)"\)', t))
+_GND_ID = next((i for i, n in nn.items() if n == "GND"), None)
 
 # ---------------------------------------------------------------- 1 parse --
 try:
@@ -390,6 +391,45 @@ for _i, _a in enumerate(_PADS):
 _thin.sort(key=lambda s: float(s.split()[-1]))
 rec(not _thin, "16 hand-solder mask dam >= %.2f mm" % MASK_DAM_MIN,
     ", ".join(_thin[:4]) or "%d hand-soldered pads, thinnest dam clears JLC" % len(_HAND))
+
+# ------------------- 17 GROUND IS ACTUALLY CONNECTED -----------------------
+# The hole this closes: check 6 excludes GND by name, because during routing an
+# unpoured GND is normal and expected. The pour is a separate, later step -- and
+# it was never run. So the board passed 17/17 and "0 open connections" while all
+# 40 GND pads were connected to NOTHING: no pour, no GND track, no GND via.
+# A gate that cannot see a missing ground plane is not a gate.
+_zt = [z for z in re.finditer(r"\(zone(.*?)\n\t\)", t, re.S)
+       if "(keepout" not in z.group(1) and '"GND"' in z.group(1)]
+# vias and segments are multi-line blocks; a [^)]* regex matches neither and
+# reported "0 GND vias, 0 GND segs" on a board carrying 15 and 54. Parse them.
+def _count_gnd():
+    try:
+        import sexp as _s2
+        _r = _s2.parse(t)
+        _nm = {_s2.s(n[1]): (_s2.s(n[2]) if len(n) > 2 else "")
+               for n in _s2.kids(_r, "net")}
+        def _isg(o):
+            _n = _s2.kid(o, "net")
+            return _n is not None and _nm.get(_s2.s(_n[1])) == "GND"
+        return (sum(1 for v in _s2.kids(_r, "via") if _isg(v)),
+                sum(1 for g in _s2.kids(_r, "segment") if _isg(g)))
+    except Exception:
+        return -1, -1
+_gv, _gs = _count_gnd()
+_gnd_bad = []
+if not _zt:
+    _gnd_bad.append("no filled GND zone on any layer")
+if _gv == 0 and _gs == 0 and not _zt:
+    _gnd_bad.append("no GND copper of any kind")
+# the authority on whether the fill actually reaches the pads
+_cc = run(os.path.join(KRT, "py_router", "check_connected.py"), BOARD, cwd=KRT, env=env)
+if "ALL NETS FULLY CONNECTED" not in _cc:
+    _m2 = re.search(r"^  GND \(net \d+\):(.*?)(?=\n  \w|\Z)", _cc, re.S | re.M)
+    if _m2 or re.search(r"^    GND \(\d+ pads\)", _cc, re.M):
+        _gnd_bad.append("check_connected reports GND NOT fully connected")
+rec(not _gnd_bad, "17 ground plane is connected",
+    "; ".join(_gnd_bad) or "%d filled GND zone(s), %d GND vias, %d GND segs, "
+    "check_connected: all nets connected" % (len(_zt), _gv, _gs))
 
 prov = []
 # BT1 no longer belongs here. The board never depended on VARTA's tab geometry:

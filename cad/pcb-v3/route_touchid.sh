@@ -53,6 +53,28 @@ python3 /tmp/strip.py "$T2" "$OUT"
 echo "nudge — one via off the clearance limit"
 python3 "$D/nudge.py" "$OUT" 8.95 -4.55 9.00 -4.55 || true
 
+# ---------------------------------------------------------------------------
+# STEP 4 - THE GROUND PLANE. Do not skip this; the board is inert without it.
+# Signals were routed with GND deliberately excluded ("pour last", the normal
+# order). If you stop here you get a board with 0 open connections and FORTY
+# GND pads connected to nothing -- which is exactly what happened, and it
+# passed every check, because check 6 excludes GND by name.
+# ---------------------------------------------------------------------------
+cp "$D/pcb-v3.kicad_pro" "$OUT%.kicad_pcb".kicad_pro 2>/dev/null || true
+T3=$(mktemp /tmp/tid3.XXXX.kicad_pcb); cp "$D/pcb-v3.kicad_pro" "${T3%.kicad_pcb}.kicad_pro"
+echo "step 4a - pour GND on F.Cu / In2.Cu / B.Cu"
+PYTHONPATH="${PYTHONPATH:-}:$KRT" python3 "$KRT/py_router/route_planes.py" "$OUT" \
+  --output "$T3" --overwrite --nets GND GND GND --plane-layers F.Cu In2.Cu B.Cu \
+  --via-size 0.6 --via-drill 0.3 --track-width 0.127 --clearance 0.10 \
+  --no-fix-drc-settings --fab-tier standard --fab-overrides "$FLOOR"
+
+# route_planes lays the plane but places NO taps, and the route step that would
+# weld them rips other nets to do it (its own improvement gate rejected that:
+# 5 nets broken to gain 1). So the taps go in deterministically.
+echo "step 4b - weld every GND pad to the plane"
+python3 "$D/gnd_taps.py" "$T3" "$OUT"
+
 cp "$D/pcb-v3.kicad_pro" "$D/pcb-v3-handoff.kicad_pro"   # rules MUST ship with it
 echo
 echo "now run:  python preflight.py pcb-v3-handoff.kicad_pcb"
+echo "  (check 17 is the one that proves ground actually exists)"
