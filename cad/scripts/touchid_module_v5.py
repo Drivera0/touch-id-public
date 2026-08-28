@@ -343,7 +343,28 @@ seat_z0 = seat_z1 = None
 # (+-7.60, 2.90 / 4.40 / 5.90).
 collar_z0 = lip_h                       # 2.90 — top-tier cavity starts here
 collar_z1 = body_h - top_t              # 5.16 — the bore starts here
-collar_od = body_w - 2 * wall_t         # 16.77
+# collar_od WAS body_w - 2*wall_t = 16.77, which is EXACTLY the top-tier cavity
+# width. That made the arc perfectly TANGENT to the cavity wall, so the union
+# below joined two coincident surfaces along a line instead of through a
+# volume -- and the exported STL carried two NON-MANIFOLD edges because of it,
+# at (0, +-8.385) spanning z 2.90..5.16, each shared by four faces instead of
+# two. No holes, no gaps: a closed mesh with two bad edges.
+#
+# Growing the arc by 0.2 mm gives the boolean a real volume to work with, and
+# the mesh comes out watertight with zero non-manifold edges.
+#
+# BE HONEST ABOUT THE COST: this is NOT a pure topology change. The cavity is
+# RECTANGULAR and the collar is a CIRCULAR arc, so the two only touch at
+# exactly +-Y. Everywhere else across the +-45 deg span the extra radius adds
+# material into open cavity, not into the wall -- volume goes 1101.53 ->
+# 1111.44 mm^3, about +9.9 mm^3.
+#
+# That material collides with nothing: all eight boolean checks still pass, it
+# sits above the MCU (which ends at z 2.05) and outside the cell pocket (ID is
+# unchanged at 12.50). And it lands as a skirt at the collar/wall junction,
+# which is one of the places JLC's DFM flagged as thin -- so it helps there.
+collar_wall_bite = 0.20
+collar_od = body_w - 2 * wall_t + 2 * collar_wall_bite   # 17.17
 collar_half_ang = 45.0
 
 def _collar(deg_mid):

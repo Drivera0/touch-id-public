@@ -28,6 +28,44 @@ one-off 20 mm part.
 Resin is the right process regardless: the sensor window is **Ø15.60 for a
 Ø15.50 barrel — 0.10 mm diametral clearance** — which FDM cannot hold.
 
+## The mesh had a real defect — fixed at source, not in Fusion
+
+The exported STL was **not watertight**: 2 **non-manifold edges**, each shared
+by four faces instead of two, at `(0, ±8.385)` spanning `z 2.90 … 5.16`.
+
+**There were no holes and no gaps** — 0 boundary edges, 1 closed body. What
+looks like holes in a viewer is the deliberate geometry: the ±X wire windows,
+the open back cavity, the sensor bore.
+
+**Cause:** `collar_od` was `body_w - 2*wall_t` = **16.77**, which is *exactly*
+the top-tier cavity width. The collar arc was therefore perfectly **tangent**
+to the cavity wall, and the union joined two coincident surfaces along a line
+rather than through a volume. The coordinates gave it away — 8.385 is
+16.77 / 2, and 2.90 → 5.16 is exactly `collar_z0 → collar_z1`.
+
+**Fix:** grow the arc 0.2 mm so the boolean has real overlap.
+
+```
+watertight            : True      (was False)
+hole edges            : 0         (unchanged — there never were any)
+non-manifold edges    : 0         (was 2)
+volume                : 1111.44 mm³  (was 1101.53)
+```
+
+All eight boolean clearance checks still pass.
+
+> **This was fixed in `touchid_module_v5.py`, deliberately not in Fusion.**
+> The housing is *generated output* from a parametric CadQuery script. Patching
+> the mesh by hand would have desynchronised the STL from its source, and the
+> next run of the script would have silently reintroduced the defect.
+
+**It is not a free change.** The cavity is rectangular and the collar is a
+circular arc, so they only touch at ±Y; across the rest of the ±45° span the
+extra radius adds material into open cavity, hence **+9.9 mm³**. It collides
+with nothing — above the MCU, outside the unchanged Ø12.50 cell pocket — and
+it happens to thicken the collar/wall junction, one of the places flagged thin
+below.
+
 ## The model is confirmed correct
 
 JLC's viewer independently measured **volume 1101.53 mm³** against the
