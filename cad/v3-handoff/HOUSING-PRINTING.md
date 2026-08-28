@@ -117,20 +117,44 @@ This is not a taper artifact and it is not local to one corner — it is **all
 four**, by construction. It is also the honest explanation for JLC's red
 heatmap regions, which I initially and wrongly put down to fillet tapering.
 
-### The fix
+### FIXED — cavity corners filleted r1.6 (v5.1)
 
-**Fillet the cavity's inner corners.** Pulling the inner corner back restores
-wall without touching `wall_t`, so it costs no cavity width on the flats where
-U1 actually needs it:
+Measured after, at the same z = 1.5:
 
-> to reach 0.8 mm at the corner, the inner corner must move from 12.690 to
-> 12.040 along the diagonal → a cavity corner radius of about **1.6 mm**.
+| direction | before | after |
+|---|---|---|
+| −x / +x flat | 0.800 | 0.795 |
+| −y / +y flat | 0.795 | 0.790 |
+| **corner −x−y** (ear) | **0.150** | **0.810** |
+| **corner +x−y** (boss) | 0.725* | **1.050** |
+| **corner −x+y** (boss) | 0.725* | **1.050** |
+| **corner +x+y** (plain) | **0.300** | **0.960** |
 
-Safe to do: U1 spans x −6.05…4.45, y −6.75…8.75, and its nearest corner is
-~4.5 mm clear of the cavity corner at (8.98, 8.98), so a 1.6 mm corner fillet
-cannot touch it. It also adds material around the M1.2 screw bosses at
-(±8.10, ∓8.10), which sit on that same diagonal — so it reinforces the bosses
-for free.
+\* those two were reading the boss, not the wall.
+
+**Worst wall anywhere is now 0.790 mm, up from 0.150. Nothing under 0.5.**
+Mesh still watertight, 0 holes, 0 non-manifold edges, 1 body. All eight
+boolean clearance checks pass. Volume 1113.03 → **1117.84 mm³**.
+
+**It had to be fixed in the right place.** The cavity is cut **twice** — once
+when the interior is first hollowed, and again in the v4 "re-cut so the bar
+cannot fill the corner". Filleting only the *re-cut* fixed three corners and
+left the fourth at 0.300 mm, because a later cut can only remove material,
+never restore it: the three that improved had the mounting arm or a screw boss
+unioned into them afterwards, which refilled them. The plain +x+y corner had
+nothing added. The fillet now lives on the **first** cut.
+
+Costs nothing where it matters: `wall_t` stays 0.8 on the flats, U1's nearest
+corner is ~4.5 mm clear of the cavity corner, and the extra material lands
+around the M1.2 bosses at (±8.10, ∓8.10) — so the bosses are reinforced for
+free, which was the other thing worth doing.
+
+### Still worth knowing before you print
+
+The mounting-ear diagonal reads **0.810 mm of wall, then 2.0 mm of air, then
+the ear**. That air is the **M2 clearance hole** (Ø2.0 centred at d = 13.84,
+spanning 12.84 → 14.84), not a void — scanning 2 mm off the diagonal shows
+4.75 mm of continuous material. It fooled me once; don't let it fool you.
 
 ### What this means
 

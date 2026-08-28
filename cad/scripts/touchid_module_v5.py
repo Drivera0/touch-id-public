@@ -250,12 +250,29 @@ except Exception as e:
 outline_prism = body
 
 # stepped interior cavity (bigger in the lip tier for the MCU module)
+#
+# THE CORNERS ARE FILLETED HERE, and it has to be here rather than only in the
+# v4 re-cut further down. The cavity is cut TWICE, and a later cut can only
+# REMOVE material -- it can never put a sharp corner back. Filleting only the
+# re-cut fixed three corners and missed the fourth, because the three that
+# improved had the mounting arm or a screw boss unioned into them afterwards,
+# which refilled them; the plain +x+y corner had nothing added and stayed at
+# 0.300 mm.
+cav_corner_r = 1.60
 cav_lo = (lip_w - 2 * wall_t, lip_l - 2 * wall_t)      # z 0..lip_h
 cav_hi = (body_w - 2 * wall_t, body_l - 2 * wall_t)    # z lip_h..body_h-top_t
-body = (body.faces("<Z").workplane(invert=True)
-        .rect(*cav_lo).cutBlind(lip_h))
-body = (body.faces("<Z").workplane(invert=True, offset=lip_h)
-        .rect(*cav_hi).cutBlind(body_h - top_t - lip_h))
+
+
+def _cavity_cutter(w, h, z0, dz):
+    """Rounded-corner cavity prism. See the wall-thickness note below."""
+    return (cq.Workplane("XY").workplane(offset=z0)
+            .rect(w, h).extrude(dz)
+            .edges("|Z").fillet(cav_corner_r))
+
+
+body = body.cut(_cavity_cutter(cav_lo[0], cav_lo[1], -0.5, lip_h + 0.5))
+body = body.cut(_cavity_cutter(cav_hi[0], cav_hi[1], lip_h,
+                               body_h - top_t - lip_h))
 
 # sensor bore: through-window all the way, then a counterbore cut DOWN from the
 # TOP face so the bezel drops in from outside and lands on the shoulder.
@@ -327,10 +344,29 @@ body = body.union(arm)
 # --- v4 FIX: the ear bar reaches radius 9.0 along the corner diagonal, which is
 # inside the cavity footprint. Re-cut both cavity tiers so the bar cannot fill
 # the corner and foul the ESP32 module.
-body = (body.faces("<Z").workplane(invert=True)
-        .rect(*cav_lo).cutBlind(lip_h))
-body = (body.faces("<Z").workplane(invert=True, offset=lip_h)
-        .rect(*cav_hi).cutBlind(body_h - top_t - lip_h))
+#
+# v5.1: the cavity corners are now FILLETED, and that is a structural fix, not
+# cosmetic. Measured on the previous build at z = 1.5:
+#
+#     wall along -x flat side      0.800 mm      <- the intended wall_t
+#     wall along -y flat side      0.795 mm
+#     wall along the -45 diagonal  0.150 mm      <- the corners
+#
+# The outer lip is a ROUNDED square, so its corner radius (~2.38) pulls the
+# outside surface INWARD at each corner, while the inner cavity was a SHARP
+# rectangle whose corner pokes OUTWARD. They converge: outer corner at
+# d = 12.840 along the diagonal, inner at d = 12.690. That left 0.15 mm of
+# material on ALL FOUR corners, well inside JLCPCB's red (<0.5 mm) DFM band --
+# and it is the true cause of the red regions their thin-wall heatmap flagged.
+#
+# Rounding the INNER corner pulls it back to d = 12.040 and restores 0.80 mm.
+# Doing it on the inside costs nothing where it matters: wall_t stays 0.8 on
+# the flats, U1's nearest corner is ~4.5 mm clear of the cavity corner, and the
+# extra material lands around the M1.2 bosses at (+-8.10, -+8.10), which sit on
+# that same diagonal -- so the bosses get reinforced for free.
+body = body.cut(_cavity_cutter(cav_lo[0], cav_lo[1], -0.5, lip_h + 0.5))
+body = body.cut(_cavity_cutter(cav_hi[0], cav_hi[1], lip_h,
+                               body_h - top_t - lip_h))
 
 # ---- v5: no cell seat ledges ----
 # The cell sits on the module lid through cell_insulator_t. Nothing to build.
