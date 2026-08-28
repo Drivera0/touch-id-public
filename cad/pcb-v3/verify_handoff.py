@@ -10,7 +10,7 @@ not reproduce in the other.
 
 Exit code is non-zero if anything disagrees.
 """
-import csv, math, os, sys
+import csv, glob, math, os, re, sys
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)) or ".")
 import sexp
 
@@ -27,6 +27,28 @@ k, kd, s, f = sexp.kids, sexp.kid, sexp.s, sexp.f
 fails, notes = [], []
 def check(ok, what, detail=""):
     (notes if ok else fails).append(("PASS" if ok else "FAIL", what, detail))
+
+# ---- 0. the CPL must live in the GERBER's coordinate space ----------------
+# This is the check that matters most and the one that was missing. A CPL can
+# be internally perfect and still be offset from the copper, and then EVERY
+# part is placed wrong by the same amount. JLCPCB's viewer found this on the
+# real upload -- it drew the parts floating beside the board and offered to
+# "align automatically". The old CPL was corner-based (0..19.30) while the
+# gerbers are centred (-9.65..+9.65), a 9.65 mm offset in both axes.
+#
+# So: read the outline out of Edge_Cuts.gbr and require every placement to sit
+# inside it. This deliberately does NOT re-derive the generator's formula --
+# comparing a formula to itself proves nothing.
+import glob
+GERB = os.path.join(HERE, "..", "v3-handoff", "gerbers")
+_edge = glob.glob(os.path.join(GERB, "*Edge_Cuts.gbr"))
+_gx = _gy = None
+if _edge:
+    _e = open(_edge[0], encoding="utf-8", errors="replace").read()
+    _px = [int(m.group(1)) / 1e6 for m in re.finditer(r"X(-?\d+)Y(-?\d+)D0[12]\*", _e)]
+    _py = [int(m.group(2)) / 1e6 for m in re.finditer(r"X(-?\d+)Y(-?\d+)D0[12]\*", _e)]
+    if _px:
+        _gx = (min(_px), max(_px)); _gy = (min(_py), max(_py))
 
 # ---- 1. board outline, measured, not assumed ------------------------------
 xs, ys = [], []
@@ -50,7 +72,8 @@ check(abs(W - 19.30) < 0.02 and abs(H - 19.30) < 0.02,
 # KiCad is Y-DOWN. Written as a corner translation, deliberately NOT as the
 # "+9.65 / 9.65-" form used by make_bom_cpl.py.
 def to_jlc(x, y):
-    return (x - x0), (y1 - y)
+    """KiCad Y-DOWN -> gerber/JLC Y-UP, in the gerbers' own coordinate space."""
+    return x, -y
 
 board, unref = {}, []
 for fp in k(root, "footprint"):
@@ -95,7 +118,7 @@ for r in rows:
                        % (ref, r["Rotation"], board[ref]["rot"]))
     if r["Layer"] != board[ref]["side"]:
         bad_side.append("%s: file %s vs board %s" % (ref, r["Layer"], board[ref]["side"]))
-    if not (0 <= gx <= W and 0 <= gy <= H):
+    if not (x0 - 0.001 <= gx <= x1 + 0.001 and x0 - 0.001 <= gy <= x1 + 0.001):
         outside.append("%s at (%.3f,%.3f)" % (ref, gx, gy))
 
 check(not bad_xy, "every CPL coordinate re-derives",
@@ -105,15 +128,33 @@ check(not bad_rot, "every CPL rotation matches the board",
 check(not bad_side, "every CPL layer matches the board",
       "; ".join(bad_side[:4]) if bad_side else "all %s" % rows[0]["Layer"])
 check(not outside, "no part sits outside the outline",
-      "; ".join(outside[:4]) if outside else "all within 0..%.2f" % W)
+      "; ".join(outside[:4]) if outside else "all within %.2f..%.2f" % (x0, x1))
 
 # ---- 4. corner sanity: the transform must map the corners exactly ----------
-c0 = to_jlc(x0, y1)          # lower-left  in JLC terms
+c0 = to_jlc(x0, y1)          # lower-left  in gerber terms
 c1 = to_jlc(x1, y0)          # upper-right
-check(abs(c0[0]) < 1e-9 and abs(c0[1]) < 1e-9
-      and abs(c1[0] - W) < 1e-9 and abs(c1[1] - H) < 1e-9,
-      "origin transform maps the corners",
-      "(%.3f,%.3f) and (%.3f,%.3f)" % (c0 + c1))
+check(abs(c0[0] - x0) < 1e-9 and abs(c1[0] - x1) < 1e-9
+      and abs(c1[1] - c0[1] - H) < 1e-9,
+      "origin transform preserves the gerber frame",
+      "corners (%.3f,%.3f) and (%.3f,%.3f); board %.2f x %.2f"
+      % (c0 + c1 + (W, H)))
+
+# ---- 4b. THE ORIGIN CHECK -------------------------------------------------
+if _gx is None:
+    check(False, "CPL sits inside the gerber outline",
+          "no Edge_Cuts.gbr found -- CANNOT VERIFY, treat as unproven")
+else:
+    _out = []
+    for r in rows:
+        gx, gy = mm(r["Mid X"]), mm(r["Mid Y"])
+        if not (_gx[0] <= gx <= _gx[1] and _gy[0] <= gy <= _gy[1]):
+            _out.append("%s (%.3f,%.3f)" % (r["Designator"], gx, gy))
+    check(not _out,
+          "CPL sits inside the gerber outline",
+          ("%d placement(s) OUTSIDE the board in gerber space: %s"
+           % (len(_out), "; ".join(_out[:3]))) if _out else
+          "all %d placements inside X %.2f..%.2f  Y %.2f..%.2f read from Edge_Cuts.gbr"
+          % (len(rows), _gx[0], _gx[1], _gy[0], _gy[1]))
 
 # ---- 5. BOM <-> CPL must cover the same designators ------------------------
 bom = list(csv.DictReader(open(BOM, encoding="utf-8")))

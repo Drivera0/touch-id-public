@@ -125,6 +125,50 @@ Everything else was already correct at JLC's 4-layer defaults: 1 oz outer /
 tested, order mark removed, and every exotic option (gold fingers, castellated
 holes, edge plating, backdrill…) off.
 
+## PAUSED at the assembly step, 2026-08-28 — waiting on U1
+
+A full **PCB + assembly** quote is built and auto-saved in JLCONE as project
+**`touchid-v3-jlcpcb`**. Nothing was ordered. Reopen it when the module is back.
+
+**Where it got to:** 20 BOM lines detected, **19 confirmed**, every one matched
+to exactly the LCSC part number in `assembly/touchid-v3-BOM.csv`. Only U1 is
+outstanding, and JLC's own parts search shows **all 19 MDBT50Q variants at 0
+stock and 0 idle parts, with no Select button on any of them** — there is no
+substitute to pick. That is the same answer the API gave, now from inside the
+order flow.
+
+Assembly settings already chosen: Standard process, **Top side only** (all 46
+footprints are front-side), qty 5, edge rails added by JLCPCB, and **Confirm
+Parts Placement = Yes** — that last one is worth keeping, because it is the only
+control that catches a U1–U4 rotation error before five boards are built wrong.
+The 72-hour auto-confirm default was left on; there is a "do not confirm
+automatically" checkbox if you would rather production waited indefinitely.
+
+> **Standard PCBA panelises the board to 71.3 × 71.3 mm** (JLC requires ≥70 mm
+> per side) and adds edge rails. So the boards arrive attached to a rail, and
+> **how they are separated matters here**: the housing lip is 19.54 mm against a
+> 19.50 mm worst-case board, so a break-off nub of even 0.1 mm would stop it
+> fitting. Either take JLC's Depaneling Service or plan to file the edges flat.
+
+### Two BOM faults JLCPCB found that none of my checks did
+
+**U3 and U4 arrived on two separate lines.** They are the same TPS7A2033DQNR,
+but the netlist describes them differently ("sensor rail" vs "switched
+sensor-MCU rail") and `make_bom_cpl.py` grouped by that description. JLC gave
+the quantity to one line and **zero** to the other. Fixed at source — a BOM line
+is one *purchasable item*, so it now groups by part number: 21 lines → 20, and
+U3,U4 is one line at qty 10.
+
+`verify_handoff.py` passed both before and after, because it only checks that
+BOM and CPL cover the same **designators** — which was true either way. One part
+spread across two lines was outside everything I had written.
+
+**C5 came back "No Part Selected"** despite `C18164635` being in the file with
+1.1 M in stock. Its search box had been pre-filled from the comment as
+`10uF0603 0603`, which matches nothing — JLC fell back to a text search instead
+of using the part number in the row. Searching `C18164635` found it first hit.
+**No file change was needed; the row was always correct.**
+
 ### Board outline tolerance: ±0.2 mm is deliberate, do not "improve" it
 
 JLC quotes ±0.2 mm (Regular) on the outline. That was designed for: the board

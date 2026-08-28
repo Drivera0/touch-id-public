@@ -18,11 +18,27 @@ source, and the file says so per line.
 
 TWO TRAPS, BOTH OF WHICH HAVE RUINED REAL BOARDS
 ------------------------------------------------
-1. ORIGIN. KiCad's file is Y-DOWN with this board centred on (0,0); JLC wants
-   Y-UP from the board's lower-left corner. Transform applied here:
-       X = x + 9.65        Y = 9.65 - y
-   Verified against the corners: file(-9.65,+9.65) -> (0,0) and
-   file(+9.65,-9.65) -> (19.30,19.30).
+1. ORIGIN. **The CPL must live in the SAME coordinate space as the gerbers**,
+   because that is the only thing the fab can align it against. Getting this
+   wrong does not corrupt one part, it moves EVERY part by the same offset.
+
+   This file used to emit "lower-left corner" coordinates, X = x + 9.65 /
+   Y = 9.65 - y, giving a tidy 0..19.30 range. That convention is common and
+   is what JLC's docs describe -- but it is only correct if the GERBERS were
+   also plotted from that origin. Ours were not: they were plotted with
+   "use drill/place file origin" OFF, so the board sits at its native KiCad
+   coordinates, **centred on (0,0), spanning -9.65..+9.65**.
+
+   JLCPCB's viewer caught it: it drew every component floating off the board
+   and offered to "automatically align" them. The offset was exactly the
+   9.65 mm half-width, in both axes.
+
+   So the transform is now just the Y flip that KiCad's Y-DOWN file requires:
+       X = x            Y = -y
+   which lands in -9.65..+9.65, the same space Edge_Cuts.gbr occupies.
+   verify_handoff.py no longer re-derives a formula; it checks the CPL against
+   the OUTLINE READ OUT OF THE GERBER, which is the thing that actually has to
+   agree.
 
 2. ROTATION. The number written here is KiCad's footprint angle. **JLC's
    expected orientation for a given package frequently differs**, which is the
@@ -137,8 +153,8 @@ def main():
         lay = kd(fp, "layer")
         side = "Bottom" if lay and s(lay[1]).startswith("B.") else "Top"
         rows.append(dict(ref=ref,
-                         X=round(x + HALF, 4),        # -> lower-left origin
-                         Y=round(HALF - y, 4),        # -> Y up
+                         X=round(x, 4),               # gerber space, see above
+                         Y=round(-y, 4),              # KiCad Y-down -> Y up
                          rot=round(rot % 360, 2),
                          side=side,
                          value=val.get(ref, "")))
