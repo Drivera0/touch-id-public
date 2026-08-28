@@ -1,0 +1,16 @@
+Info: X scale constrained.
+Info: Y scale constrained.
+Plotted to 'C:\Users\drive\Documents\Obsidian Vaults\Foundation\touchid\cad\v3-handoff\gerbers\pcb-v3-handoff-F_Cu.gbr'.
+Plotted to 'C:\Users\drive\Documents\Obsidian Vaults\Foundation\touchid\cad\v3-handoff\gerbers\pcb-v3-handoff-In1_Cu.gbr'.
+Plotted to 'C:\Users\drive\Documents\Obsidian Vaults\Foundation\touchid\cad\v3-handoff\gerbers\pcb-v3-handoff-In2_Cu.gbr'.
+Plotted to 'C:\Users\drive\Documents\Obsidian Vaults\Foundation\touchid\cad\v3-handoff\gerbers\pcb-v3-handoff-B_Cu.gbr'.
+Plotted to 'C:\Users\drive\Documents\Obsidian Vaults\Foundation\touchid\cad\v3-handoff\gerbers\pcb-v3-handoff-F_Paste.gbr'.
+Plotted to 'C:\Users\drive\Documents\Obsidian Vaults\Foundation\touchid\cad\v3-handoff\gerbers\pcb-v3-handoff-B_Paste.gbr'.
+Plotted to 'C:\Users\drive\Documents\Obsidian Vaults\Foundation\touchid\cad\v3-handoff\gerbers\pcb-v3-handoff-F_Silkscreen.gbr'.
+Plotted to 'C:\Users\drive\Documents\Obsidian Vaults\Foundation\touchid\cad\v3-handoff\gerbers\pcb-v3-handoff-B_Silkscreen.gbr'.
+Plotted to 'C:\Users\drive\Documents\Obsidian Vaults\Foundation\touchid\cad\v3-handoff\gerbers\pcb-v3-handoff-F_Mask.gbr'.
+Plotted to 'C:\Users\drive\Documents\Obsidian Vaults\Foundation\touchid\cad\v3-handoff\gerbers\pcb-v3-handoff-B_Mask.gbr'.
+Plotted to 'C:\Users\drive\Documents\Obsidian Vaults\Foundation\touchid\cad\v3-handoff\gerbers\pcb-v3-handoff-Edge_Cuts.gbr'.
+Created Gerber job file 'C:\Users\drive\Documents\Obsidian Vaults\Foundation\touchid\cad\v3-handoff\gerbers\pcb-v3-handoff-job.gbrjob'.
+Error: Board stackup settings not up to date.
+Info: Done.

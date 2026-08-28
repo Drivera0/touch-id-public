@@ -656,12 +656,35 @@ rec(not _unfilled, "18 copper zones are filled",
 # Not visible in any 2D check -- thickness is not in the copper. housing v5 is
 # built around a 1.20 mm board; KiCad AND JLCPCB both default 4-layer to 1.60.
 # Ordering the default gives a board 0.40 mm too thick for its own housing.
-_m3 = re.search(r"\(stackup(.*?)\n\t\t\)", t, re.S)
-if not _m3:
+# LAMINATE vs FINISHED, and the difference is not pedantry.
+# The number you pick on JLC's order form, and the number housing v5 was built
+# around, is the LAMINATE: copper + dielectric. Solder mask is applied on top of
+# it. Summing every (thickness) in the stackup adds the two 0.01 mm mask coats
+# and reads 1.22 -- which is a real measurement of the finished part, but it is
+# NOT the thing being ordered, and blocking on it would block on a 0.02 mm
+# bookkeeping difference inside a fab tolerance of roughly +-0.13 mm.
+#
+# This first bit only after KiCad itself wrote the stackup: our generated block
+# listed copper and dielectric only, so the old whole-sum was accidentally right
+# and silently became wrong the moment the file went through the GUI.
+_setup19 = _sx.kid(_sx.parse(t), "setup")
+_st19 = _sx.kid(_setup19, "stackup") if _setup19 is not None else None
+if _st19 is None:
     rec(False, "19 board thickness vs the housing",
         "no (stackup) block: thickness undeclared, so the fab uses its default 1.6 mm")
 else:
-    _tot = sum(float(x) for x in re.findall(r"\(thickness ([\d.]+)\)", _m3.group(1)))
+    _lam = _mask = 0.0
+    for _L in _sx.kids(_st19, "layer"):
+        _ty = _sx.kid(_L, "type")
+        _th = _sx.kid(_L, "thickness")
+        if _th is None:
+            continue
+        _tyv = (_sx.s(_ty[1]) if _ty else "").lower()
+        _v = _sx.f(_th[1])
+        if "mask" in _tyv:
+            _mask += _v
+        elif _tyv in ("copper", "prepreg", "core") or "dielectric" in _tyv:
+            _lam += _v
     _want = None
     try:
         _hs = open(os.path.join(HERE, "..", "scripts", "touchid_module_v5.py"),
@@ -670,15 +693,13 @@ else:
         _want = float(_hm.group(1)) if _hm else None
     except Exception:
         pass
-    _ok3 = _want is not None and abs(_tot - _want) < 0.005
+    _ok3 = _want is not None and abs(_lam - _want) < 0.005 and _lam > 0
     rec(_ok3, "19 board thickness vs the housing",
-        ("stackup %.3f mm vs housing pcb_t_ref %s -- MISMATCH"
-         % (_tot, _want)) if not _ok3 else
-        "%.2f mm, matches housing pcb_t_ref (SELECT THIS EXPLICITLY WHEN ORDERING)")
-    if _ok3:
-        results[-1] = (results[-1][0], results[-1][1],
-                       "%.2f mm = housing pcb_t_ref. MUST be chosen on the order "
-                       "form; JLC defaults 4-layer to 1.6" % _tot)
+        ("laminate %.4f mm vs housing pcb_t_ref %s -- MISMATCH" % (_lam, _want))
+        if not _ok3 else
+        "laminate %.2f mm = housing pcb_t_ref (+%.2f mm mask -> %.2f finished, "
+        "inside fab tolerance). MUST be chosen on the order form; JLC defaults "
+        "4-layer to 1.6" % (_lam, _mask, _lam + _mask))
 
 # ------------------- 20 no dangling track ends (net antennae) --------------
 # ALTIUM FOUND THIS AND I COULD NOT. Its Net Antennae rule flagged a GND stub

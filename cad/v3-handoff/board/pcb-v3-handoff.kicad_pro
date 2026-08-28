@@ -278,7 +278,7 @@
     "pinned_symbol_libs": []
   },
   "meta": {
-    "filename": "pcb-v3.kicad_pro",
+    "filename": "pcb-v3-handoff.kicad_pro",
     "version": 3
   },
   "net_settings": {
@@ -289,7 +289,7 @@
         "microvia_drill": 0.1,
         "name": "Default",
         "pcb_color": "rgba(0, 0, 0, 0.000)",
-        "priority": -1,
+        "priority": 2147483647,
         "schematic_color": "rgba(0, 0, 0, 0.000)",
         "track_width": 0.2,
         "tuning_profile": "",
@@ -302,7 +302,7 @@
         "microvia_drill": 0.1,
         "name": "Power",
         "pcb_color": "rgba(0, 0, 0, 0.000)",
-        "priority": -1,
+        "priority": 0,
         "schematic_color": "rgba(0, 0, 0, 0.000)",
         "track_width": 0.4,
         "tuning_profile": "",
@@ -350,7 +350,7 @@
     "last_paths": {
       "idf": "",
       "netlist": "",
-      "plot": "",
+      "plot": "C:/Users/drive/Documents/Obsidian Vaults/Foundation/touchid/cad/v3-handoff/gerbers",
       "specctra_dsn": "",
       "step": "",
       "vrml": ""

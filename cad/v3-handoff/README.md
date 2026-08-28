@@ -5,15 +5,15 @@ type: project
 
 # TouchID v3 — handoff
 
-Verified 2026-08-28. **Gerbers are not here yet** — they are the next step, and
-they must be exported from `board/pcb-v3-handoff.kicad_pcb`, not from anything
-older.
+Verified 2026-08-28. **`touchid-v3-jlcpcb.zip` is the file you upload.**
 
 Everything here is a **copy**. The originals stay in `cad/pcb-v3/` and
 `cad/exports/` where the build scripts expect them. `reports/SHA256SUMS.txt`
 proves these copies are the files that were graded.
 
 ```
+touchid-v3-jlcpcb.zip   <-- UPLOAD THIS. 11 gerbers + 2 drill files + job file
+gerbers/    the same files loose, for inspection
 board/      pcb-v3-handoff.kicad_pcb   the board
             pcb-v3-handoff.kicad_pro   THE RULES — must travel with the board
 assembly/   touchid-v3-BOM.csv         21 lines, every one sourced
@@ -21,7 +21,8 @@ assembly/   touchid-v3-BOM.csv         21 lines, every one sourced
 housing/    touchid_housing_v5_diagonal.step / .stl    the part you print
             touchid_assembly_v5_diagonal.step          housing + PCB + U1 + cell + sensor
             touchid_pcb_v5_diagonal.step               board solid, for fit checks
-reports/    VERIFICATION.txt           full output of all four checkers
+reports/    VERIFICATION.txt           full output of all five checkers
+            plot-log.txt               KiCad's own plot log
             SHA256SUMS.txt
 ```
 
@@ -37,7 +38,41 @@ reports/    VERIFICATION.txt           full output of all four checkers
 | `preflight.py` | **21 checks, 0 blockers**, 2 warnings |
 | `verify_handoff.py` | **13 checks, 0 failures** — BOM/CPL re-derived from the board by different code |
 | `verify_sourcing.py` | **25/25 lands** match the package actually bought |
+| `verify_gerbers.py` | **12 checks, 0 failures** — plotted output vs the board |
 | `touchid_module_v5.py` | **8/8 boolean checks = 0.0000 mm³**, housing zmin ≥ 0 |
+
+## What the gerber check actually proves
+
+Not that the files exist — that they are *this* board:
+
+* **67 drill hits, 67 board holes**, and the diameters agree exactly:
+  `{0.30: 65, 1.30: 2}` in the drill files, `{0.30: 65, 1.30: 2}` on the board.
+* **Outline 19.300 × 19.300 mm**, read back out of `Edge_Cuts.gbr`.
+* **No layer silently empty.** This is the failure that produces a board with a
+  missing plane and no error anywhere: F.Cu 3631 draws, In1.Cu 158, In2.Cu 2462,
+  B.Cu 3298. In1.Cu is low because it is the only copper layer that is *not* a
+  ground plane — signals only.
+* All 11 layers metric, 4.6 format, positive image, unmirrored.
+
+## Two things KiCad flagged, and what they were
+
+**"Board stackup settings not up to date"** on the first plot. Our stackup was
+written by script and listed only copper and dielectric; KiCad expects the mask,
+paste and silk entries too. Accepting KiCad's completed stackup added them and
+the second plot ran with **0 errors, 0 warnings**. The dielectrics were not
+touched — copper + dielectric is still exactly **1.2000 mm**.
+
+That is why the job file says **1.22 mm**: KiCad reports the *finished* part,
+1.20 laminate + 0.02 of solder mask. **You still order 1.2 mm** — that is the
+laminate, and 0.02 mm is far inside the fab's own ±0.13 mm tolerance. `preflight`
+check 19 now separates the two instead of summing everything, which is what made
+it briefly report a blocker that was pure bookkeeping.
+
+**"Zone fills are out-of-date"** before the first plot. Expected: the pours were
+built by `route_planes.py` and `gnd_taps.py`, so KiCad has no fill hash of its
+own and will always say this. Refilled rather than plotting copper nothing had
+graded — then re-ran everything. Still 458 segments, 65 vias, 3 filled zones,
+0 unrouted.
 
 `verify_handoff.py` exists because `make_bom_cpl.py` grading its own output
 proves nothing. It re-derives the origin transform as a translation of the

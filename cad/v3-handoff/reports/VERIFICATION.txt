@@ -1,9 +1,9 @@
 TouchID v3 handoff — verification report
-generated 2026-08-28 21:01 UTC
+generated 2026-08-28 21:14 UTC
 
 ### sexp_check (parser sanity — ALWAYS first)
 pcb-v3-handoff.kicad_pcb
-  line endings : 0 CRLF, 11998 bare LF   <-- mixed, git will show a whole-file diff
+  line endings : 12021 CRLF, 0 bare LF
   PARSE OK     : 628 top-level children
   footprints 46   pads 134   segments 458   vias 65   zones 17
 
@@ -29,7 +29,7 @@ PREFLIGHT — pcb-v3-handoff.kicad_pcb
   PASS     16 hand-solder mask dam >= 0.25 mm 35 hand-soldered pads, thinnest dam clears JLC
   PASS     17 ground plane is connected       3 filled GND zone(s), 14 GND vias, 52 GND segs, check_connected: all nets connected
   PASS     18 copper zones are filled         3 zone(s), all carry fill geometry
-  PASS     19 board thickness vs the housing  1.20 mm = housing pcb_t_ref. MUST be chosen on the order form; JLC defaults 4-layer to 1.6
+  PASS     19 board thickness vs the housing  laminate 1.20 mm = housing pcb_t_ref (+0.02 mm mask -> 1.22 finished, inside fab tolerance). MUST be chosen on the order form; JLC defaults 4-layer to 1.6
   PASS     20 no dangling track ends          916 track ends, all land on copper of their own net
   PASS     21 every placed part has an LCSC code 29 placed designators, all sourced (20 distinct LCSC codes)
   WARN     21b JLC assembly stock (snapshot)  as of 2026-08-28: C5118826 stock=0 need=1/board -- RE-CHECK AT ORDER TIME
@@ -95,3 +95,23 @@ U4        1.008    0.820     5  C46459900   TI TPS7A2033DQNR, X2SON-4 1x1       
 
 2-terminal lands checked : 25
 package mismatches       : 0
+
+### verify_gerbers.py — plotted fab output vs the board
+==========================================================================
+GERBER VERIFICATION — plotted output vs the board
+==========================================================================
+  PASS  all 11 fabrication layers plotted            F_Cu, In1_Cu, In2_Cu, B_Cu, F_Mask, B_Mask, F_Silkscreen, B_Silkscreen, F_Paste, B_Paste, Edge_Cuts
+  PASS  no layer is empty that the board says should have copper 0 back-side footprints, so B_Paste legitimately empty; F_Cu=3631; In1_Cu=158; In2_Cu=2462; B_Cu=3298; F_Mask=109; B_Mask=27; F_Silkscreen=13; B_Silkscreen=200; F_Paste=99; Edge_Cuts=8
+  PASS  every layer is mm / 4.6 / positive / unmirrored 11/11 correct
+  PASS  Edge.Cuts outline is the 19.30 mm board      19.300 x 19.300 mm across 12 profile points (stroke width accounts for <=0.05)
+  PASS  all four copper layers carry substantial geometry F=3631 In1=158 In2=2462 B=3298 draws
+  PASS  drill file(s) present                        pcb-v3-handoff-NPTH.drl, pcb-v3-handoff-PTH.drl
+  PASS  drill hole count matches the board           gerbers 67 vs board 67  (65 vias + 0 PTH pads + 2 NPTH)
+  PASS  NPTH holes match the board                   drill NPTH 2 vs board 2
+  PASS  every drill diameter matches the board       gerbers {0.3: 65, 1.3: 2} vs board {0.3: 65, 1.3: 2}
+  PASS  job file declares 4 layers                   4
+  PASS  job file declares the 1.22 mm finished thickness 1.22 mm = 1.20 laminate + 0.02 mask. ORDER 1.2 mm.
+  PASS  job file lists all 11 layers                 11
+==========================================================================
+  0 FAILURE(S)
+==========================================================================
