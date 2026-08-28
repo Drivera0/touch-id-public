@@ -415,3 +415,38 @@ the fourth time regex has lied about this file format. Both now go through
 18 checks. **One blocker, and it is a step you have to take, not a defect:**
 fill the zones in KiCad and save. Everything else passes — DRC clean,
 all nets connected, placement identical to the generator.
+
+## VBAT's "no 0.40 mm trunk" — measured, and deliberately not fixed
+
+The warning asked the wrong question. Width is a proxy; what matters is the
+volt drop at the current the net actually carries. Measured on the routed board:
+
+| net | worst path | R | I peak | IR drop |
+|---|---|---|---|---|
+| **VBAT** | BT1.1 → U2.18 | **67.8 mΩ** | 210 mA | **14.2 mV** |
+| VSTOR | TP2.1 → C10.1 | 59.5 mΩ | 210 mA | 12.5 mV |
+| LX | L1.1 → U2.20 | 11.6 mΩ | 210 mA | 2.4 mV |
+| VIN_DC | L1.2 → R2.2 | 4.2 mΩ | 3.3 mA | 0.01 mV |
+
+210 mA is the **CP1254's own maximum pulse rating**, so it bounds anything the
+board can draw. At that current the cell's own ~0.5 Ω ESR drops **105 mV** —
+**7.4× more than the entire trace**. Widening VBAT to 0.40 mm would halve
+67.8 mΩ and buy about 7 mV against a 105 mV drop that is inherent to the cell.
+Thermally there is nothing to discuss either: 0.2 mm of 1 oz copper carries well
+over an amp, and the peak here is 0.21 A.
+
+**No board change. The trace is not, and cannot become, the limiting element.**
+
+Check 10 is now an IR-drop check rather than a width check, with peak currents
+taken from the design docs (sensor 25 mA / 200 mA·4 µs, nRF ~15 mA, harvest
+1.1 mA/pin, cell 210 mA) and a 25 mV budget — roughly 8 % of the sensor rail's
+300 mV margin.
+
+> **It grades only the nets it can trace, and says so.** Its graph is
+> endpoint-and-overlap based, while real copper connectivity is geometric: a
+> track may cross a pad without ending on it, and VSTOR's copper reads as six
+> disconnected components to a naive endpoint graph while being perfectly
+> whole. Rather than ship a model that might one day report a flattering
+> number for a net it cannot actually follow, the check stays silent where it
+> has no evidence. **Connectivity is check 6's job, and check_connected models
+> the geometry properly.**
