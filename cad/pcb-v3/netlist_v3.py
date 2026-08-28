@@ -162,8 +162,19 @@ rc("R2", "1k 0402", "HARV_2", "VIN_DC")
 rc("R3", "1k 0402", "HARV_3", "VIN_DC")
 
 # BQ25505 programming — all 0402 so they can be swapped by hand
-rc("ROV1", "5.6M 0402", "VBAT_OV_SET", "GND", "VBAT_OV = 1.5*1.21*13.1/5.6 = 4.246 V")
-rc("ROV2", "7.5M 0402", "VRDIV", "VBAT_OV_SET")
+# WAS 5.6M / 7.5M = 4.246 V, which OVERCHARGES THE CELL.
+# VARTA CP1254 A4 max charging voltage is 4.00 +-0.05 V, so 4.246 V is 246 mV
+# over the limit -- and it sits only 54 mV under the 4.30 V point where a PCM
+# trips on over-charge. That makes the safety device the de-facto regulator,
+# which the CoinPower handbook explicitly warns against.
+# 6.04M / 6.98M -> 3.912 V nominal, 3.955 V worst case with 1% parts:
+# under the cell's limit in every corner, and 345 mV below the PCM trip.
+# Costs ~10% of usable capacity (still ~60 days of autonomy) and BUYS cycle
+# life -- charging a Li-ion to a lower ceiling is the single biggest lever on
+# how many cycles it survives.
+rc("ROV1", "6.04M 0402 1%", "VBAT_OV_SET", "GND",
+   "VBAT_OV = 1.5*1.21*(1+6.98/6.04) = 3.912 V  (CP1254 limit 4.00)")
+rc("ROV2", "6.98M 0402 1%", "VRDIV", "VBAT_OV_SET")
 rc("ROK1", "4.53M 0402", "OK_PROG", "GND", "VBAT_OK falling = 3.12 V")
 rc("ROK2", "7.15M 0402", "OK_HYST", "OK_PROG")
 rc("ROK3", "1.33M 0402", "VRDIV", "OK_HYST", "VBAT_OK rising = 3.47 V")
@@ -176,8 +187,26 @@ rc("C4", "10nF 0402 low-leak", "VREF_SAMP", "GND", "CREF, 9-11 nF window")
 rc("C5", "10uF 0603", "VBAT", "GND", "CBAT bulk beside the cell")
 
 rc("C6", "1uF 0402", "SENSOR_3V3", "GND", "LDO input side of U3 is VSTOR; this is OUT")
-rc("C7", "22uF 0603", "SENSOR_3V3", "GND",
-   "holds the ZW0905's 200 mA / 4 us scan transient to 36 mV. 1.25 mm TALL.")
+# The REQUIREMENT is Hi-Link's "sensor-rail ripple < 200 mV" (DESIGN-SPEC 3).
+# The old note claimed 36 mV, but 36 mV was merely what a full 22 uF happens to
+# give -- it was never the spec, and quoting it hid how much margin there is.
+#
+#   200 mA x 4 us = 0.8 uC.  droop = 0.8 uC / C_effective
+#     C_eff 22 uF -> 36 mV      C_eff 8 uF -> 100 mV
+#     C_eff 4 uF  -> 200 mV  <- the vendor limit, the real floor
+#
+# THE PART MUST BE SPECIFIED BY C_eff AT 3.3 V, NOT BY ITS MARKED VALUE.
+# A 22 uF 0603 in the common 6.3 V rating keeps only ~20-30% at 3.3 V DC bias
+# (~4-7 uF), and after -20% tolerance and X5R temperature drift the worst case
+# lands ON the 4 uF floor. That is not margin, it is a coin toss.
+#
+# A 10 V rating in the SAME 0603 case derates far less at 3.3 V and roughly
+# doubles the delivered capacitance for no area, no height and no cost.
+# Verify the exact figure on the vendor's DC-bias curve before ordering.
+rc("C7", "22uF 10V X5R 0603", "SENSOR_3V3", "GND",
+   "ZW0905 200 mA / 4 us scan transient. REQUIREMENT: ripple < 200 mV "
+   "(Hi-Link), so C_eff at 3.3 V bias must be >= 4 uF, target >= 8 uF. "
+   "Do NOT substitute a 6.3 V part -- it derates onto the floor.")
 rc("C8", "1uF 0402", "SENSOR_MCU_3V3", "GND")
 
 rc("C9", "1uF 0402", "NRF_VDD", "GND", "REG0 output decoupling")
@@ -242,11 +271,31 @@ FLAGS = [
      "a GPIO cannot tell them apart, and a 1M/220k divider would shrink "
      "0.32 V to 0.06 V. This netlist uses a 100k series resistor into an "
      "SAADC pin and reads it as an ANALOG value, threshold ~0.15 V."),
-    ("B6  BT1 — STILL OPEN, and it is the safety one",
-     "VARTA: 'Cell must not be used without external safety electronics "
-     "(PCM).' There is no PCM here. BQ25505 VBAT_OV covers overcharge and "
-     "firmware covers undervoltage, but neither covers a short. Source the "
-     "CP1254 as a tabbed assembly with a PCM fitted, or add a protection IC."),
+    ("B6  BT1 PCM — RESOLVED AS A PROCUREMENT ITEM. It cannot go on this board.",
+     "VARTA CoinPower handbook 6.3: a CoinPower cell MUST run with a PCM "
+     "providing over-charge, over-discharge, over-current AND short-circuit "
+     "protection. It names acceptable parts: SGM41100V, Ricoh R5613L, Seiko "
+     "S8211CAY/S8200A, Mitsumi MM3077LY, TI BQ29700/29707, Diodes AP9211. "
+     "MEASURED on pcb-v3: 9.1 % of the top layer is free, and there is NO "
+     "free spot anywhere -- not even 1.3 x 1.3 mm -- where a VIA IS LEGAL. "
+     "Every remaining gap sits over a J4/J11 pogo pad, and a through-hole "
+     "via there exits through the mating contact. The AP9211 (2.0 x 3.0, "
+     "the only single-chip option, FETs included) does not fit at all. "
+     "So the PCM goes ON THE CELL: buy the CP1254 as a protected, tabbed "
+     "assembly and solder its two leads to BT1's wire pads. That also "
+     "retires the 'VARTA publishes no tab geometry' warning, because the "
+     "assembly's leads are specified by whoever builds it. "
+     "IF a future revision puts the PCM on the board instead, it needs "
+     "~2.0 x 3.0 mm WITH via access, which means freeing area -- most "
+     "plausibly a narrower BLE module, since U1 is 10.5 x 15.5 on a "
+     "19.3 mm square."),
+    ("B6b VBAT_OV WAS OVERCHARGING THE CELL — FIXED",
+     "ROV1/ROV2 were 5.6M/7.5M, giving VBAT_OV = 4.246 V. The CP1254 A4's "
+     "maximum charging voltage is 4.00 +-0.05 V, so the charger was set "
+     "246 mV ABOVE the cell limit -- and only 54 mV under the 4.30 V "
+     "over-charge trip of the very PCM that B6 adds, which would have made "
+     "the safety device the working regulator. Now 6.04M/6.98M = 3.912 V "
+     "nominal, 3.955 V worst case with 1 % parts."),
     ("Load budget grew — 3.3 -> 4.0 mWh/day",
      "The always-on LDO's own quiescent current was never counted. TPS7A20 "
      "IGND is 6.5 uA typ / 10 uA over -40..85 C, against the sensor's 10 uA "

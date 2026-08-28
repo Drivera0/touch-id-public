@@ -23,7 +23,16 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 # "checker gave no verdict" on a board whose DRC was in fact clean.
 BOARD = os.path.abspath(sys.argv[1] if len(sys.argv) > 1
                         else os.path.join(HERE, "pcb-v3-handoff.kicad_pcb"))
-KRT = os.environ.get("KRT", "/tmp/krt")
+# Default to the checkout that lives IN THIS REPO, not /tmp. preflight once
+# reported "checker gave no verdict" on a board whose DRC was clean, purely
+# because /tmp/krt had been wiped -- an order gate that silently stops checking
+# when a scratch directory disappears is worse than no gate.
+_IN_REPO = os.path.normpath(os.path.join(
+    HERE, "..", "..", "tools", "com_github_drandyhaas_kicadroutingtools"))
+KRT = os.environ.get("KRT") or (_IN_REPO if os.path.isdir(
+    os.path.join(_IN_REPO, "py_router")) else "/tmp/krt")
+if not os.path.isdir(os.path.join(KRT, "py_router")):
+    sys.exit("PREFLIGHT CANNOT RUN: no py_router under %s. Set $KRT." % KRT)
 
 # 0.20 was unachievable: U3/U4 pads are 0.34-0.40 mm apart and a 0.20 track
 # needs 0.60 to pass. 0.127 is the design rule now, still 1.4x JLC 4-layer.
@@ -292,9 +301,103 @@ except Exception as e:
     rec(False, "13 U1 antenna faces +Y (spacebar)", str(e))
 
 # ------------------------------------------------------ 14 provisional BOM --
+# ------------------- 15 the charger may not overcharge the cell ------------
+# This board once shipped VBAT_OV = 4.246 V against a cell rated 4.00 V. The
+# geometry checks all passed while it did -- copper cannot tell you that a
+# resistor divider is cooking the battery. So the ELECTRICAL limits are a gate
+# too, derived from the same netlist the board is built from.
+CELL_V_CHARGE_MAX = 4.00        # VARTA CP1254 A4 data sheet
+CELL_V_FLOOR      = 2.50        # CoinPower handbook: do not go below
+PCM_OV_TRIP       = 4.30        # what a fitted PCM trips at -- must stay clear
+VBIAS             = 1.21        # BQ25505 internal reference
+try:
+    import importlib.util as _il
+    _sp = _il.spec_from_file_location("nl3", os.path.join(HERE, "netlist_v3.py"))
+    _nl = _il.module_from_spec(_sp)
+    import io as _io, contextlib as _ctx
+    with _ctx.redirect_stdout(_io.StringIO()):
+        _sp.loader.exec_module(_nl)
+    _val = {}
+    for _p in _nl.PARTS:
+        _v = _p.get("name", "")
+        _m = re.match(r"([\d.]+)M", _v)
+        if _m:
+            _val[_p["ref"]] = float(_m.group(1))
+    _ov = 1.5 * VBIAS * (1 + _val["ROV2"] / _val["ROV1"])
+    _ovw = 1.5 * VBIAS * (1 + (_val["ROV2"] * 1.01) / (_val["ROV1"] * 0.99))
+    _fall = VBIAS * (1 + _val["ROK2"] / _val["ROK1"])
+    _rise = VBIAS * (1 + (_val["ROK2"] + _val["ROK3"]) / _val["ROK1"])
+    _bad = []
+    if _ovw > CELL_V_CHARGE_MAX:
+        _bad.append("VBAT_OV %.3f V worst case EXCEEDS the cell's %.2f V limit"
+                    % (_ovw, CELL_V_CHARGE_MAX))
+    if _ovw > PCM_OV_TRIP - 0.15:
+        _bad.append("VBAT_OV %.3f V is within 150 mV of the PCM trip %.2f V"
+                    % (_ovw, PCM_OV_TRIP))
+    if _fall < CELL_V_FLOOR:
+        _bad.append("VBAT_OK falling %.2f V is below the cell floor %.2f V"
+                    % (_fall, CELL_V_FLOOR))
+    rec(not _bad, "15 charger limits vs the cell",
+        "; ".join(_bad) or "OV %.3f V (wc %.3f) / OK %.2f-%.2f V, cell max %.2f"
+        % (_ov, _ovw, _fall, _rise, CELL_V_CHARGE_MAX))
+except Exception as _e:
+    rec(False, "15 charger limits vs the cell", "could not evaluate: %s" % _e)
+
+# ------------------- 16 solder-mask dam on hand-soldered pads --------------
+# BT1's two pads are 1.6 mm apart with Phi1.4 copper: a 0.200 mm mask web, ON
+# JLCPCB's minimum, between VBAT and GND on a joint made by hand. A bridge
+# there is a dead short across a <0.5 ohm lithium cell.
+#
+# Scoped to HAND-SOLDERED pads only -- those with a mask opening but NO paste.
+# Fine-pitch ICs (U3/U4 are 0.5 mm-pitch X2SON) legitimately run a 0.166 mm dam
+# because they are placed by stencil and reflow, with the paste volume
+# controlling the joint. Flagging those was noise, and noise in an order gate
+# is how a real warning gets ignored.
+MASK_DAM_MIN = 0.25
+sys.path.insert(0, HERE)
+import sexp as _sx
+_PADS = _sx.pads(t)
+_mm = {}
+for _fp in re.finditer(r'\(footprint "touchid:([^"]+)"(.*?)\n\t\)', t, re.S):
+    for _pd in re.finditer(r'\(pad "([^"]+)"(.*?)\n\t\t\)', _fp.group(2), re.S):
+        _e = re.search(r"\(solder_mask_margin ([-\d.]+)\)", _pd.group(2))
+        _mm[(_fp.group(1), _pd.group(1))] = float(_e.group(1)) if _e else 0.0
+_thin = []
+def _hand(pd):
+    """no paste -> a human makes this joint by hand"""
+    return not any(l.endswith(".Paste") for l in pd["layers"])
+
+_HAND = [q for q in _PADS if _hand(q)]
+for _i, _a in enumerate(_PADS):
+    for _b in _PADS[_i + 1:]:
+        if not (_hand(_a) or _hand(_b)):
+            continue
+        if _a["net"] and _a["net"] == _b["net"]:
+            continue
+        if not (set(_a["layers"]) & set(_b["layers"]) & {"F.Cu", "B.Cu"}):
+            continue
+        _ea = _mm.get((_a["ref"], _a["pad"]), 0.0)
+        _eb = _mm.get((_b["ref"], _b["pad"]), 0.0)
+        _d = math.hypot(_a["x"] - _b["x"], _a["y"] - _b["y"])
+        if _a["shape"] == "circle" and _b["shape"] == "circle":
+            _gap = _d - (_a["w"] / 2 + _ea) - (_b["w"] / 2 + _eb)
+        else:
+            _gx = abs(_a["x"] - _b["x"]) - (_a["w"] / 2 + _ea) - (_b["w"] / 2 + _eb)
+            _gy = abs(_a["y"] - _b["y"]) - (_a["h"] / 2 + _ea) - (_b["h"] / 2 + _eb)
+            _gap = max(_gx, _gy)
+        if _gap < MASK_DAM_MIN:
+            _thin.append("%s.%s-%s.%s %.3f" % (_a["ref"], _a["pad"], _b["ref"], _b["pad"], _gap))
+_thin.sort(key=lambda s: float(s.split()[-1]))
+rec(not _thin, "16 hand-solder mask dam >= %.2f mm" % MASK_DAM_MIN,
+    ", ".join(_thin[:4]) or "%d hand-soldered pads, thinnest dam clears JLC" % len(_HAND))
+
 prov = []
-if "VARTA gives CP1254" in open(os.path.join(HERE, "build_pcb_v3.py"), encoding="utf-8").read():
-    prov.append("BT1 cell-tab pads (VARTA publishes no tab geometry)")
+# BT1 no longer belongs here. The board never depended on VARTA's tab geometry:
+# it presents two Phi1.4 wire pads and the cell is wired down from above. The
+# cell is now specified as a PROTECTED, TABBED ASSEMBLY (see B6), so its leads
+# are defined by whoever builds that assembly -- there is no VARTA dimension
+# left to verify. What the board owes that decision is a mask dam wide enough
+# to hand-solder safely, and check 16 enforces exactly that.
 prov.append("J4/J11 pogo pads (fixed by the keyboard; measurement, not a datasheet)")
 rec(False, "14 unverified geometry remaining", "; ".join(prov), blocker=False)
 

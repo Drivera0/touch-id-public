@@ -120,9 +120,16 @@ Edit the Python and re-run, or the two will disagree.
 | 1 | `SENSOR_3V3` |
 | 2 | `GND` |
 
-### C7 — 22uF 0805
+### C7 — 22uF **10 V** X5R 0603
 
-> holds the ZW0905's 200 mA / 4 us scan transient to 36 mV. 1.25 mm TALL.
+> ZW0905 200 mA / 4 us scan transient. The requirement is Hi-Link's
+> **ripple < 200 mV**, not the 36 mV once quoted here — 36 mV was merely what a
+> *full* 22 uF gives, and quoting it hid the real margin. 200 mA x 4 us = 0.8 uC,
+> so **C_eff at 3.3 V bias must be >= 4 uF; target >= 8 uF.**
+> A 22 uF **6.3 V** 0603 keeps only ~20–30 % at 3.3 V DC bias and lands on the
+> 4 uF floor once tolerance and temperature are counted. The **10 V** rating in
+> the same 0603 case derates far less, for no area and no height.
+> **Specify this part by C_eff at 3.3 V, never by the marked value.**
 
 | Pin | Net |
 |---|---|
@@ -310,7 +317,8 @@ Edit the Python and re-run, or the two will disagree.
 
 ### ROV1 — 5.6M 0402
 
-> VBAT_OV = 1.5*1.21*13.1/5.6 = 4.246 V
+> VBAT_OV = 1.5*1.21*(1+6.98/6.04) = **3.912 V** (was 4.246 V, which
+> overcharged a cell rated 4.00 V — see B6b)
 
 | Pin | Net |
 |---|---|
@@ -534,9 +542,38 @@ These print on every run of `netlist_v3.py`. They are not cosmetic.
 
 NEXT-SESSION specifies '1M/220k' on J11-4. The MEASUREMENTS say that cannot work: J11-4 reads 0.316 V awake and 0.000 V asleep (Pin Test Results, 3-6 ohm source). Both are below any digital V_IL, so a GPIO cannot tell them apart, and a 1M/220k divider would shrink 0.32 V to 0.06 V. This netlist uses a 100k series resistor into an SAADC pin and reads it as an ANALOG value, threshold ~0.15 V.
 
-### B6  BT1 — STILL OPEN, and it is the safety one
+### B6  BT1 PCM — resolved as a PROCUREMENT item; it cannot go on this board
 
-VARTA: 'Cell must not be used without external safety electronics (PCM).' There is no PCM here. BQ25505 VBAT_OV covers overcharge and firmware covers undervoltage, but neither covers a short. Source the CP1254 as a tabbed assembly with a PCM fitted, or add a protection IC.
+VARTA's CoinPower handbook 6.3 requires a PCM giving **over-charge, over-discharge,
+over-current and short-circuit** protection, and names acceptable parts (SGM41100V,
+Ricoh R5613L, Seiko S8211CAY/S8200A, Mitsumi MM3077LY, TI BQ29700/29707, Diodes
+AP9211).
+
+**Measured on pcb-v3: 9.1 % of the top layer is free, and none of it can take a
+via.** Every remaining gap sits over a J4/J11 pogo pad, where a through-hole via
+would exit through the mating contact. Even a 1.3 x 1.3 mm patch with via access
+does not exist. The AP9211 — the only single-chip option, FETs included, at
+2.0 x 3.0 mm — does not fit at all.
+
+**So the PCM goes on the cell.** Buy the CP1254 as a *protected, tabbed assembly*
+and solder its two leads to BT1's wire pads. This also retires the old "VARTA
+publishes no tab geometry" warning: the assembly's leads are specified by whoever
+builds it, so there is no VARTA dimension left to guess.
+
+A future revision could host the PCM on-board, but only by freeing ~2.0 x 3.0 mm
+**with via access** — most plausibly via a narrower BLE module, since U1 is
+10.5 x 15.5 mm on a 19.3 mm square.
+
+### B6b  VBAT_OV was overcharging the cell — FIXED
+
+ROV1/ROV2 were 5.6M/7.5M => **VBAT_OV = 4.246 V**, against a CP1254 A4 whose
+maximum charging voltage is **4.00 +-0.05 V**. The charger was set 246 mV above
+the cell's limit, and its worst case (4.295 V) sat *on* the 4.30 V over-charge
+trip of the very PCM that B6 adds — which would have made the safety device the
+working regulator, exactly what the CoinPower handbook warns against.
+
+Now **6.04M / 6.98M => 3.912 V** nominal, 3.955 V worst case with 1 % parts.
+Costs ~10 % of usable capacity and buys cycle life.
 
 ### Load budget grew — 3.3 -> 4.0 mWh/day
 

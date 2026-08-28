@@ -25,7 +25,8 @@ import numpy as np
 import sexp
 
 HERE = os.path.dirname(os.path.abspath(__file__))
-KRT = os.environ.get("KRT", "/tmp/krt")
+KRT = os.environ.get("KRT") or os.path.normpath(os.path.join(
+    HERE, "..", "..", "tools", "com_github_drandyhaas_kicadroutingtools"))
 LAYERS = ["F.Cu", "In1.Cu", "B.Cu"]
 BOARD_SZ, EDGE = 19.30, 0.30
 STEP = 0.025
