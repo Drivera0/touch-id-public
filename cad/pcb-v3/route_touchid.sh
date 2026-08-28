@@ -60,7 +60,7 @@ python3 "$D/nudge.py" "$OUT" 8.95 -4.55 9.00 -4.55 || true
 # GND pads connected to nothing -- which is exactly what happened, and it
 # passed every check, because check 6 excludes GND by name.
 # ---------------------------------------------------------------------------
-cp "$D/pcb-v3.kicad_pro" "$OUT%.kicad_pcb".kicad_pro 2>/dev/null || true
+cp "$D/pcb-v3.kicad_pro" "${OUT%.kicad_pcb}.kicad_pro" 2>/dev/null || true
 T3=$(mktemp /tmp/tid3.XXXX.kicad_pcb); cp "$D/pcb-v3.kicad_pro" "${T3%.kicad_pcb}.kicad_pro"
 echo "step 4a - pour GND on F.Cu / In2.Cu / B.Cu"
 PYTHONPATH="${PYTHONPATH:-}:$KRT" python3 "$KRT/py_router/route_planes.py" "$OUT" \
