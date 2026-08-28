@@ -450,3 +450,52 @@ taken from the design docs (sensor 25 mA / 200 mA·4 µs, nRF ~15 mA, harvest
 > number for a net it cannot actually follow, the check stays silent where it
 > has no evidence. **Connectivity is check 6's job, and check_connected models
 > the geometry properly.**
+
+## There is no BOM or CPL for this board — and the files that exist are POISON
+
+`cad/exports/fingerprint module-BOM.csv` and `-CPL.csv` (19 Aug) describe a
+**completely different, dead board**:
+
+* `U1 = ESP32-C3-MINI-1-N4` — the retired architecture. U1 is now a Raytac
+  MDBT50Q.
+* `U2 = TPS7A2033` — on this board U2 is the **BQ25505 charger**; the LDOs are
+  U3/U4. Same designators, different parts.
+* 4 BOM lines and 6 placements, against ~30 parts that need placing.
+* Coordinates around 92–108 mm — a different board origin entirely.
+
+**Uploading them would place the wrong parts at the wrong coordinates.**
+They should be deleted or moved to `cad/archive/`, not left next to the good
+exports where they can be picked up by mistake.
+
+### What JLCPCB actually needs for assembly (and what it does not)
+
+It does **not** use 3D models. Placement is 2D:
+
+| file | contents |
+|---|---|
+| **BOM** | designator → LCSC part number |
+| **CPL** (pick-and-place) | designator, X, Y, **rotation**, top/bottom |
+
+The machine takes a part from the feeder its LCSC number identifies and puts it
+at X/Y with that rotation. JLC knows the part's real body from **their own
+library, keyed by the LCSC number** — nothing in our files describes it. The
+3D models in `cad/pcb-v3/3dmodels/` exist purely for our housing collision
+check; the fab never sees them.
+
+### Two things that will bite
+
+1. **Rotation convention.** JLC's expected orientation for a package frequently
+   differs from KiCad's footprint rotation, which is the classic way to get a
+   whole reel placed 90° or 180° out. Every rotation must be checked against
+   JLC's own part preview, not assumed.
+2. **LCSC numbers exist for only a handful of parts** — U1 (C5118826), the 0402
+   (C1525), 0603 (C19666), L1 (C2849435), and U2's package reference. **Every
+   BOM line needs one**, and several resistor values here are unusual
+   (6.04M, 6.98M, 4.53M, 7.15M, 1.33M) — they are unlikely to be JLC "basic"
+   parts, which means extended-part fees or a substitution that changes the
+   thresholds those dividers set.
+
+> Note the divider values are not free to substitute: ROV1/ROV2 set the charge
+> ceiling and ROK1/2/3 set the VBAT_OK window. Swapping to a nearest-available
+> value moves those voltages — recompute with preflight check 15 before agreeing
+> to any substitution.
