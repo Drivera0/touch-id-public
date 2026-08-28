@@ -1,5 +1,5 @@
 TouchID v3 handoff — verification report
-generated 2026-08-28 21:56 UTC
+generated 2026-08-28 22:04 UTC
 
 ### sexp_check
 pcb-v3-handoff.kicad_pcb
@@ -7,7 +7,7 @@ pcb-v3-handoff.kicad_pcb
   PARSE OK     : 628 top-level children
   footprints 46   pads 134   segments 458   vias 65   zones 17
 
-### preflight.py — the order gate
+### preflight.py
 ==========================================================================
 PREFLIGHT — pcb-v3-handoff.kicad_pcb
 ==========================================================================
@@ -71,7 +71,7 @@ C13       0.540    1.340     2  C15195      Samsung CL05B103KB5NNNC 10nF 50V X7R
 C2        0.540    1.340     2  C2858031    Murata GRM155R61E475ME15D 4.7uF 25V X5R 0402   OK
 C3        0.540    1.340     2  C1525       Samsung CL05B104KO5NNNC 100nF 16V X7R 0402     OK
 C4        0.540    1.340     2  C22400107   Murata GRM1555C1H103JE01D 10nF 50V C0G 0402    OK
-C5        2.200    0.900     2  C18164635   CCTC TCC0603X5R106K160CT 10uF 16V X5R 0603     OK
+C5        2.200    0.900     2  C70225      FH 0603X106K160NT 10uF 16V X5R 0603            OK
 C6        0.540    1.340     2  C52923      Samsung CL05A105KA5NQNC 1uF 25V X5R 0402       OK
 C7        2.200    0.900     2  C20416425   CCTC TCC0603X5R226M100CT 22uF 10V X5R 0603     OK
 C8        0.540    1.340     2  C52923      Samsung CL05A105KA5NQNC 1uF 25V X5R 0402       OK

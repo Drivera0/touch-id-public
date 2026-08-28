@@ -87,7 +87,14 @@ SRC = {
     "C3":   ("C1525",     "BASIC",   35834447, "Samsung CL05B104KO5NNNC 100nF 16V X7R 0402"),
     "C10":  ("C1525",     "BASIC",   35834447, "Samsung CL05B104KO5NNNC 100nF 16V X7R 0402"),
     "C4":   ("C22400107", "extended",   72632, "Murata GRM1555C1H103JE01D 10nF 50V C0G 0402"),
-    "C5":   ("C18164635", "extended", 1128075, "CCTC TCC0603X5R106K160CT 10uF 16V X5R 0603"),
+    # C5 was C18164635 (CCTC TCC0603X5R106K160CT). Identical spec, 1.1 M in
+    # stock, and JLCPCB's part search finds it instantly by code -- but its BOM
+    # matcher refused to auto-select it on EVERY upload, through a clean
+    # 4-column file and a fully-specified comment alike. The only categorical
+    # difference against parts that always match is `idleFlag`: null on the
+    # CCTC part, true on this one and on C7's. Swapped rather than accept a
+    # manual click on every future upload; same 10uF 16V X5R +-10% 0603.
+    "C5":   ("C70225",    "extended",  479335, "FH 0603X106K160NT 10uF 16V X5R 0603"),
     "C6":   ("C52923",    "BASIC",   11865003, "Samsung CL05A105KA5NQNC 1uF 25V X5R 0402"),
     "C8":   ("C52923",    "BASIC",   11865003, "Samsung CL05A105KA5NQNC 1uF 25V X5R 0402"),
     "C9":   ("C52923",    "BASIC",   11865003, "Samsung CL05A105KA5NQNC 1uF 25V X5R 0402"),
