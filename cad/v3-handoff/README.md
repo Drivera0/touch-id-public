@@ -125,6 +125,25 @@ Everything else was already correct at JLC's 4-layer defaults: 1 oz outer /
 tested, order mark removed, and every exotic option (gold fingers, castellated
 holes, edge plating, backdrill…) off.
 
+## Everything also lives in a JLCONE project
+
+**Projects ▸ My Projects ▸ "TouchID v3 - fingerprint keyboard module"**, so a
+future order does not depend on finding these files again:
+
+| tab | holds | note |
+|---|---|---|
+| **PCB** | `touchid-v3-jlcpcb.zip` + BOM + CPL as one entry | has an **Order Now** button |
+| **3D** | housing `.stl` and full assembly `.step` | each has its own Order Now |
+| **Others** | `touchid-v3-docs.zip` | README, verification report, checksums, annotated BOM, no-U1 BOM, sourcing notes |
+
+The PCB entry carries the **full 20-line BOM** — the real design. If U1 is
+still out of stock when you order, swap in `touchid-v3-BOM-no-U1.csv` from the
+docs zip instead.
+
+> The Others tab rejects `.md` and `.txt`, which is why the documentation is
+> zipped. The project description field also caps at ~200 characters, so the
+> detail lives here rather than there.
+
 ## IN THE CART, NOT ORDERED — 2026-08-28
 
 Both line items are **saved in the JLCPCB cart, unticked, subtotal $0.00**.
