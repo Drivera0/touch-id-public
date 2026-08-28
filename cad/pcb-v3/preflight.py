@@ -101,8 +101,13 @@ env = dict(os.environ, PYTHONPATH=KRT)
 o = run(os.path.join(KRT, "py_router", "check_connected.py"), BOARD, cwd=KRT, env=env)
 opens = len(re.findall(r"^      \(-?[\d.]+, -?[\d.]+\) on", o, re.M))
 unrouted = [x for x in re.findall(r"^    ([A-Z_0-9]+) \(\d+ pads\)", o, re.M) if x != "GND"]
+# A net with NO copper is not "split" and never appears as a disconnected pad.
+# Counting only disconnected pads lets a router delete a whole net and look
+# better for it -- that is exactly what happened while chasing 8 -> 3.
+dead_pads = sum(cnt[n] for n in unrouted if n in cnt)
 rec(opens == 0 and not unrouted, "6  every connection routed",
-    "%d open pad(s); unrouted nets: %s" % (opens, ", ".join(unrouted) or "none"))
+    "TRUE open pads = %d (%d disconnected + %d in zero-copper nets: %s)"
+    % (opens + dead_pads, opens, dead_pads, ", ".join(unrouted) or "none"))
 
 o = run(os.path.join(KRT, "py_router", "check_drc.py"), BOARD, "--clearance", str(DESIGN_CU),
         cwd=KRT, env=env)

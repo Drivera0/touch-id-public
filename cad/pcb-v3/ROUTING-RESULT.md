@@ -298,3 +298,40 @@ pcb-v3 had **no silkscreen at all** — no designators, no text.
 | `check_escape` | 67 escapable, 2 boxed (the known U2 pins) |
 | `check_drc` @0.20 | 1 (a 0.053 mm pad-corner clip on U3) |
 | open connections | 7 |
+
+## 2026-08-27 — I was measuring the wrong thing
+
+The "8 -> 5 -> 4 -> 3 opens" progress reported earlier **was partly an
+artefact.** My optimisation metric counted only *disconnected pads* from
+`check_connected`. A net with **zero copper** is not "split" — it never appears
+in that list at all. So the loop was free to delete an entire net and score it
+as an improvement, and it did.
+
+**True count on the same board: 11, not 3** — 3 disconnected pads plus 8 pads
+belonging to three nets with no copper at all (SENSOR_SW_EN, VBAT, VREF_SAMP).
+
+`/tmp/openpads.py` and `preflight.py` check 6 now report
+`disconnected + pads in zero-copper nets`. Same lesson as the four Y-sign bugs
+and the three checker bugs: **a number is not evidence until something
+independent agrees with it.**
+
+### The three dead nets are an ORDERING problem, not geometry
+
+Each routes fine alone on a bare board:
+
+| net | alone | in the full run |
+|---|---|---|
+| VBAT | SUCCESS, 19 seg, 12.35 mm | 0 segments |
+| SENSOR_SW_EN | SUCCESS, 18 seg, 7.20 mm | 0 segments |
+| VREF_SAMP | SUCCESS, 7 seg, 5.50 mm | 0 segments |
+
+They lose the race to nets routed earlier and never recover the space.
+
+**Seeding them first works — but costs more than it saves.** Routing the hard
+nets on a bare board and then everything else with `--keep-input-copper`
+eliminates the dead nets entirely (0 zero-copper), but total open pads goes
+**11 -> 12..16**: the seeded nets take the good channels and block others.
+Six seed/cost combinations tried, best 11 — the same as not seeding.
+
+**Converged at 11** across full re-routes, per-net rip-up to depth 8, three
+layer-cost families, both directions and via-cost variation.
