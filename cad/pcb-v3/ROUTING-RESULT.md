@@ -152,3 +152,46 @@ connections.
 is why this board is 4 layers; a plane cut by a 23.8 mm slot under the boost
 converter is a permanent defect that is hard to reason about later, whereas
 sixteen short hand-routes are an evening's work and most sit in open board.
+
+## Driving it further — and the third proof the board is over-subscribed
+
+Routing one net at a time onto the plane-clean board, accepting a result only
+if it (a) added **zero** In2.Cu copper and (b) reduced total open pads, drove it
+from 16 open to **12 open with the plane fully intact**. It then converged —
+no further single-net attempt improved it.
+
+`pcb-v3-handoff.kicad_pcb`: 397 segments, 49 vias, **min track 0.200 mm, all
+vias 0.6/0.3, NO DRC VIOLATIONS at 0.20, zero signal copper on In2.Cu.**
+
+But the 12 are *not* all U2. Five VSTOR opens are on U3/U4/TP2/J3 and two
+VIN_DC opens are on TP1/C1 — the **left strip**. Measured:
+
+```
+left column: 4 parts (U3,U4,C1,C2), 4.90 mm of bodies in 5.80 mm of space
+   (BT1's 3.00 mm wire pads occupy -6.60..-3.60 of the same strip)
+=> max gap per part = 0.225 mm     a 0.20 track needs 0.60 pad-to-pad
+```
+
+So the left column has the identical defect the 0402 rows had, and it cannot be
+fixed by spacing: 0.60 mm gaps for those four parts need 7.30 mm and there is
+5.80. Raising the gap just drives C2 into BT1 (verified: -0.225 mm overlap).
+
+That is the **third independent place** the board runs out of room — bottom row,
+U2's ring, left column. It is one finding, not three: **there is not enough
+perimeter to give every part a routing channel.**
+
+## The way out is the BOM, not the layout
+
+| change | frees |
+|---|---|
+| C1, C2 4.7 uF **0603 -> 0402** | 0.50 mm of left-column height, 1.45 mm width each |
+| C5 10 uF, C7 22 uF **0805 -> 0603** | the right strip stops being the only home for them |
+| **BT1's wire pads out of the left column** | left column gap 0.225 -> **1.14 mm** |
+
+That last one is the big one. Tested C1/C2 -> 0402 alone: still only 0.35 mm of
+gap, because BT1 is what actually caps the column.
+
+Caveat before adopting: a 22 uF 0603 has worse DC-bias derating and higher ESR
+than the 0805. C7 exists to hold the ZW0905's 200 mA / 4 us scan transient to
+36 mV, so that one needs its derated capacitance checked, not just its
+footprint swapped.
