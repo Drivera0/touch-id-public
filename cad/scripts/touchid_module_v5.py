@@ -133,7 +133,10 @@ mcu_l, mcu_w, mcu_h = 15.5, 10.5, 2.05         # MDBT50Q-1MV2, Raytac Ver. K
 # SETTLED by pcb-v3: the module is 15.5 (y) x 10.5 (x) and sits OFF-CENTRE in
 # x, because the BQ25505's ~3.98 mm land will not fit beside a centred module
 # on a 19.30 board. See build_pcb_v3.py.
-mcu_center = (-0.80, 0.90)
+mcu_center = (-0.80, 1.00)   # tracks build_pcb_v3.py U1_CX/U1_CY.
+                             # Was 0.90 while the board said 1.00 --
+                             # 0.10 mm of drift between the mechanical
+                             # model and the board it is built around.
 mcu_l, mcu_w = 10.5, 15.5       # (x, y) in board orientation
 
 # The cell rests on the module's lid through an INSULATING PAD.
@@ -529,7 +532,7 @@ print(f"       cause 1: cell height max is 5.6, not 5.4        -0.20")
 print(f"       cause 2: cell sits on the 2.05 module + pad     "
       f"{-(cell_z0 - 1.80):+.2f}")
 print(f"  module centre    : {mcu_center}")
-print(f"  tallest board part: 22 uF 0805 at 1.25, L1 at 1.20 — both clear")
+print(f"  tallest board part: L1 at 1.20 (C5/C7 are now 0603, ~0.90) — clear")
 print(f"  cell radial slop in collar      : "
       f"{(cell_pocket_d - cell_d_max) / 2:.2f} mm per side")
 print(f"  wire windows                    : +-X, open from z {collar_z0:.2f}"
