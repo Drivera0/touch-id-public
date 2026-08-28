@@ -125,3 +125,68 @@ keyboard geometry and the cell is wired from above. Those stay as they are.
   Check it against the board file first. Most "blockers" in this project turned
   out to be the checker, not the board.
 * Fixes land in KiCad and get re-exported. One master, always.
+
+---
+
+# RESULT — imported 2026-08-28
+
+## The KiCad 10 file imports WRONG. Use the KiCad 9 fallback.
+
+This is the risk this document was written around, and it was real.
+
+**`touchid-v4.kicad_pcb` (KiCad 10) produced a garbage layer mapping:**
+
+| KiCad layer | Altium gave it |
+|---|---|
+| F.Cu | Top Layer ✓ |
+| **B.Cu** | **Mid Layer2** ✗ |
+| In1.Cu | Mid Layer4 ✗ |
+| In2.Cu | Mid Layer6 ✗ |
+| **Edge.Cuts** | **Mid Layer25** ✗ |
+| **F.CrtYd** | **Bottom Layer** ✗ |
+
+It mapped by index order, not meaning — the board outline became a copper
+layer and the courtyard became the bottom copper. **A DRC on that would have
+been meaningless**, and it would have looked like a successful import.
+
+**`touchid-v4-kicad9format.kicad_pcb` maps correctly:**
+F.Cu→Top, In1.Cu→Mid Layer1, In2.Cu→Mid Layer2, B.Cu→Bottom, F/B.Mask→Solder
+Mask, F/B.SilkS→Overlay, F/B.Paste→Paste, Edge.Cuts→Keep Out Layer,
+courtyards and F.Fab→Mechanical.
+
+> The importer predates KiCad 10's format, exactly as suspected. Its analysis
+> log flags the new constructs it does not understand — `uuid`, `stroke`,
+> `embedded_fonts`, via `tenting`/`covering`/`plugging`/`capping`/`filling`,
+> `duplicate_pad_numbers_are_jumpers` — with **errors: 0**, which is precisely
+> why "no errors" is not the same as "imported correctly".
+
+## Fidelity check — what actually came across
+
+| quantity | expected | Altium | |
+|---|---|---|---|
+| Nets | 27 | **27** | PASS — exact name-for-name match |
+| Components | 46 | **46** | PASS |
+| Copper layers | 4, in order | Top / Mid1 / Mid2 / Bottom | PASS |
+| **Board thickness** | **1.200 mm** | **0.142 mm** | **FAIL** |
+| **Dielectrics** | 3 (prepreg/core/prepreg) | **none — "No Dielectric", height 0** | **FAIL** |
+
+**The stackup was dropped by the importer, not missing from the file** —
+verified: the source carries `(stackup ...)` with all three dielectrics summing
+to 1.200 mm. Altium kept the copper layers and discarded the dielectric between
+them.
+
+`Un0` / `Un1` are the two NPTH mounting holes, which carry no reference in
+KiCad; the importer auto-named them and said so in its log. Expected, not a
+fault.
+
+## Before any Altium DRC result means anything
+
+1. **Set the board thickness** — Design ▸ Layer Stack Manager, 1.2 mm total.
+   Nothing thickness-dependent (3D, via aspect ratio, impedance) is valid until
+   this is done.
+2. **Repour the polygons** — this file's zones are unfilled by design, so GND
+   will read as unconnected until Altium pours it.
+3. **Set the rules** to the table in section 3 above. Altium's defaults are
+   ~0.254 mm clearance and would flag this whole board.
+
+**Do not read a DRC taken before those three steps.**
