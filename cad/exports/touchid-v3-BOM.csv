@@ -18,5 +18,4 @@ Comment,Designator,Footprint,JLCPCB Part # (LCSC Part #),JLC library,JLC stock,P
 6.98M 0402 1%,ROV2,0402,C137942,extended,2674,YAGEO RC0402FR-076M98L 6.98M 1% 0402,"Sets VBAT_OV. Only 2674 in stock, single source. Do not substitute blind."
 Raytac MDBT50Q-1MV2 (nRF52840),U1,,C5118826,extended,0,"Raytac MDBT50Q-1MV2, SMD-61P","*** JLC ASSEMBLY STOCK 0, NEED 1 PER BOARD *** JLC ASSEMBLY STOCK 0 - backorder ~11 days, backlog -75. CHECK BEFORE ORDERING."
 TI BQ25505,U2,,C882746,extended,829,"TI BQ25505RGRR, VQFN-20-EP 3.5x3.5",
-TI TPS7A2033 3.3 V LDO (sensor rail),U3,,C46459900,extended,4371,"TI TPS7A2033DQNR, X2SON-4 1x1",
-TI TPS7A2033 3.3 V LDO (switched sensor-MCU rail),U4,,C46459900,extended,4371,"TI TPS7A2033DQNR, X2SON-4 1x1",
+TI TPS7A2033 3.3 V LDO (sensor rail),"U3,U4",,C46459900,extended,4371,"TI TPS7A2033DQNR, X2SON-4 1x1",

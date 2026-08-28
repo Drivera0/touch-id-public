@@ -154,10 +154,28 @@ def main():
             w.writerow([r["ref"], "%.4fmm" % r["X"], "%.4fmm" % r["Y"],
                         r["side"], "%g" % r["rot"]])
 
-    # ---- BOM, grouped by value ------------------------------------------
+    # ---- BOM, grouped by PART NUMBER -------------------------------------
+    # Grouping by the value STRING put U3 and U4 on two separate lines, because
+    # the netlist describes them differently ("sensor rail" vs "switched
+    # sensor-MCU rail") even though they are the same TPS7A2033DQNR. JLCPCB's
+    # matcher then saw one part on two lines, assigned the quantity to one and
+    # ZERO to the other, and reported "1 part not selected".
+    #
+    # A BOM line is one PURCHASABLE ITEM, so the key has to be the part number.
+    # Unsourced lines keep falling back to the value string, so they still
+    # cannot silently merge with each other.
     groups = collections.OrderedDict()
     for r in rows:
-        groups.setdefault(r["value"], []).append(r["ref"])
+        key = SRC[r["ref"]][0] if r["ref"] in SRC else "\0" + r["value"]
+        groups.setdefault(key, []).append(r["ref"])
+    # rebuild as {comment: refs}, comment taken from the first designator
+    _named = collections.OrderedDict()
+    _first = {}
+    for key, refs in groups.items():
+        val = next((x["value"] for x in rows if x["ref"] == refs[0]), "")
+        _named[val] = refs
+        _first[val] = refs[0]
+    groups = _named
     bom = os.path.join(OUT, "touchid-v3-BOM.csv")
     unsourced, zero_stock, extended = [], [], set()
     with open(bom, "w", newline="", encoding="utf-8") as fh:
