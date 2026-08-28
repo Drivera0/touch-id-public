@@ -169,14 +169,14 @@ rc("ROK2", "7.15M 0402", "OK_HYST", "OK_PROG")
 rc("ROK3", "1.33M 0402", "VRDIV", "OK_HYST", "VBAT_OK rising = 3.47 V")
 
 rc("L1", "22uH", "LX", "VIN_DC", "LBOOST -> VIN_DC. Package NOT verified.")
-rc("C1", "4.7uF 0603", "VIN_DC", "GND", "CIN, datasheet minimum")
-rc("C2", "4.7uF 0603", "VSTOR", "GND", "CSTOR")
+rc("C1", "4.7uF 0402", "VIN_DC", "GND", "CIN, datasheet minimum")
+rc("C2", "4.7uF 0402", "VSTOR", "GND", "CSTOR")
 rc("C3", "0.1uF 0402", "VSTOR", "GND", "CSTOR HF")
 rc("C4", "10nF 0402 low-leak", "VREF_SAMP", "GND", "CREF, 9-11 nF window")
-rc("C5", "10uF 0805", "VBAT", "GND", "CBAT bulk beside the cell")
+rc("C5", "10uF 0603", "VBAT", "GND", "CBAT bulk beside the cell")
 
 rc("C6", "1uF 0402", "SENSOR_3V3", "GND", "LDO input side of U3 is VSTOR; this is OUT")
-rc("C7", "22uF 0805", "SENSOR_3V3", "GND",
+rc("C7", "22uF 0603", "SENSOR_3V3", "GND",
    "holds the ZW0905's 200 mA / 4 us scan transient to 36 mV. 1.25 mm TALL.")
 rc("C8", "1uF 0402", "SENSOR_MCU_3V3", "GND")
 

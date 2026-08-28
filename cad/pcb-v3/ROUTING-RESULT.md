@@ -195,3 +195,35 @@ Caveat before adopting: a 22 uF 0603 has worse DC-bias derating and higher ESR
 than the 0805. C7 exists to hold the ZW0905's 200 mA / 4 us scan transient to
 36 mV, so that one needs its derated capacitance checked, not just its
 footprint swapped.
+
+## Implemented: the BOM change, and the result
+
+Three changes, then re-routed:
+
+1. **C1, C2 (4.7 uF) 0603 -> 0402** and moved out of the hand-written left
+   column into the netlist-driven packer. They are CIN and CSTOR — they belong
+   at U2, and a size-only stack had put them on the opposite edge of the board.
+2. **C5 (10 uF), C7 (22 uF) 0805 -> 0603**, so the right strip is no longer the
+   only place they can physically go.
+3. **Left column is now just U3 + U4** at 1.00 mm gaps. BT1 stayed where it was
+   — it was never the problem on its own; *four* parts in a 5.80 mm column was.
+
+Slots went 20/20 (no spare) to **22 parts in 22 slots**, and the router stopped
+needing the plane layer at all.
+
+| | before | after |
+|---|---|---|
+| open connections | 12 | **7** |
+| signal copper on In2.Cu | 0 (only after stripping) | **0, natural** |
+| DRC violations @0.20 | 0 | 1 (53 um pad clip) |
+| min track / vias | 0.200 / 0.6-0.3 | 0.200 / 0.6-0.3 |
+
+The one DRC item is a VSTOR segment clipping the corner of U3's thermal pad by
+**0.053 mm**. Four re-route variants all reproduce it; it is a ten-second drag
+in KiCad and not worth more batch attempts.
+
+### Still to verify before ordering
+
+C7's 22 uF is now 0603. It exists to hold the ZW0905's 200 mA / 4 us scan
+transient to 36 mV. **Check its DC-bias-derated capacitance, not just that the
+footprint fits** — a 0603 22 uF derates harder than the 0805 did.
