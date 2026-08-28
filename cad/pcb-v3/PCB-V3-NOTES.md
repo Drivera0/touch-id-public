@@ -319,3 +319,14 @@ preflight check 10 now exempts nets shorter than twice the neck-down length
 instead of flagging them forever.
 
 Open connections went 8 -> 7.
+
+### C7 out of the right column — 7 opens -> 5
+
+With only L1 + U2 left in the right column it has **0.70 mm of gap to spend
+instead of 0.25**, which is enough for a via lane above and below the chip.
+C7 (0603, 1.04 mm tall) fits the 2.22 mm bottom strip, and the 0402 packer had
+**3 spare slots** to give up — the first time this board has had any slack.
+
+`check_escape` went 3 boxed-in -> **1**, and the remaining opens are no longer
+concentrated on U2: they are spread across ROK3, C7, U1, U2 and U2, which is
+what a board at its limit looks like rather than one with a structural fault.
