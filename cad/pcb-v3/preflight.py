@@ -171,11 +171,31 @@ rec(under == 0, "9  no track below the %.2f design rule" % DESIGN_CU,
 # "power route neck-down" deliberately narrows to signal width where a 0.4 mm
 # track enters a 0.24 mm pad. What matters is that the net's TRUNK is 0.4, not
 # that its minimum is -- testing min() flagged all six as thin every run.
-nofat = [n for n in POWER if n in per_net and max(per_net[n]) < 0.399]
+# A power net whose whole run sits inside the neck-down zone of its own pads
+# cannot be 0.40 anywhere, and should not be: you cannot land 0.40 copper on a
+# 0.24 mm QFN pad without a taper. Only flag a net that is long enough to have
+# a trunk and still has none. (LX is 1.9 mm end to end by design -- short loop
+# area is the whole point of a switching node.)
+def _netlen(n):
+    tot = 0.0
+    for m in re.finditer(r'\(segment\b(.*?)\n\t\)', t, re.S):
+        b = m.group(1); nm = re.search(r'\(net (\d+)\)', b)
+        if not nm or nn.get(nm.group(1)) != n:
+            continue
+        s_ = re.search(r'\(start ([-\d.]+) ([-\d.]+)\)', b)
+        e_ = re.search(r'\(end ([-\d.]+) ([-\d.]+)\)', b)
+        if s_ and e_:
+            tot += math.hypot(float(e_.group(1))-float(s_.group(1)),
+                              float(e_.group(2))-float(s_.group(2)))
+    return tot
+NECK = 2.5   # --neckdown-length default, mm, applied at BOTH ends
+nofat = [n for n in POWER if n in per_net and max(per_net[n]) < 0.399
+         and _netlen(n) > 2 * NECK]
 necks = {n: sum(1 for x in per_net[n] if x < 0.399) for n in POWER if n in per_net}
 rec(not nofat, "10 power nets have a 0.40 trunk",
-    ("no 0.40 segment on: " + ", ".join(nofat)) if nofat else
-    "all 6 trunks 0.40 (%d neck-down segs at pads, by design)" % sum(necks.values()),
+    ("no 0.40 trunk on: " + ", ".join(nofat)) if nofat else
+    "trunks OK (%d neck-down segs at pads, by design; short nets exempt)"
+    % sum(necks.values()),
     blocker=False)
 
 # ------------------------------------------------------ 11 silk over pads ----

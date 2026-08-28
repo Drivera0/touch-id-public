@@ -281,3 +281,41 @@ L1 went from 1.10 mm of courtyard to 2.34, forcing C5 out of the right column
 (it moved beside BT1 on the left, where CBAT belongs anyway). Open connections
 went 7 -> 9. The 0402 shrink gave back some room: **25 slots for 22 parts**,
 the first real spare capacity this board has had.
+
+## 2026-08-27 — two real bugs found by asking why LX was thin
+
+### U2's land was 0.25 mm off its own centreline
+
+```python
+off = [(-2 + i) * pitch + pitch / 2 for i in range(5)]   # -0.75 .. +1.25
+```
+
+That is the **even**-count formula. The BQ25505 has **5 pads per side**, so the
+row must be symmetric: `(i - 2) * pitch` = -1.0, -0.5, 0, +0.5, +1.0. As
+written, every edge of the land sat **0.25 mm off the package centreline** and
+the perimeter pads did not line up with the thermal pad. The part would have
+been placed crooked on its own footprint.
+
+Fixed. U2's perimeter pad field is now centred on (0, 0) with the thermal pad,
+verified from the emitted board.
+
+### LX wrapped 11 mm around three sides of the chip
+
+U2's **LX is pin 20, on the TOP edge**. L1 was stacked *below* U2, so the
+switching node ran from the top of the package, around the right-hand side, and
+down to the inductor — about **11 mm** for a node that should be as small as
+possible. On a boost converter LX is the highest-dv/dt net on the board and its
+loop area sets the radiated noise and part of the efficiency.
+
+Two changes: **L1 moved above U2**, and **L1 rotated 180 deg** so its LX
+terminal faces down. Pad-to-pad is now **1.91 mm, essentially straight**
+(U2.20 at x 5.81, L1.1 at x 5.78).
+
+LX stays 0.20 mm wide and that is correct — the whole run is inside the
+neck-down zone of both pads, and 0.40 copper cannot land on a 0.24 mm QFN pad
+without a taper. 0.20 mm carries 0.74 A; this converter moves microamps to
+milliamps. **For LX the number that matters is loop area, not width**, and
+preflight check 10 now exempts nets shorter than twice the neck-down length
+instead of flagging them forever.
+
+Open connections went 8 -> 7.
