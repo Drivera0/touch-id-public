@@ -95,3 +95,38 @@ housing. It has not got worse, but it has not got better either.
 - `mcu_center` now tracks `pcb-v3` at **(−0.80, 0.90)**. If the board placement
   moves again, re-run this script — it re-runs all eight boolean checks and will
   catch a collision.
+
+## 2026-08-27 — board synced, and a real 3D collision check
+
+**`mcu_center` was 0.90 while the board said `U1_CY = 1.00`.** 0.10 mm of drift
+between the mechanical model and the board it is built around — the note above
+said to re-run if the placement moved, and it moved when the bottom-strip
+0.08 mm fix nudged U1. Synced; all eight boolean checks still pass.
+
+Also corrected a stale line: the tallest board part is no longer "22 uF 0805 at
+1.25" — C5 and C7 are 0603 now (0.80 mm). **L1 at 1.20 mm is the tallest
+discrete**, and only U1 at 2.05 is taller.
+
+### `board_3d.py` — component bodies vs the housing
+
+Body dimensions are not guessed. They come from the 3D-model names in JLCPCB's
+library, which encode L/W/H:
+
+```
+C0402_L1.0-W0.5-H0.5           -> 0402 = 1.0 x 0.5 x 0.5
+C0603_L1.6-W0.8-H0.8           -> 0603 = 1.6 x 0.8 x 0.8
+VQFN-20_L3.5-W3.5-H1.0-P0.50   -> U2   = 3.5 x 3.5 x 1.0
+IND-SMD_L2.5-W2.0-1            -> L1   = 2.5 x 2.0 x 1.2
+```
+
+29 bodies, boolean-intersected against `touchid_housing_v5_diagonal.step`:
+**no collisions.** Exported `exports/pcb-v3-assembly.step`.
+
+> **Trap, hit and fixed while writing this.** The first run reported three
+> collisions (R5, ROK1, C13). They were not real: I had negated Y to convert
+> "KiCad Y-down" into CadQuery's Y-up. DESIGN-SPEC §1 says explicitly not to —
+> the Y-down numbers *are* the project frame, and the housing uses the same
+> convention (its bosses sit at (8.1,-8.1)/(-8.1,8.1), matching `BOSS_XY`
+> verbatim). Negating put every part on the wrong half of the board and drove
+> three of them into the mounting bosses. Same Y-convention trap as the
+> footprint-rotation bug earlier today, third time this project.
