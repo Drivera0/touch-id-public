@@ -44,9 +44,43 @@ def rot(px, py, adeg):
     r = math.radians(adeg); c, sn = math.cos(r), math.sin(r)
     return px * c + py * sn, -px * sn + py * c
 
+def net_of(node):
+    """Net NAME from a (net ...) child, in EITHER KiCad file format.
+
+    KiCad <=9 :  a top-level table of (net N "NAME"), and items say (net N).
+    KiCad 10  :  NO table at all; every item carries (net "NAME") directly.
+
+    Round-tripping the board through KiCad 10 silently turned every net name
+    into "" here, because the old code read index [2] and v10 puts the name at
+    index [1]. 134 pads, 0 nets -- and a checker that sees no nets passes
+    everything. Handle both, and never assume the format.
+    """
+    n = kid(node, "net")
+    if n is None or len(n) < 2:
+        return ""
+    if len(n) > 2:                       # (net N "NAME")
+        return s(n[2])
+    v = s(n[1])                          # (net "NAME") or (net N)
+    return "" if str(v).lstrip("-").isdigit() else v
+
+
+def net_table(board_text):
+    """id -> name, empty on KiCad 10 (which has no table)."""
+    root = parse(board_text)
+    out = {}
+    for n in kids(root, "net"):
+        if len(n) > 2:
+            out[s(n[1])] = s(n[2])
+    return out
+
+
 def pads(board_text):
     """-> list of dicts with global geometry."""
     root = parse(board_text)
+    _tbl = {}
+    for _n in kids(root, "net"):
+        if len(_n) > 2:
+            _tbl[s(_n[1])] = s(_n[2])
     out = []
     for fp in kids(root, 'footprint'):
         at = kid(fp, 'at'); fx, fy = f(at[1]), f(at[2])
@@ -58,11 +92,19 @@ def pads(board_text):
             pat = kid(pd, 'at'); px, py = f(pat[1]), f(pat[2])
             sz = kid(pd, 'size')
             lay = [s(x) for x in kid(pd, 'layers')[1:]]
-            net = kid(pd, 'net')
+            net = kid(pd, "net")
+            if net is not None and len(net) == 2 and str(s(net[1])).lstrip("-").isdigit():
+                _nm = _tbl.get(s(net[1]), "")     # KiCad <=9: (net N) -> table
+            elif net is not None and len(net) > 2:
+                _nm = s(net[2])                   # KiCad <=9: (net N "NAME")
+            elif net is not None:
+                _nm = s(net[1])                   # KiCad 10:  (net "NAME")
+            else:
+                _nm = ""
             gx, gy = rot(px, py, fa)
             out.append(dict(ref=ref, pad=s(pd[1]), shape=s(pd[3]),
                             x=fx + gx, y=fy + gy,
                             w=f(sz[1]), h=f(sz[2]),
                             rot=(fa + (f(kid(pd,'at')[3]) if len(pat) > 3 else 0)) % 360,
-                            layers=lay, net=s(net[2]) if net and len(net) > 2 else ''))
+                            layers=lay, net=_nm))
     return out

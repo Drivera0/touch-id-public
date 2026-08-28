@@ -63,8 +63,23 @@ def rec(ok, name, detail="", blocker=True):
     results.append(("PASS" if ok else ("BLOCKER" if blocker else "WARN"), name, detail))
 
 t = open(BOARD, encoding="utf-8", errors="replace").read()
+# TWO FILE FORMATS. KiCad <=9 writes a top-level table of (net N "NAME") and
+# items refer to it as (net N). KiCad 10 has NO TABLE AT ALL -- every item
+# carries (net "NAME") directly. Round-tripping this board through KiCad 10 to
+# fill the zones turned every net invisible to the old patterns, and a checker
+# that sees no nets passes everything. Never assume the format.
 nn = dict(re.findall(r'\(net (\d+) "([^"]*)"\)', t))
 _GND_ID = next((i for i, n in nn.items() if n == "GND"), None)
+KICAD10 = not nn and bool(re.search(r'\(net\s+"', t))
+
+def _seg_net(block):
+    """net NAME of a segment/via block, either format."""
+    m_ = re.search(r'\(net (?:(\d+) )?"([^"]*)"\)', block)
+    if m_:
+        return m_.group(2)
+    m_ = re.search(r'\(net (\d+)\)', block)
+    return nn.get(m_.group(1), "?") if m_ else "?"
+
 
 # ---------------------------------------------------------------- 1 parse --
 try:
@@ -110,7 +125,7 @@ try:
         # steals the NEXT pad's net -- that produced 6 phantom mismatches on
         # U2/J4, whose NC pins carry no (net ...) at all.
         for pm in re.finditer(r'\(pad "([^"]+)"(.*?)\n\t\t\)', blk, re.S):
-            _n = re.search(r'\(net \d+ "([^"]*)"\)', pm.group(2))
+            _n = re.search(r'\(net (?:\d+ )?"([^"]*)"\)', pm.group(2))
             if _n:
                 have[(ref, pm.group(1))] = _n.group(1)
     missing = [k for k in want if k not in have]
@@ -187,9 +202,13 @@ for sm in re.finditer(r'\(segment\b(.*?)\n\t\)', t, re.S):
 for vm in re.finditer(r'\(via\b(.*?)\n\t\)', t, re.S):
     a_ = re.search(r'\(at ([-\d.]+) ([-\d.]+)\)', vm.group(1))
     sz = re.search(r'\(size ([\d.]+)\)', vm.group(1))
-    if a_ and sz and _box(float(a_.group(1))-float(sz.group(1))/2, float(a_.group(2))-float(sz.group(1))/2,
-                          float(a_.group(1))+float(sz.group(1))/2, float(a_.group(2))+float(sz.group(1))/2).intersects(ko_all):
-        bad += 1   # a via pierces every layer, so the union is right here
+    if a_ and sz:
+        _vx, _vy, _vd = float(a_.group(1)), float(a_.group(2)), float(sz.group(1))
+        # AREA, not .intersects(): a via whose edge exactly meets the keep-out
+        # boundary touches it with zero overlap and is not a violation.
+        from shapely.geometry import Point as _Pt
+        if _Pt(_vx, _vy).buffer(_vd / 2).intersection(ko_all).area > 1e-6:
+            bad += 1   # a via pierces every layer, so the union is right here
 # ZONE FILL TOO. This checked tracks and vias only, and a poured plane is
 # neither -- so a fill spilling into the antenna keep-out would have been
 # invisible here, on the one part of the board whose emptiness is the point.
@@ -212,10 +231,17 @@ try:
             _pp = [(_s4.f(q[1]), _s4.f(q[2])) for q in _s4.kids(_ptsn, "xy")]
             if len(_pp) < 3:
                 continue
-            _poly = _P(_pp)
+            # buffer(0) REPAIRS the polygon. KiCad writes a filled zone as one
+            # keyholed ring -- it walks into each hole and back out along a
+            # zero-width slit -- so the raw ring is self-touching and INVALID,
+            # and .intersects() on invalid geometry answers nonsense (it said
+            # all three pours were in the antenna keep-out; the true overlap is
+            # 0.000000 mm2). Repair first, then measure AREA, because touching
+            # a boundary is not intruding through it.
+            _poly = _P(_pp).buffer(0)
             for _L in _ls:
                 _kz = ko_by_layer.get(_L)
-                if _kz is not None and _poly.intersects(_kz):
+                if _kz is not None and _poly.intersection(_kz).area > 1e-6:
                     _fillbad += 1
 except Exception:
     _fillbad = 0
@@ -234,10 +260,10 @@ widths = collections.Counter()
 per_net = collections.defaultdict(list)
 for sm in re.finditer(r'\(segment\b(.*?)\n\t\)', t, re.S):
     b = sm.group(1)
-    w = re.search(r'\(width ([\d.]+)\)', b); n = re.search(r'\(net (\d+)\)', b)
+    w = re.search(r'\(width ([\d.]+)\)', b)
     if w:
         widths[float(w.group(1))] += 1
-        per_net[nn.get(n.group(1), "?") if n else "?"].append(float(w.group(1)))
+        per_net[_seg_net(b)].append(float(w.group(1)))
 under = sum(c for k, c in widths.items() if k < DESIGN_TRACK - 1e-9)
 rec(under == 0, "9  no track below the %.3f track rule" % DESIGN_TRACK,
     "%d segment(s), min %.4f" % (under, min(widths) if widths else 0))
@@ -254,8 +280,8 @@ rec(under == 0, "9  no track below the %.3f track rule" % DESIGN_TRACK,
 def _netlen(n):
     tot = 0.0
     for m in re.finditer(r'\(segment\b(.*?)\n\t\)', t, re.S):
-        b = m.group(1); nm = re.search(r'\(net (\d+)\)', b)
-        if not nm or nn.get(nm.group(1)) != n:
+        b = m.group(1)
+        if _seg_net(b) != n:
             continue
         s_ = re.search(r'\(start ([-\d.]+) ([-\d.]+)\)', b)
         e_ = re.search(r'\(end ([-\d.]+) ([-\d.]+)\)', b)
@@ -439,9 +465,9 @@ def _copper_zones():
         for _z in _s3.kids(_r, "zone"):
             if _s3.kid(_z, "keepout"):
                 continue
-            _nn2 = _s3.kid(_z, "net_name")
+            _nn2 = _s3.kid(_z, "net_name") or _s3.kid(_z, "net")
             _lay = _s3.kid(_z, "layers") or _s3.kid(_z, "layer")
-            out.append(dict(net=_s3.s(_nn2[1]) if _nn2 and len(_nn2) > 1 else "",
+            out.append(dict(net=(_s3.s(_nn2[-1]) if _nn2 and len(_nn2) > 1 else ""),
                             layers=[_s3.s(x) for x in _lay[1:]] if _lay else [],
                             filled=bool(_s3.kids(_z, "filled_polygon"))))
         return out
@@ -459,8 +485,13 @@ def _count_gnd():
         _nm = {_s2.s(n[1]): (_s2.s(n[2]) if len(n) > 2 else "")
                for n in _s2.kids(_r, "net")}
         def _isg(o):
+            # net_of covers KiCad 10's (net "NAME"); the numeric (net N) of
+            # older files still needs the top-level table to resolve.
+            if _s2.net_of(o) == "GND":
+                return True
             _n = _s2.kid(o, "net")
-            return _n is not None and _nm.get(_s2.s(_n[1])) == "GND"
+            return (_n is not None and len(_n) == 2
+                    and _nm.get(_s2.s(_n[1])) == "GND")
         return (sum(1 for v in _s2.kids(_r, "via") if _isg(v)),
                 sum(1 for g in _s2.kids(_r, "segment") if _isg(g)))
     except Exception:
@@ -474,7 +505,7 @@ if _gv == 0 and _gs == 0 and not _zt:
 # the authority on whether the fill actually reaches the pads
 _cc = run(os.path.join(KRT, "py_router", "check_connected.py"), BOARD, cwd=KRT, env=env)
 if "ALL NETS FULLY CONNECTED" not in _cc:
-    _m2 = re.search(r"^  GND \(net \d+\):(.*?)(?=\n  \w|\Z)", _cc, re.S | re.M)
+    _m2 = re.search(r"^  GND \((?:net \d+|\d+ pads)\):(.*?)(?=\n  \w|\Z)", _cc, re.S | re.M)
     if _m2 or re.search(r"^    GND \(\d+ pads\)", _cc, re.M):
         _gnd_bad.append("check_connected reports GND NOT fully connected")
 rec(not _gnd_bad, "17 ground plane is connected",

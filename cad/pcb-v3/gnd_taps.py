@@ -203,6 +203,21 @@ def main():
     GRID_SAFETY = STEP * math.sqrt(2) / 2          # 0.0354 mm at STEP 0.05
     tmask = masks(CLR + TRACK / 2 + GRID_SAFETY)
     vmask = masks(CLR + VIA_D / 2 + GRID_SAFETY)
+    # GROW the no-via keep-out by the via's own radius (plus clearance).
+    # poly_mask marks cells whose CENTRE is inside; a via centred 0.25 mm
+    # OUTSIDE the antenna keep-out still puts 0.05 mm of copper inside it,
+    # which is exactly what happened at (-5.20, 4.70). A keep-out applies to
+    # the copper, not to the centre point.
+    if novia.any():
+        _rad = VIA_D / 2 + CLR
+        _n2 = novia.copy()
+        _steps = int(math.ceil(_rad / STEP))
+        for _dx in range(-_steps, _steps + 1):
+            for _dy in range(-_steps, _steps + 1):
+                if math.hypot(_dx, _dy) * STEP > _rad:
+                    continue
+                _n2 |= np.roll(np.roll(novia, _dy, axis=0), _dx, axis=1)
+        novia = _n2
     via_ok = ~(vmask["F.Cu"] | vmask["In1.Cu"] | vmask["B.Cu"]) & ~novia
     # a via must never pierce a pogo contact -- GND ones included
     for p in pads:
