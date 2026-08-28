@@ -72,8 +72,14 @@ check(abs(W - 19.30) < 0.02 and abs(H - 19.30) < 0.02,
 # KiCad is Y-DOWN. Written as a corner translation, deliberately NOT as the
 # "+9.65 / 9.65-" form used by make_bom_cpl.py.
 def to_jlc(x, y):
-    """KiCad Y-DOWN -> gerber/JLC Y-UP, in the gerbers' own coordinate space."""
-    return x, -y
+    """KiCad Y-DOWN -> JLC Y-UP, measured from the board's LOWER-LEFT corner.
+
+    Deliberately written as a translation of the MEASURED outline (x - x0,
+    y1 - y) rather than the generator's "+9.65 / 9.65 -" constants, so a wrong
+    constant in one does not reproduce in the other. That is still not enough
+    on its own -- see the gerber-outline check, which is what actually proves
+    the CPL and the copper share an origin."""
+    return (x - x0), (y1 - y)
 
 board, unref = {}, []
 for fp in k(root, "footprint"):
@@ -118,7 +124,7 @@ for r in rows:
                        % (ref, r["Rotation"], board[ref]["rot"]))
     if r["Layer"] != board[ref]["side"]:
         bad_side.append("%s: file %s vs board %s" % (ref, r["Layer"], board[ref]["side"]))
-    if not (x0 - 0.001 <= gx <= x1 + 0.001 and x0 - 0.001 <= gy <= x1 + 0.001):
+    if not (-0.001 <= gx <= W + 0.001 and -0.001 <= gy <= H + 0.001):
         outside.append("%s at (%.3f,%.3f)" % (ref, gx, gy))
 
 check(not bad_xy, "every CPL coordinate re-derives",
@@ -128,16 +134,15 @@ check(not bad_rot, "every CPL rotation matches the board",
 check(not bad_side, "every CPL layer matches the board",
       "; ".join(bad_side[:4]) if bad_side else "all %s" % rows[0]["Layer"])
 check(not outside, "no part sits outside the outline",
-      "; ".join(outside[:4]) if outside else "all within %.2f..%.2f" % (x0, x1))
+      "; ".join(outside[:4]) if outside else "all within 0..%.2f" % W)
 
 # ---- 4. corner sanity: the transform must map the corners exactly ----------
 c0 = to_jlc(x0, y1)          # lower-left  in gerber terms
 c1 = to_jlc(x1, y0)          # upper-right
-check(abs(c0[0] - x0) < 1e-9 and abs(c1[0] - x1) < 1e-9
-      and abs(c1[1] - c0[1] - H) < 1e-9,
-      "origin transform preserves the gerber frame",
-      "corners (%.3f,%.3f) and (%.3f,%.3f); board %.2f x %.2f"
-      % (c0 + c1 + (W, H)))
+check(abs(c0[0]) < 1e-9 and abs(c0[1]) < 1e-9
+      and abs(c1[0] - W) < 1e-9 and abs(c1[1] - H) < 1e-9,
+      "origin transform maps the corners to 0,0 and W,H",
+      "(%.3f,%.3f) and (%.3f,%.3f)" % (c0 + c1))
 
 # ---- 4b. THE ORIGIN CHECK -------------------------------------------------
 if _gx is None:

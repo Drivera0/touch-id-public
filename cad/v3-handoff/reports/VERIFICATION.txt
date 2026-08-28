@@ -1,7 +1,7 @@
 TouchID v3 handoff — verification report
-generated 2026-08-28 21:14 UTC
+generated 2026-08-28 21:56 UTC
 
-### sexp_check (parser sanity — ALWAYS first)
+### sexp_check
 pcb-v3-handoff.kicad_pcb
   line endings : 12021 CRLF, 0 bare LF
   PARSE OK     : 628 top-level children
@@ -39,7 +39,7 @@ PREFLIGHT — pcb-v3-handoff.kicad_pcb
   VERDICT: orderable once the warnings are accepted
 ==========================================================================
 
-### verify_handoff.py — BOM/CPL re-derived independently
+### verify_handoff.py
 ==========================================================================
 HANDOFF VERIFICATION — BOM / CPL re-derived independently
 ==========================================================================
@@ -49,10 +49,11 @@ HANDOFF VERIFICATION — BOM / CPL re-derived independently
   PASS  every CPL rotation matches the board       0 mismatches
   PASS  every CPL layer matches the board          all Top
   PASS  no part sits outside the outline           all within 0..19.30
-  PASS  origin transform maps the corners          (0.000,0.000) and (19.300,19.300)
+  PASS  origin transform maps the corners to 0,0 and W,H (0.000,0.000) and (19.300,19.300)
+  PASS  CPL sits inside the gerber outline         all 29 placements inside X 0.00..19.30  Y 0.00..19.30 read from Edge_Cuts.gbr
   PASS  BOM and CPL cover the same parts           BOM 29, CPL 29, only-in-BOM=[] only-in-CPL=[]
   PASS  no designator listed twice in the BOM      29 entries, 29 unique
-  PASS  every BOM line carries an LCSC code        21 lines, all sourced
+  PASS  every BOM line carries an LCSC code        20 lines, all sourced
   PASS  CPL omits exactly the hand-worked parts    omitted=BT1, J11, J2, J3, J4, TP1, TP10, TP2, TP3, TP4, TP5, TP6, TP7, TP8, TP9, <no ref>
   PASS  NPTH holes sit on the housing's screw bosses 2 hole(s) [(-8.1, 8.1), (8.1, -8.1)] vs housing [(-8.1, 8.1), (8.1, -8.1)]
   INFO  parts whose rotation can be wrong          4 of 29: U1, U2, U3, U4 (all others are 2-pad symmetric)
@@ -61,7 +62,7 @@ HANDOFF VERIFICATION — BOM / CPL re-derived independently
   0 FAILURE(S)
 ==========================================================================
 
-### verify_sourcing.py — bought package vs land on the board
+### verify_sourcing.py
 ref       landX    landY  pads  LCSC        part bought
 C1        0.540    1.340     2  C2858031    Murata GRM155R61E475ME15D 4.7uF 25V X5R 0402   OK
 C10       0.540    1.340     2  C1525       Samsung CL05B104KO5NNNC 100nF 16V X7R 0402     OK
@@ -96,7 +97,7 @@ U4        1.008    0.820     5  C46459900   TI TPS7A2033DQNR, X2SON-4 1x1       
 2-terminal lands checked : 25
 package mismatches       : 0
 
-### verify_gerbers.py — plotted fab output vs the board
+### verify_gerbers.py
 ==========================================================================
 GERBER VERIFICATION — plotted output vs the board
 ==========================================================================

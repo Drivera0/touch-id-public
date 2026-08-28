@@ -22,23 +22,23 @@ TWO TRAPS, BOTH OF WHICH HAVE RUINED REAL BOARDS
    because that is the only thing the fab can align it against. Getting this
    wrong does not corrupt one part, it moves EVERY part by the same offset.
 
-   This file used to emit "lower-left corner" coordinates, X = x + 9.65 /
-   Y = 9.65 - y, giving a tidy 0..19.30 range. That convention is common and
-   is what JLC's docs describe -- but it is only correct if the GERBERS were
-   also plotted from that origin. Ours were not: they were plotted with
-   "use drill/place file origin" OFF, so the board sits at its native KiCad
-   coordinates, **centred on (0,0), spanning -9.65..+9.65**.
+   This emits "lower-left corner" coordinates:
+       X = x + 9.65        Y = 9.65 - y
+   giving 0..19.30, which is the convention JLCPCB's own documentation
+   describes -- **and it is only correct because the gerbers are now plotted
+   from that same origin.** The board carries `(aux_axis_origin -9.65 9.65)`
+   (KiCad is Y-DOWN, so +9.65 is the bottom edge) and is plotted with
+   "use drill/place file origin" ON, so Edge_Cuts.gbr also runs 0..19.30.
+   The Excellon drill files follow the same origin.
 
-   JLCPCB's viewer caught it: it drew every component floating off the board
-   and offered to "automatically align" them. The offset was exactly the
-   9.65 mm half-width, in both axes.
+   It was briefly the other way round and JLCPCB's viewer caught it: gerbers
+   centred on (0,0) against a corner-based CPL drew every component floating
+   beside the board, offset by exactly the 9.65 mm half-width in both axes.
+   Either convention works; only agreement matters.
 
-   So the transform is now just the Y flip that KiCad's Y-DOWN file requires:
-       X = x            Y = -y
-   which lands in -9.65..+9.65, the same space Edge_Cuts.gbr occupies.
-   verify_handoff.py no longer re-derives a formula; it checks the CPL against
-   the OUTLINE READ OUT OF THE GERBER, which is the thing that actually has to
-   agree.
+   verify_handoff.py does not settle this by re-deriving a formula -- two
+   derivations of the same wrong ASSUMPTION still agree. It reads the outline
+   out of Edge_Cuts.gbr and requires every placement to fall inside it.
 
 2. ROTATION. The number written here is KiCad's footprint angle. **JLC's
    expected orientation for a given package frequently differs**, which is the
@@ -153,8 +153,8 @@ def main():
         lay = kd(fp, "layer")
         side = "Bottom" if lay and s(lay[1]).startswith("B.") else "Top"
         rows.append(dict(ref=ref,
-                         X=round(x, 4),               # gerber space, see above
-                         Y=round(-y, 4),              # KiCad Y-down -> Y up
+                         X=round(x + HALF, 4),        # -> board lower-left
+                         Y=round(HALF - y, 4),        # KiCad Y-down -> Y up
                          rot=round(rot % 360, 2),
                          side=side,
                          value=val.get(ref, "")))
@@ -192,13 +192,28 @@ def main():
         _named[val] = refs
         _first[val] = refs[0]
     groups = _named
+    # TWO FILES, and the difference matters.
+    #
+    # touchid-v3-BOM.csv is the one JLCPCB gets: EXACTLY the four columns their
+    # template defines, nothing else. The previous version carried four extra
+    # metadata columns (library, stock, part fitted, note) because they are
+    # useful to a human -- and JLCPCB's matcher, which has to work out which
+    # column holds the part number, dropped C5 to "No Part Selected" on every
+    # single upload even though C18164635 was sitting right there with 1.1 M in
+    # stock. Do not put anything in the upload file that the template does not
+    # ask for; the annotated copy below keeps all of it for us.
     bom = os.path.join(OUT, "touchid-v3-BOM.csv")
+    bom_note = os.path.join(OUT, "touchid-v3-BOM-annotated.csv")
     unsourced, zero_stock, extended = [], [], set()
+    fh2 = open(bom_note, "w", newline="", encoding="utf-8")
+    w2 = csv.writer(fh2)
+    w2.writerow(["Comment", "Designator", "Footprint",
+                 "JLCPCB Part # (LCSC Part #)",
+                 "JLC library", "JLC stock", "Part fitted", "NOTE"])
     with open(bom, "w", newline="", encoding="utf-8") as fh:
         w = csv.writer(fh)
         w.writerow(["Comment", "Designator", "Footprint",
-                    "JLCPCB Part # (LCSC Part #)",
-                    "JLC library", "JLC stock", "Part fitted", "NOTE"])
+                    "JLCPCB Part # (LCSC Part #)"])
         for v, refs in groups.items():
             pkg = ""
             m = re.search(r"\b(0402|0603|0805|X2SON-4|VQFN-20)\b", v)
@@ -210,10 +225,11 @@ def main():
             missing = [r for r in refs if r not in SRC]
             if missing or len(codes) != 1:
                 unsourced.append((v, refs, missing))
-                w.writerow([v, ",".join(refs), pkg, "", "", "", "",
-                            "*** SOURCE THIS -- no LCSC number known ***"
-                            + (("  (" + LAND_REF[pkg] + ")")
-                               if pkg in LAND_REF else "")])
+                w.writerow([v, ",".join(refs), pkg, ""])
+                w2.writerow([v, ",".join(refs), pkg, "", "", "", "",
+                             "*** SOURCE THIS -- no LCSC number known ***"
+                             + (("  (" + LAND_REF[pkg] + ")")
+                                if pkg in LAND_REF else "")])
                 continue
             lc, lib, stock, desc = SRC[refs[0]]
             if lib != "BASIC":
@@ -225,10 +241,14 @@ def main():
                 zero_stock.append((v, refs, stock, need))
                 note = ("*** JLC ASSEMBLY STOCK %d, NEED %d PER BOARD *** "
                         % (stock, need)) + note
-            w.writerow([v, ",".join(refs), pkg, lc, lib, stock, desc, note])
+            w.writerow([v, ",".join(refs), pkg, lc])
+            w2.writerow([v, ",".join(refs), pkg, lc, lib, stock, desc, note])
 
+    fh2.close()
     print("wrote %s   (%d parts placed)" % (cpl, len(rows)))
-    print("wrote %s   (%d BOM lines)" % (bom, len(groups)))
+    print("wrote %s   (%d BOM lines, 4 columns - THIS IS THE UPLOAD FILE)"
+          % (bom, len(groups)))
+    print("wrote %s   (same lines + library/stock/notes, for humans)" % bom_note)
     print()
     print("SOURCING")
     print("  lines fully sourced : %d / %d" % (len(groups) - len(unsourced),
