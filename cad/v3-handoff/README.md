@@ -154,11 +154,24 @@ explicitly on upload: *"U1 designator don't exist in the BOM file"* → Continue
 **When the module returns**, re-upload the full `touchid-v3-BOM.csv` instead
 and U1 comes back. Nothing else changes.
 
-> **Every re-upload drops C5 again.** `C18164635` is in the file with 1.1 M in
-> stock, but JLC pre-fills its part search from the *comment* as
-> `10uF0603 0603`, matches nothing, and marks it "No Part Selected". Click
-> Search on that row, type **`C18164635`**, Select. First hit. The file is not
-> wrong — this is a JLC-side matcher quirk and it recurs every single upload.
+### C5 — fixed by changing the part, after two wrong theories
+
+`C18164635` (CCTC) came back "No Part Selected" on **every** upload despite
+1.1 M in stock. Two plausible causes were tested and both were wrong: it was
+not the four extra metadata columns (a clean 4-column file failed identically)
+and not the under-specified comment (`10uF 16V X5R 0603` failed too).
+
+Diffing it field-by-field against `C20416425` — C7's part, same CCTC 0603
+family, always matches — everything material is equivalent. The one categorical
+difference is **`idleFlag`: null on the failing part, true on the working one.**
+
+C5 is now **`C70225`** (FH 0603X106K160NT), same 10 µF 16 V X5R ±10% 0603,
+479 k in stock, `idleFlag` true. **JLC auto-matched it first try, 19/19
+confirmed.** Costs $0.88 more, which buys the removal of a manual step from
+every future upload.
+
+That is an observation, not a proven mechanism — `idleFlag` tracked the
+behaviour and the swap is verified to work. Do not treat it as a general rule.
 
 Assembly settings already chosen: Standard process, **Top side only** (all 46
 footprints are front-side), qty 5, edge rails added by JLCPCB, and **Confirm
