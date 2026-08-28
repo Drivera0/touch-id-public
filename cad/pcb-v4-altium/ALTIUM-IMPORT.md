@@ -190,3 +190,66 @@ fault.
    ~0.254 mm clearance and would flag this whole board.
 
 **Do not read a DRC taken before those three steps.**
+
+## Altium DRC — run 2026-08-28, after repour + rules
+
+Rules corrected first: Altium's imported **Width min was 0.254 mm** (its 10-mil
+default) against our 0.127 mm tracks — every trace would have flagged. Set to
+0.127 on all four layers. Clearance came across correctly at 0.10 mm on its own.
+Polygons repoured (3 of them, as expected).
+
+**Result: 0 warnings, 1 rule violation.**
+
+| rule | violations |
+|---|---|
+| Clearance (Gap = 0.1 mm), incl. polygon and netclass variants | **0** |
+| Short-Circuit | **0** |
+| **Un-Routed Net** | **0** |
+| **Width (Min = 0.127 mm)** | **0** |
+| Hole Size, Hole-to-Hole | **0** |
+| Minimum Solder Mask Sliver | **0** |
+| Silk to Solder Mask, Silk to Silk | **0** |
+| Modified Polygon, Routing Topology, Power Plane Connect, Height | **0** |
+| **Net Antennae** | **1** |
+
+Un-Routed Net = 0 is the meaningful one: it is the rule that would have caught
+the missing ground plane instantly, and it is clean now.
+
+### The one violation is REAL, and it is mine
+
+`Net Antennae: Track (17.05,2.75)–(17.2,2.6) on F.Cu` — in board coordinates,
+a **GND stub from (+7.400, +6.900) to (+7.550, +7.050)**, 0.127 wide.
+
+Verified independently against the KiCad file: the far end sits on a GND via at
+(+7.65, +7.25), and **the other end touches nothing at all** — no track, no via,
+no pad. It is a genuine dangling antenna, produced by `gnd_taps.py`'s
+endpoint-snapping pass detaching a tap from the pad it was welding.
+
+Electrically it is harmless — the F.Cu GND pour covers it and
+`check_connected` still reports every net whole — but it is a stub that serves
+nothing, and **none of my 19 checks could see it.**
+
+> **This is the entire value of the exercise.** Altium found a class of defect
+> the gate had no concept of: a free track end. A sweep for dangling ends across
+> the whole board turns up more candidates, though that scan uses an
+> axis-aligned pad test and will over-report on rotated pads — the same flaw
+> already fixed inside `gnd_taps`. The one Altium named was confirmed by hand.
+
+**Fix belongs in KiCad, the master** — then re-export and re-import.
+
+## 3D models — Altium does NOT have them for us
+
+The 3D view renders the board correctly (copper, mask, silkscreen, holes) but
+**every component is flat: no 3D bodies came across.** KiCad stores model
+references as external STEP paths and the importer does not resolve them.
+
+Altium's Manufacturer Part Search *can* supply real vendor STEP, but:
+
+* the install is currently **Not Connected**, so the service is unavailable;
+* it is per-part manual work, not a bulk operation;
+* **nothing will exist for J2, J3, J4, J11 or BT1** — pogo blocks are keyboard
+  geometry and the cell is wired from above.
+
+So this does not replace `cad/pcb-v3/3dmodels/`. Those boxes are built from
+datasheet body dimensions and **circumscribe** the real parts, which is why the
+existing housing collision check is conservative and still stands.
