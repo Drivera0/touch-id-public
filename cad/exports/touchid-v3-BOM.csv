@@ -1,0 +1,22 @@
+Comment,Designator,Footprint,JLCPCB Part # (LCSC Part #),NOTE
+4.7uF 0402,"C1,C2",0402,,*** SOURCE THIS -- no LCSC number known ***  (land traced from C1525)
+0.1uF 0402,"C3,C10",0402,,*** SOURCE THIS -- no LCSC number known ***  (land traced from C1525)
+10nF 0402 low-leak,C4,0402,,*** SOURCE THIS -- no LCSC number known ***  (land traced from C1525)
+10uF 0603,C5,0603,,*** SOURCE THIS -- no LCSC number known ***  (land traced from C19666)
+1uF 0402,"C6,C8,C9",0402,,*** SOURCE THIS -- no LCSC number known ***  (land traced from C1525)
+22uF 10V X5R 0603,C7,0603,,*** SOURCE THIS -- no LCSC number known ***  (land traced from C19666)
+10nF 0402,"C12,C13",0402,,*** SOURCE THIS -- no LCSC number known ***  (land traced from C1525)
+22uH,L1,,,*** SOURCE THIS -- no LCSC number known ***
+1k 0402,"R1,R2,R3,R7",0402,,*** SOURCE THIS -- no LCSC number known ***  (land traced from C1525)
+4.7M 0402,R4,0402,,*** SOURCE THIS -- no LCSC number known ***  (land traced from C1525)
+1M 0402,R5,0402,,*** SOURCE THIS -- no LCSC number known ***  (land traced from C1525)
+100k 0402,R6,0402,,*** SOURCE THIS -- no LCSC number known ***  (land traced from C1525)
+4.53M 0402,ROK1,0402,,*** SOURCE THIS -- no LCSC number known ***  (land traced from C1525)
+7.15M 0402,ROK2,0402,,*** SOURCE THIS -- no LCSC number known ***  (land traced from C1525)
+1.33M 0402,ROK3,0402,,*** SOURCE THIS -- no LCSC number known ***  (land traced from C1525)
+6.04M 0402 1%,ROV1,0402,,*** SOURCE THIS -- no LCSC number known ***  (land traced from C1525)
+6.98M 0402 1%,ROV2,0402,,*** SOURCE THIS -- no LCSC number known ***  (land traced from C1525)
+Raytac MDBT50Q-1MV2 (nRF52840),U1,,C5118826,
+TI BQ25505,U2,,,*** SOURCE THIS -- no LCSC number known ***
+TI TPS7A2033 3.3 V LDO (sensor rail),U3,,,*** SOURCE THIS -- no LCSC number known ***
+TI TPS7A2033 3.3 V LDO (switched sensor-MCU rail),U4,,,*** SOURCE THIS -- no LCSC number known ***
