@@ -330,3 +330,36 @@ C7 (0603, 1.04 mm tall) fits the 2.22 mm bottom strip, and the 0402 packer had
 `check_escape` went 3 boxed-in -> **1**, and the remaining opens are no longer
 concentrated on U2: they are spread across ROK3, C7, U1, U2 and U2, which is
 what a board at its limit looks like rather than one with a structural fault.
+
+## Bottom-face copper, and why TP9/TP10 stay (2026-08-27)
+
+**Every one of the 25 bottom-side pads is bare copper, and the bottom face is
+the outside of the assembled module** — `touchid_module_v5.py` is explicit that
+"the PCB forms the bottom 1.2 of the assembled 8.36 stack". Nothing covers it.
+
+That is 10 test points + J3 (SWD: SWDIO, SWCLK, RESET, VSTOR, GND) + the J4/J11
+pogo pads, spread from x -7.97 to +6.03 across the face that seats into the
+keyboard slot. Live rails down there include **VSTOR, VBAT and VIN_DC**.
+
+Daniel confirmed the module **drops straight down** onto the pogo pins rather
+than sliding in. That removes the failure I was most worried about: on a sliding
+insertion the sprung pins sweep across the whole bottom face on the way in, and
+J4.5 is chassis ground — a ground pin dragging over the VSTOR pad would short
+the storage cap on every insertion. Straight-down means each pin only ever meets
+its own pad.
+
+**TP9 and TP10 (spare GND) were removed and then put back.** Two reasons:
+
+1. Removing two pads shifted the 0402 assignment enough to break the routing:
+   **0 open connections became 4** (R6/BL_FLAG, C6/SENSOR_3V3, and both of U2's
+   VBAT and VSTOR pins), and the best recovery over several re-route strategies
+   was 3. The placement that routes cleanly is not robust to small perturbations.
+2. The premise was wrong anyway. I proposed removing them as clutter, but
+   they are **GND** — the safest possible net to expose on that face. Shorting
+   GND to the chassis is a non-event; it is VSTOR and VBAT that matter. Trading
+   a fully-passing board for tidiness on the two least risky pads is a bad deal.
+
+**Still worth knowing:** the exposed rails are a real if low-probability hazard
+(conductive debris, a dropped module, a metal slot floor). If that ever needs
+closing, the fix is to tent everything except J4/J11 in solder mask and accept
+losing probe access — not to delete pads and re-route.
