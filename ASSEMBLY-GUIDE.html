@@ -1,0 +1,231 @@
+<title>TouchID Assembly Guide</title>
+<style>
+:root{--bg:#fbfaf8;--fg:#1a1917;--mut:#6b665e;--line:#e0dbd3;--card:#fff;
+ --acc:#8a5a2b;--warn:#b4531a;--warnbg:#fdf3ec;--ok:#3d6b46;--okbg:#eef4ef;
+ --board:#2f6b4f;--pad:#c9a227;--sol:#c2410c;--mono:ui-monospace,"SF Mono",Menlo,Consolas,monospace}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#161513;--fg:#eae7e1;--mut:#9d978c;
+ --line:#332f2a;--card:#1e1c19;--acc:#d99a5b;--warn:#e08a4e;--warnbg:#2a1e14;--ok:#7fbb8c;--okbg:#18241a;
+ --board:#2f6b4f;--pad:#d9b53c;--sol:#f97316}}
+:root[data-theme="dark"]{--bg:#161513;--fg:#eae7e1;--mut:#9d978c;--line:#332f2a;--card:#1e1c19;
+ --acc:#d99a5b;--warn:#e08a4e;--warnbg:#2a1e14;--ok:#7fbb8c;--okbg:#18241a;--pad:#d9b53c;--sol:#f97316}
+body{background:var(--bg);color:var(--fg);font:16px/1.65 ui-sans-serif,system-ui,-apple-system,sans-serif;margin:0;padding:2.5rem 1.25rem 5rem}
+.wrap{max-width:56rem;margin:0 auto}
+h1{font-size:2rem;line-height:1.15;margin:0 0 .4rem;letter-spacing:-.02em}
+.sub{color:var(--mut);margin:0 0 2.5rem;font-size:1.05rem}
+h2{font-size:1.3rem;margin:3rem 0 .9rem;padding-top:1.2rem;border-top:1px solid var(--line);letter-spacing:-.01em}
+h3{font-size:1.02rem;margin:1.8rem 0 .5rem}
+p{margin:.75rem 0}
+.mono{font-family:var(--mono);font-size:.94em}
+.card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:1.1rem 1.3rem;margin:1.1rem 0}
+.warn{background:var(--warnbg);border:1px solid var(--warn);border-radius:10px;padding:1rem 1.3rem;margin:1.3rem 0}
+.warn strong{color:var(--warn)}
+.ok{background:var(--okbg);border:1px solid var(--ok);border-radius:10px;padding:1rem 1.3rem;margin:1.3rem 0}
+table{border-collapse:collapse;width:100%;font-size:.94rem;margin:.7rem 0}
+th,td{text-align:left;padding:.45rem .6rem;border-bottom:1px solid var(--line);vertical-align:top}
+th{font-weight:600;font-size:.79rem;text-transform:uppercase;letter-spacing:.05em;color:var(--mut)}
+.scroll{overflow-x:auto}
+figure{margin:1.6rem 0}
+svg{display:block;max-width:100%;height:auto;margin:0 auto}
+ol,ul{padding-left:1.4rem} li{margin:.5rem 0}
+.big{font-size:1.5rem;font-weight:600;color:var(--acc);letter-spacing:-.01em}
+.flow{display:flex;flex-wrap:wrap;align-items:center;gap:.5rem;margin:1rem 0;font-size:.92rem}
+.flow span{background:var(--card);border:1px solid var(--line);border-radius:6px;padding:.4rem .7rem}
+.flow i{color:var(--mut);font-style:normal}
+.key{display:flex;gap:1.5rem;flex-wrap:wrap;justify-content:center;font-size:.87rem;color:var(--mut);margin-top:.7rem}
+.key i{display:inline-block;width:.8rem;height:.8rem;border-radius:50%;margin-right:.35rem;vertical-align:-2px}
+</style>
+<div class="wrap">
+
+<h1>Your board, in plain language</h1>
+<p class="sub">What it is, how it powers itself, what arrives already built, and
+the eight wires you attach by hand.</p>
+
+<h2>1. What the board actually is</h2>
+
+<p>It's a small square of fibreglass — <span class="mono">19.3 × 19.3 mm</span>,
+about the size of a postage stamp — that drops into a slot in your keyboard.</p>
+
+<p>Its job: <strong>read your fingerprint and tell your computer, over Bluetooth,
+that it's you.</strong> It has no battery cable, no USB, no switch. It powers
+itself from your keyboard's backlight.</p>
+
+<p>Inside that fibreglass are four separate sheets of copper, stacked like pages,
+with the electrical connections etched into them. That's what "4-layer" means —
+the wiring runs on four levels so it can all fit in a stamp-sized square.</p>
+
+<h2>2. How it powers itself</h2>
+
+<p>This is the clever part, and it's why the design is unusual:</p>
+
+<div class="flow">
+<span>Keyboard backlight LEDs</span><i>→</i>
+<span>3 contacts underneath</span><i>→</i>
+<span><b>U2</b> harvester chip</span><i>→</i>
+<span>charges the cell</span><i>→</i>
+<span><b>U3/U4</b> steady 3.3 V</span><i>→</i>
+<span>sensor + radio</span>
+</div>
+
+<p>Your keyboard's backlight is already there, already powered. The board taps a
+tiny amount of that through contacts on its underside, and <strong>U2</strong>
+(the "charger") turns that trickle into a charge for a small rechargeable cell.
+<strong>U3</strong> and <strong>U4</strong> then make the clean, steady 3.3 volts
+the sensor and radio need.</p>
+
+<p>The whole thing needs about <strong>4 mWh a day</strong> — roughly what the
+backlight gives it in four hours of use, with about 4× to spare.</p>
+
+<h2>3. What arrives from JLCPCB, already built</h2>
+
+<p><strong>29 components, all soldered on by machine.</strong> You don't touch any
+of these:</p>
+
+<div class="scroll"><table>
+<thead><tr><th>Name on board</th><th>What it is</th><th>Size</th></tr></thead>
+<tbody>
+<tr><td class="mono">U1</td><td>The brain and the Bluetooth radio, in one metal-lidded module</td><td>10.5 × 15.5 mm</td></tr>
+<tr><td class="mono">U2</td><td>The harvester — sips power from the backlight and charges the cell</td><td>3.5 mm square</td></tr>
+<tr><td class="mono">U3, U4</td><td>Two voltage regulators, making steady 3.3 V</td><td><b>1.0 × 0.8 mm</b></td></tr>
+<tr><td class="mono">L1</td><td>A coil the harvester needs to do its job</td><td>2.5 × 2.0 mm</td></tr>
+<tr><td class="mono">C1–C13</td><td>Twelve capacitors — small energy buffers</td><td>1.0 × 0.5 mm</td></tr>
+<tr><td class="mono">R1–R7, ROK, ROV</td><td>Twelve resistors, mostly setting voltage thresholds</td><td>1.0 × 0.5 mm</td></tr>
+</tbody></table></div>
+
+<p style="color:var(--mut);font-size:.93rem">Look at U3 and U4 — <b>one
+millimetre</b>, with four connections underneath. That is why the board is
+machine-assembled. Nobody solders those by hand.</p>
+
+<h2>4. The eight wires you attach</h2>
+
+<p>Everything above arrives done. <strong>You add eight wires.</strong> Here's
+where they go — this is the board seen from the top, with the components on it:</p>
+
+<figure>
+<svg viewBox="-115 -60 730 620" width="700" role="img"
+ aria-label="Top view of the TouchID board showing the six sensor pads at left and right, and the two battery pads at upper left">
+  <rect x="0" y="0" width="501.8" height="501.8" rx="52" fill="var(--board)" stroke="var(--fg)" stroke-width="2"/>
+  <circle cx="461.5" cy="40.3" r="16.9" fill="var(--bg)" stroke="var(--mut)" stroke-width="2"/>
+  <circle cx="40.3" cy="461.5" r="16.9" fill="var(--bg)" stroke="var(--mut)" stroke-width="2"/>
+  <rect x="93.6" y="75.4" width="273" height="403" rx="8" fill="#54595e" stroke="#3a3e42" stroke-width="2"/>
+  <text x="230" y="265" fill="#e8e6e3" font="600 17px ui-sans-serif" text-anchor="middle" font-size="17" font-weight="600">U1</text>
+  <text x="230" y="288" fill="#b9b5b0" font-size="12.5" text-anchor="middle">radio + brain</text>
+  <circle cx="250.9" cy="250.9" r="157.3" fill="none" stroke="var(--mut)" stroke-width="2.5" stroke-dasharray="9 7"/>
+  <text x="250.9" y="118" fill="var(--mut)" font-size="12.5" text-anchor="middle">cell sits here, on top</text>
+
+  <circle cx="53.0" cy="97.5"  r="18.2" fill="var(--sol)"/>
+  <circle cx="53.0" cy="139.1" r="18.2" fill="var(--sol)"/>
+  <circle cx="37.7" cy="336.7" r="15.6" fill="var(--pad)"/>
+  <circle cx="37.7" cy="375.7" r="15.6" fill="var(--pad)"/>
+  <circle cx="37.7" cy="414.7" r="15.6" fill="var(--pad)"/>
+  <circle cx="453.7" cy="336.7" r="15.6" fill="var(--pad)"/>
+  <circle cx="453.7" cy="375.7" r="15.6" fill="var(--pad)"/>
+  <circle cx="453.7" cy="414.7" r="15.6" fill="var(--pad)"/>
+
+  <g font-size="13" fill="var(--fg)">
+    <text x="-10" y="102" text-anchor="end">BT1 &nbsp;<tspan fill="var(--sol)">+ cell</tspan></text>
+    <text x="-10" y="144" text-anchor="end">BT1 &nbsp;<tspan fill="var(--sol)">− cell</tspan></text>
+    <text x="-10" y="341" text-anchor="end">power to sensor</text>
+    <text x="-10" y="380" text-anchor="end">wake-up</text>
+    <text x="-10" y="419" text-anchor="end">power (switched)</text>
+    <text x="478" y="341">sensor talks</text>
+    <text x="478" y="380">sensor listens</text>
+    <text x="478" y="419">ground</text>
+  </g>
+  <g stroke="var(--mut)" stroke-width="1.3">
+    <line x1="-8" y1="98" x2="32" y2="98"/><line x1="-8" y1="140" x2="32" y2="140"/>
+    <line x1="-8" y1="337" x2="20" y2="337"/><line x1="-8" y1="376" x2="20" y2="376"/><line x1="-8" y1="415" x2="20" y2="415"/>
+    <line x1="472" y1="337" x2="471" y2="337"/><line x1="472" y1="376" x2="471" y2="376"/><line x1="472" y1="415" x2="471" y2="415"/>
+  </g>
+  <text x="250.9" y="533" fill="var(--mut)" font-size="13" text-anchor="middle" font-style="italic">this edge faces the spacebar</text>
+  <text x="250.9" y="-28" fill="var(--mut)" font-size="13" text-anchor="middle" font-style="italic">the keyboard's contact pins press up on the UNDERSIDE, near this edge</text>
+</svg>
+<div class="key">
+  <span><i style="background:var(--sol)"></i>2 cell wires (BT1)</span>
+  <span><i style="background:var(--pad)"></i>6 sensor wires (J2)</span>
+</div>
+</figure>
+
+<h3>The six sensor wires — three each side</h3>
+
+<div class="scroll"><table>
+<thead><tr><th>Side</th><th>Pad</th><th>What it carries</th></tr></thead>
+<tbody>
+<tr><td>Left, top</td><td class="mono">J2-1</td><td>Power to the sensor (always on, so it can wait for a finger)</td></tr>
+<tr><td>Left, middle</td><td class="mono">J2-2</td><td>"A finger arrived" — the sensor's way of waking the board up</td></tr>
+<tr><td>Left, bottom</td><td class="mono">J2-3</td><td>Power to the sensor's own processor (switched off when idle, to save energy)</td></tr>
+<tr><td>Right, top</td><td class="mono">J2-4</td><td>The sensor talking to the board</td></tr>
+<tr><td>Right, middle</td><td class="mono">J2-5</td><td>The board talking to the sensor</td></tr>
+<tr><td>Right, bottom</td><td class="mono">J2-6</td><td>Ground — the common return that every circuit needs</td></tr>
+</tbody></table></div>
+
+<div class="warn">
+<p><strong>Get the sensor's wire order right before you solder anything.</strong>
+This exact table was <em>wrong</em> earlier in the project — it had been copied
+from a different sensor model and was reversed end-for-end. Check your sensor's
+own datasheet against this table, and if they disagree, stop and ask. Swapping
+power and ground will destroy the sensor instantly.</p>
+</div>
+
+<h3>The two cell wires</h3>
+<p>Bigger pads, further apart, on the upper left. <span class="mono">BT1-1</span>
+is <strong>+</strong>, <span class="mono">BT1-2</span> is <strong>−</strong>.
+There's a <b>+</b> and <b>−</b> printed on the board next to them.</p>
+
+<h2>5. How to actually solder them</h2>
+
+<p>If you've never done this: the pads are bare gold-plated copper circles. You're
+melting a small amount of solder to join a wire to each circle. The technique that
+works:</p>
+
+<ol>
+<li><strong>Tin the pad first.</strong> Touch the iron to the pad, feed a
+little solder, remove both. You want a small shiny dome, not a blob.</li>
+<li><strong>Tin the wire end.</strong> Strip about 2 mm, twist the strands,
+melt a little solder into them so they hold their shape.</li>
+<li><strong>Join them.</strong> Hold the tinned wire onto the tinned pad, touch
+the iron to both for about a second. The two pools merge. Remove the iron and
+<em>don't move the wire</em> until it dulls — a second or two.</li>
+<li><strong>Tug it gently.</strong> If it moves, redo it. A joint that looks fine
+but isn't bonded is the most common failure.</li>
+</ol>
+
+<div class="card">
+<p><strong>Kit:</strong> a fine-tipped iron around 320 °C, thin solder
+(0.5 mm or less), flux, tweezers, and a magnifier. The pads are
+<span class="mono">1.2–1.4 mm</span> across — about the size of the tip of a
+ballpoint pen — so they're comfortable, but you do want to see what you're doing.</p>
+<p><strong>The cell pads are the easier pair</strong>: bigger, further apart, and
+only two of them. The sensor's six are the fiddlier job.</p>
+</div>
+
+<h2>6. Do it in this order</h2>
+
+<ol>
+<li><strong>Boards arrive from JLCPCB</strong> with all 29 parts fitted.</li>
+<li><strong>Test before attaching anything.</strong> Feed 3.3 V from a bench
+supply to the test points and check the board behaves. Nothing is at risk yet.</li>
+<li><strong>Solder the six sensor wires.</strong> Check the pinout twice first.</li>
+<li><strong>Fit the board into the 3D-printed housing.</strong></li>
+<li><strong>Drop the cell into its pocket</strong> above U1 and solder its two
+wires last.</li>
+<li><strong>Slide the module into the keyboard slot.</strong> The keyboard's
+spring-loaded pins press up on the contacts underneath — nothing to solder there.</li>
+</ol>
+
+<div class="ok">
+<p><strong>Why the cell goes last:</strong> until it's connected, there's no
+stored energy anywhere on the board. You can probe, re-solder and make mistakes
+safely. Once a lithium cell is attached, a slip with a metal tool can short it.
+Leaving it to the end isn't just convenient — it's the safe order.</p>
+</div>
+
+<div class="warn">
+<p><strong>One thing is still unresolved, and it matters.</strong> The cell needs
+a small protection circuit, and there isn't room for one on the board. That means
+buying the cell as a <em>protected assembly</em> — a cell that comes with the
+protection and its wires already fitted. <strong>Do not wire a bare, unprotected
+lithium cell to this board.</strong> It's the one open item that could actually
+hurt you rather than just waste a board.</p>
+</div>
+
+</div>
