@@ -9,11 +9,19 @@
 # A 0.20 track needs 0.60 mm to pass between pads; a 0.127 track needs 0.381.
 # Measured effect on open connections: 0.20 -> 13, 0.15 -> 6, 0.127 -> 5.
 #
-# 0.127 is 1.4x JLC's 4-layer minimum, so there is still real margin.
+# TRACK and CLEARANCE are separate rungs and were wrongly set to one number.
+# JLCPCB standard 4-layer is 0.0889 track / 0.10 clearance -- clearance is the
+# LOOSER of the two, so tying them together threw away 0.027 mm per side for
+# nothing. That margin is decisive in the one corridor that matters: U2's east
+# pads have only 0.21 mm to the housing lip.
+#
+#   track 0.127 = 1.43x JLC's 0.0889 minimum
+#   clear 0.10  = 1.00x JLC's 0.10 minimum   (their standard rung exactly)
+#
 # Vias stay at the netclass 0.6/0.3, NOT the 0.25/0.15 advanced rung.
 
 track_width  = 0.127
-clearance    = 0.127
+clearance    = 0.10
 via_diameter = 0.60
 via_drill    = 0.30
 hole_to_hole = 0.20

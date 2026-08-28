@@ -372,3 +372,69 @@ still **1.4x** JLC's 4-layer minimum, with vias unchanged at the netclass
 > rules entirely.
 
 **State: 14 of 15 checks pass. 5 open connections, no dead nets.**
+
+## ZERO OPEN CONNECTIONS — 2026-08-27
+
+`preflight.py` on `pcb-v3-handoff.kicad_pcb`: **15/15 pass, 0 blockers.**
+Reproduce with `route_touchid.sh` (three steps — see the header for why).
+
+The last five opens were not one problem. They were four:
+
+**1. The test points were placed decoratively.** Ten of them sat in an evenly
+spaced row at y = 0.20, x = -8..+8, hard-coded. TP3 (VBAT) was parked at
+x = -4.00 while every other VBAT pad is at U2, x = +6.8 — so the router had to
+drag a B.Cu net two thirds of the way across the board. They are now assigned
+to slots by net locality, the same way the passives already were.
+
+> Second-order: those ten pads were also in `_NETPTS`, so they had been
+> dragging every net centroid toward the middle of the board and pulling the
+> passive placement with them. Test points are probe pads, not circuit nodes,
+> and are now excluded.
+
+**2. Parts were sitting on top of the pogo pads.** ROV1 and ROK3 were directly
+over J11's Ø2.2 contacts. JLCPCB standard is through-hole vias only, so a via
+above a pogo pad comes out *through the mating contact* — those parts had no
+via available anywhere and were stranded on F.Cu. (They are also the one part
+of the board that flexes: pogo pins are sprung and push up on those pads.)
+Forbidding them outright leaves 12 slots for 22 parts, so pogo slots are now
+heavily penalised in the assignment instead of banned.
+
+**3. `CHAN` was stale.** The slot generator reserved 0.60 mm channels — the
+figure for a 0.20 track at 0.20 clearance — long after the design rule moved.
+It is now derived from the rule (0.377) instead of hard-coded.
+
+**4. Net ORDER, which was the real one.** U2's east pins (OK_HYST, OK_PROG,
+VBAT_OK) are 0.26 mm apart, so all three must escape east through the gap
+between the package and the housing lip — a corridor that fits about one
+track. Whoever routes first takes it. OK_PROG won and then ran **10 mm north up
+the board edge**, walling VBAT_OK's pin in completely: a flood fill from that
+pad reaches x = 8.775 and stops. No amount of re-routing VBAT_OK helps, because
+the corridor is already occupied. Ripping the squatter and re-routing it *after*
+the pin it was starving closes it.
+
+### Things that turned out to be checker bugs, not board bugs
+
+Three of the "blockers" on the way here were wrong, which is worth recording
+because the pattern keeps repeating:
+
+| symptom | actual cause |
+|---|---|
+| 39 DRC violations "Required clearance 0.1270 (netclass override)" | the routed board shipped with **no matching `.kicad_pro`**, so KiCad and the checker fell back to stale rules |
+| check 6b "checker gave no verdict" on a clean board | `preflight.BOARD` was used verbatim; several checkers run with `cwd=KRT`, where a **relative** board name does not exist |
+| check 2 "3 violating pairs" against a 0.100 rule | `check_board.MIN_CU` was hard-coded 0.127 and could never follow the design rule |
+| `nudge.py` reporting success having changed nothing | it matched `f"{x:g}"` against a file that writes six decimals |
+
+All four are now read-from-source rather than hard-coded, and `sexp.py` (a real
+s-expression parser) replaces the regex pad parsing that has now produced
+**three** separate silent-wrong-answer bugs in this project.
+
+### Remaining, both advisory
+
+* **VBAT has no 0.40 mm trunk** — it is 0.2 mm over 27 mm, about 66 mΩ, ~7 mV
+  at 100 mA. That is nothing next to a CP1254's own ESR. Accept.
+* **BT1 tabs and the J4/J11 pogo pads are still unverified** and only Daniel can
+  close the pogo one, against the real keyboard slot. It is the
+  highest-consequence unverified number on the board.
+
+**This does not clear B6: the CP1254 has no protection circuit. That still
+outranks everything here before any order.**

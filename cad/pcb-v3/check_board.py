@@ -15,7 +15,23 @@ from shapely.geometry import box, Point, LineString
 from shapely import affinity
 
 PCB = sys.argv[1] if len(sys.argv) > 1 else "pcb-v2.kicad_pcb"
-MIN_CU = 0.127          # JLCPCB minimum copper to copper
+# Read the rule instead of hard-coding it. This said 0.127 while the board was
+# being routed to a 0.10 clearance rule, so the checker was reporting "3
+# violations" for copper that was in fact legal -- and would have gone on
+# reporting 0.127 no matter what the design rule became.
+import os as _os
+def _clearance_rule():
+    _p = _os.path.join(_os.path.dirname(_os.path.abspath(__file__)),
+                       "fab_floor_touchid.txt")
+    if _os.path.exists(_p):
+        for _l in open(_p):
+            if "=" in _l and not _l.strip().startswith("#"):
+                _k, _v = [x.strip() for x in _l.split("=", 1)]
+                if _k == "clearance":
+                    return float(_v)
+    return 0.127
+
+MIN_CU = _clearance_rule()      # JLCPCB standard 4-layer minimum is 0.10
 
 t = open(PCB).read()
 # --- 2026-08-20: the board now uses KiCad's real net schema ---

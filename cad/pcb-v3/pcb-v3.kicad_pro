@@ -140,7 +140,7 @@
       },
       "rules": {
         "max_error": 0.005,
-        "min_clearance": 0.127,
+        "min_clearance": 0.1,
         "min_connection": 0.0,
         "min_copper_edge_clearance": 0.3,
         "min_groove_width": 0.0,
@@ -284,7 +284,7 @@
   "net_settings": {
     "classes": [
       {
-        "clearance": 0.127,
+        "clearance": 0.1,
         "microvia_diameter": 0.3,
         "microvia_drill": 0.1,
         "name": "Default",
@@ -297,7 +297,7 @@
         "via_drill": 0.3
       },
       {
-        "clearance": 0.127,
+        "clearance": 0.1,
         "microvia_diameter": 0.3,
         "microvia_drill": 0.1,
         "name": "Power",

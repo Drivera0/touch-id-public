@@ -18,12 +18,34 @@ Checks that exist because something actually went wrong:
 import collections, math, os, re, subprocess, sys
 
 HERE = os.path.dirname(os.path.abspath(__file__))
-BOARD = sys.argv[1] if len(sys.argv) > 1 else os.path.join(HERE, "pcb-v3-handoff.kicad_pcb")
+# ABSOLUTE. Several checkers below run with cwd=KRT, so a relative board name
+# silently became "not found" there -- which surfaced as check 6b reporting
+# "checker gave no verdict" on a board whose DRC was in fact clean.
+BOARD = os.path.abspath(sys.argv[1] if len(sys.argv) > 1
+                        else os.path.join(HERE, "pcb-v3-handoff.kicad_pcb"))
 KRT = os.environ.get("KRT", "/tmp/krt")
 
 # 0.20 was unachievable: U3/U4 pads are 0.34-0.40 mm apart and a 0.20 track
 # needs 0.60 to pass. 0.127 is the design rule now, still 1.4x JLC 4-layer.
-FAB_MIN_CU, DESIGN_CU = 0.127, 0.127
+# Track width and clearance are DIFFERENT rungs and must not be one constant.
+# JLCPCB standard 4-layer: 0.0889 track / 0.10 clearance -- clearance is the
+# looser of the two. Read them from the fab floor file so this checker can
+# never drift from what the router was actually given.
+def _fab_floor():
+    tw, cl = 0.127, 0.10
+    fp = os.path.join(HERE, "fab_floor_touchid.txt")
+    if os.path.exists(fp):
+        for _l in open(fp):
+            if "=" in _l and not _l.strip().startswith("#"):
+                _k, _v = [x.strip() for x in _l.split("=", 1)]
+                if _k == "track_width":
+                    tw = float(_v)
+                elif _k == "clearance":
+                    cl = float(_v)
+    return tw, cl
+
+DESIGN_TRACK, DESIGN_CU = _fab_floor()
+FAB_MIN_CU = DESIGN_CU
 VIA_MIN_D, VIA_MIN_DRILL = 0.45, 0.20        # JLC standard 4-layer
 POWER = {"VSTOR", "VBAT", "VIN_DC", "LX", "SENSOR_3V3", "SENSOR_MCU_3V3"}
 
@@ -111,7 +133,12 @@ rec(opens == 0 and not unrouted, "6  every connection routed",
     "TRUE open pads = %d (%d disconnected + %d in zero-copper nets: %s)"
     % (opens + dead_pads, opens, dead_pads, ", ".join(unrouted) or "none"))
 
-o = run(os.path.join(KRT, "py_router", "check_drc.py"), BOARD, "--clearance", str(DESIGN_CU),
+o = run(os.path.join(KRT, "py_router", "check_drc.py"), BOARD,
+        "--clearance", str(DESIGN_CU),
+        # pin the fab rung; check_drc otherwise size-checks against the
+        # ADVANCED tier (via 0.25/0.15), which we are not buying.
+        "--fab-tier", "standard",
+        "--fab-overrides", os.path.join(HERE, "fab_floor_touchid.txt"),
         cwd=KRT, env=env)
 _m = re.search(r"FOUND (\d+) DRC", o)
 rec("NO DRC VIOLATIONS" in o, "6b router DRC @ %.2f" % DESIGN_CU,
@@ -170,8 +197,8 @@ for sm in re.finditer(r'\(segment\b(.*?)\n\t\)', t, re.S):
     if w:
         widths[float(w.group(1))] += 1
         per_net[nn.get(n.group(1), "?") if n else "?"].append(float(w.group(1)))
-under = sum(c for k, c in widths.items() if k < DESIGN_CU - 1e-9)
-rec(under == 0, "9  no track below the %.2f design rule" % DESIGN_CU,
+under = sum(c for k, c in widths.items() if k < DESIGN_TRACK - 1e-9)
+rec(under == 0, "9  no track below the %.3f track rule" % DESIGN_TRACK,
     "%d segment(s), min %.4f" % (under, min(widths) if widths else 0))
 
 # ------------------------------------------------------- 10 power net width --
