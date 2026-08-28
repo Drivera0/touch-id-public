@@ -90,13 +90,47 @@ FDM."* JLC now says it is thin for resin too.
 **More seriously, parts read RED — under 0.5 mm**, below JLC's own minimum:
 
 * a **band along the top rim**, where the wall meets the outer chamfer. Some of
-  this is a taper artifact — any filleted edge reads thin locally — so discount
-  it.
-* a **broad triangular region on the inner cavity wall at a corner.** This one
-  is *not* a taper artifact; it is a flat area of genuinely thin material, and
-  it sits where the **M1.2 screw boss** is flattened on its inner face
-  (`boss_flat_x`, `boss_r = 1.20` at `boss_c = ±8.10`). That is a load-bearing
-  corner — the PCB screws into it.
+  this is a taper artifact — any filleted edge reads thin locally.
+* a **broad triangular region on the inner cavity wall at a corner.**
+
+### The corner wall is 0.15 mm, and that is the real defect
+
+Measured by ray-casting the mesh at the lip tier, z = 1.5:
+
+| direction | wall |
+|---|---|
+| along −x (flat side) | **0.800 mm** |
+| along −y (flat side) | 0.795 mm |
+| **along the −45° corner diagonal** | **0.150 mm** |
+
+The flat sides are exactly the intended `wall_t = 0.8`. **At the corners the
+wall collapses to 0.15 mm** — a fifth of that, and deep inside JLC's red
+(< 0.5 mm) band.
+
+**Cause:** the outer lip is a **rounded** square (corner radius ≈ 2.38 mm pulls
+the outside surface *inward* at each corner) while the inner cavity is a
+**sharp** rectangle (its corner pokes *outward*). The two surfaces converge:
+outer corner sits at d = 12.840 along the diagonal, inner cavity corner at
+d = 12.690.
+
+This is not a taper artifact and it is not local to one corner — it is **all
+four**, by construction. It is also the honest explanation for JLC's red
+heatmap regions, which I initially and wrongly put down to fillet tapering.
+
+### The fix
+
+**Fillet the cavity's inner corners.** Pulling the inner corner back restores
+wall without touching `wall_t`, so it costs no cavity width on the flats where
+U1 actually needs it:
+
+> to reach 0.8 mm at the corner, the inner corner must move from 12.690 to
+> 12.040 along the diagonal → a cavity corner radius of about **1.6 mm**.
+
+Safe to do: U1 spans x −6.05…4.45, y −6.75…8.75, and its nearest corner is
+~4.5 mm clear of the cavity corner at (8.98, 8.98), so a 1.6 mm corner fillet
+cannot touch it. It also adds material around the M1.2 screw bosses at
+(±8.10, ∓8.10), which sit on that same diagonal — so it reinforces the bosses
+for free.
 
 ### What this means
 
