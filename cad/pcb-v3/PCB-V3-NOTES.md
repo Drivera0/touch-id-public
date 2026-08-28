@@ -17,12 +17,12 @@ Built by `build_pcb_v3.py`. **`pcb-v2.kicad_pcb` was not touched.**
 | Layers | **4** — F.Cu, In1.Cu, In2.Cu, B.Cu |
 | Nets | 27, from `netlist_v3.py` (single source of truth) |
 | Footprints | 46 · **177 pads** |
-| Zones | 15 — antenna keep-out ×4, **screw-boss keep-outs ×2 ×4**, GND pour on F.Cu / In2.Cu / B.Cu |
+| Zones | **12 — keep-outs only** (antenna ×4, screw-boss ×2×4). GND pours are OFF until routing is done — see below |
 
 ## Checker results
 
 ```
-sexp_check    PARSE OK, 0 bare LF, 46 footprints, 177 pads, 15 zones
+sexp_check    PARSE OK, 0 bare LF, 46 footprints, 177 pads, 12 zones
 check_board   different-net pairs < 0.127 mm : 0
 check_drc     NO DRC VIOLATIONS          (KiCadRoutingTools, graded at 0.20)
 check_connect 27 nets split                <- EXPECTED, see below
@@ -36,6 +36,26 @@ autorouter in one sitting and trusting its output is a worse idea than routing
 it in KiCad, where you can see what it does. So `check_connect` reports every
 net as split — that is the unrouted state, not a defect. Route, then re-run all
 three.
+
+## Route first, pour last — the GND pours are OFF on purpose
+
+`EMIT_GND_POURS = False`. This is not a detail; it is what was hanging KiCad.
+
+KiCadRoutingTools' parser states it plainly (`kicad_parser.py:5163`):
+*"every zone consumer (obstacle map, plane connectivity) treats `pcb.zones` as
+copper"*. The earlier board had GND pours spanning the **whole 19.30 mm square
+on three of the four layers**. To any of the 26 non-GND nets that is one giant
+foreign-copper obstacle covering the entire board — every pad escape blocked
+immediately. The router thrashed 200,000 iterations per net, and because the
+plugin routes **in-process**, KiCad's window could not repaint. It looked
+frozen. It was working, hopelessly.
+
+Rule areas are unaffected — the parser skips them via `GetIsRuleArea()` — so
+the twelve keep-out zones are still enforced during routing.
+
+**Order: route the signals, then lay the plane down** (the plugin's Planes tab,
+or set `EMIT_GND_POURS = True` and rebuild). That is the normal PCB order
+anyway. Settings sheet: `ROUTING-SETTINGS.md`.
 
 ## The mounting screws — a constraint I had missed
 
