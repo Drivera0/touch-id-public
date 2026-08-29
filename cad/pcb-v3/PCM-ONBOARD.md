@@ -198,3 +198,40 @@ here until one of these produces it:
 3. Ask Mitsumi for the recommended land pattern.
 
 Route 1 is the fastest and the most trustworthy.
+
+---
+
+## Placement feasibility — measured 2026-08-29
+
+**U5 does not fit anywhere on the current board.** Scanning every 0.1 mm
+position against pads, component bodies, all F.Cu tracks and vias:
+
+| | placements |
+|---|---|
+| U5 courtyard 3.41 × 1.81 | **0** |
+| U5 rotated 1.81 × 3.41 | **0** |
+| one 0402 (R8/R9/C14) | 57 |
+| one 0402 rotated | 103 |
+
+So the three passives have homes; **the IC does not**. Dropping the PCM in is
+not possible — existing parts have to move and the board has to be re-routed.
+
+That makes this a **re-layout**, not an insertion. The 55.52 mm² of free area
+is real but fragmented into slivers under 0.9 mm, and the PCM needs one
+contiguous 3.41 × 1.81 with via access.
+
+**Options, in increasing disruption:**
+
+1. **Re-place locally** — shift the 0402s around the least-congested edge to
+   consolidate a 3.4 × 1.8 pocket, then re-route. Cheapest, and the free area
+   exists in principle. May not converge.
+2. **Move U2 or L1** — the next-largest movable bodies after U1. Frees a real
+   pocket but disturbs the BQ25505's switching loop, which is the one place on
+   this board where layout genuinely matters electrically.
+3. **Narrower BLE module (v4)** — U1 is 44 % of the board. This is the answer
+   B6 originally proposed, and it is the only one with room to spare. But every
+   sub-162 mm² module either lacks a VDDH pad or needs antenna clearance a
+   19.30 mm board cannot give (see the module survey).
+
+**Recommended: try 1, fall back to 2.** Option 3 is a bigger project than the
+PCM justifies on its own.
