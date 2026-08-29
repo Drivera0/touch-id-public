@@ -51,7 +51,24 @@ Against this design: `VBAT_OV` worst case **3.955 V** sits **325 mV** below the
 the correct order. Energy cost **0.266 mWh/day = 6.7 %** of the 4.0 mWh/day
 budget.
 
-## Availability
+## Availability — Digi-Key beats JLC for this part
+
+**Digi-Key CA `2508-MC3651DF1AAMCT-ND` (Cut Tape) — Part Status ACTIVE,
+In-Stock 2,485, US$1.33 at quantity ONE.** Cut tape means you can buy a single
+piece. Manufacturer lead time 12 weeks for restock, MSL 1.
+
+That is materially better than JLC: stock 0, minimum 5, C$12.72 pre-order
+(unit C$2.54). **So consign it from Digi-Key**, exactly like the BLE module.
+
+**A CAD model exists.** Digi-Key's EDA/CAD Models page for this part
+(`digikey.ca/en/models/13684190?tab=ultralibrarian`) carries an **Ultra
+Librarian** model with symbol and footprint. Downloading needs a Digi-Key
+account and acceptance of their model download agreement, so that is the
+user's action, not mine — but it removes the need to derive a land pattern at
+all, and an Ultra Librarian footprint is a far safer starting point than
+anything I would draw from the package outline.
+
+## Old availability note (JLC)
 
 **JLCPCB `C6989585` — stock 0, minimum 5, pre-order $9.19 for 5**
 (unit $1.8376). Pre-orderable exactly like U1. Digi-Key CA also lists
