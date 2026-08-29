@@ -140,10 +140,34 @@ sensor_flange_t  = 0.20    # sits proud of the top face by this much
 # on a slot depth NOBODY HAS MEASURED (DESIGN-SPEC, open questions). Growing
 # the riser helps the CELL fit and makes the KEYBOARD fit harder -- opposite
 # directions. If the slot turns out shallow this is the first thing to give.
-riser_h    = 6.50               # was 4.50; +2.00 to clear a protected assembly
+# ==== v5.3 2026-08-29 — TWO VARIANTS, selected by VARIANT below ====
+# The PCM moved ONTO THE PCB (Mitsumi MC3651), so the cell no longer carries
+# one. A bare cell with factory leads is 5.6 mm tall, not the 8.4 mm a
+# protected assembly needs -- which lets the riser come back DOWN and makes the
+# module SHORTER, cutting the unmeasured-slot risk from 6.50 mm to 4.50 mm.
+#
+# Both are kept because the choice is not final: "tall" still works if a
+# protected cell assembly turns up, "short" is the plan of record.
+#
+#   VARIANT = "tall"   riser 6.50, cell O13.5 x 8.4 (protected assembly),
+#                      pocket O14.00, module 14.86 mm
+#   VARIANT = "short"  riser 4.50, cell O12.5 x 5.6 (BARE cell + leads),
+#                      pocket O13.00, module 12.86 mm      <-- plan of record
+#
+# Override from the command line:  python touchid_module_v5.py short
+import sys as _sys
+VARIANT = "tall"
+for _a in _sys.argv[1:]:
+    if _a in ("tall", "short"):
+        VARIANT = _a
+
+if VARIANT == "short":
+    riser_h = 4.50
+else:
+    riser_h = 6.50              # clears a PCM-carrying cell assembly
 riser_od   = body_w             # 18.37 — flush with the top tier
 riser_id   = sensor_window_d    # 15.60 — continuous with the barrel window
-top_h      = body_h + riser_h   # 13.66 — new top face / sensor flange seat
+top_h      = body_h + riser_h   # 13.66 tall / 11.66 short
 
 # ---- the cell is now an ASSEMBLY, not a bare cell ----
 # Target: LiPol LPM1254, 65-80 mAh Li-ion coin, supplied WITH PCM AND WIRES.
@@ -168,10 +192,20 @@ top_h      = body_h + riser_h   # 13.66 — new top face / sensor flange seat
 #   over-discharge 2.75 V +-50 mV (restore 3.50)
 #   over-current  0.2 .. 0.75 A                   <- right-sized for 140 mA
 #   charge        4.2 V +-50 mV
-cell_d_max = 13.5               # LPM1254 ASSEMBLED dia, datasheet worst case
-cell_h_max = 8.4                # LPM1254 ASSEMBLED height (website adder)
-cell_fit   = 0.50               # radial+diametral clearance for the pocket
-cell_pocket_d = cell_d_max + cell_fit          # 14.00
+if VARIANT == "short":
+    # BARE cell with factory-attached leads. No PCM on the cell -- it is on the
+    # board (MC3651). Sized for the widest bare 1254-class cell: an LIR1254 is
+    # O12.5 nominal, a VARTA CP1254 A4X is O12.1 +0.0/-0.3, and either may carry
+    # a thin kapton wrap. Height 5.4 +0.2/-0.1 -> 5.6 max (VARTA A4X datasheet).
+    cell_d_max = 12.5           # widest bare 1254-class cell
+    cell_h_max = 5.6            # VARTA A4X worst case; LIR1254 is the same 5.4
+    cell_fit   = 0.50
+else:
+    # PROTECTED ASSEMBLY. LiPol LPM1254 with PCM + wires, datasheet worst case.
+    cell_d_max = 13.5           # LPM1254 ASSEMBLED dia, datasheet worst case
+    cell_h_max = 8.4            # LPM1254 ASSEMBLED height (website adder)
+    cell_fit   = 0.50
+cell_pocket_d = cell_d_max + cell_fit          # 13.00 short / 14.00 tall
 
 # The cell has to clear the BLE module's metal lid. The lid is grounded and
 # the cell can is live, so this gap is electrical, not just mechanical.
@@ -647,7 +681,7 @@ else:
     print("  all boolean checks passed")
 print("=" * 66 + "\n")
 
-_tag = "v5_" + MODE
+_tag = "v5_" + MODE + "_" + VARIANT
 cq.exporters.export(pcb, os.path.join(out_dir, f"touchid_pcb_{_tag}.step"))
 cq.exporters.export(pcb, os.path.join(out_dir, f"touchid_pcb_{_tag}.stl"), tolerance=0.01)
 
