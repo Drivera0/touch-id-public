@@ -201,7 +201,88 @@ Route 1 is the fastest and the most trustworthy.
 
 ---
 
-## Placement feasibility — measured 2026-08-29
+## Placement feasibility — CORRECTED 2026-08-29
+
+> [!error] **The "U5 does not fit anywhere" result below was WRONG.**
+> It came from a scratch scanner I wrote for the question, which modelled
+> **J2, J3 and BT1 — bare PAD ARRAYS — as solid bounding boxes.** J2's six
+> sensor pads sit at x = ±8.20/+7.80, **15.2 mm apart**; its bounding box is
+> 16.0 × 3.0 mm and the middle of it is empty board. That one mistake walled
+> off ~48 mm² and turned 2,838 legal positions into zero.
+>
+> **`build_pcb_v3.py` never had this bug.** Its `_OBST` only takes a body
+> rectangle when `_cw > 0`, and adds J2/BT1 **pad by pad**. The pipeline was
+> right and my second opinion was wrong.
+>
+> **This is the FOURTH bug in free-space scanning on this project** (the first
+> three: scanning the unrouted file, a `"(segment "` prefix that matched 0 of
+> 288 tracks, and ignoring component bodies). Every one of them produced a
+> confident, wrong "this is blocked". The rule from
+> `touchid-checkers-lie-more-than-the-board` applies: **never trust a
+> throwaway checker over the pipeline that already works.**
+
+### What is actually true
+
+Placement is now done **by the build script's own packer**, largest-part-first:
+
+* **U5 has 1,520 legal positions** (96 distinct at 0.20 mm).
+* Nearest to BT1-2 is **(−6.35, −7.90) rot 0, S1 just 2.28 mm from the cell pad.**
+* Chosen by search, not by hand: U5 is ordered by distance to `CELL_NEG` and
+  the packer **vetoes** — the winner is the closest position that still houses
+  every passive. Greedy-on-one-objective picks the bottom shelf, the most
+  productive row on the board, and costs three 0402 slots.
+
+### The real constraint: the board is at capacity
+
+| | slots |
+|---|---|
+| 0402 slots with no U5 | **26** for 25 parts (1 spare) |
+| best over 96 U5 positions | **22** — U5 costs 4 |
+| **shortfall** | **3** |
+
+Shelf-phase search (32 offsets) finds 26 either way, so **the packer is at its
+limit — this is structural, not a packing failure.** U1 is 162.75 mm² = 44 % of
+a 372.49 mm² board, plus a 58.75 mm² antenna keep-out. There is no slack.
+
+### The fix: R8/R9/C14 go to 0201
+
+Probe of what fits in the leftovers after U5 + the 22 originals:
+
+| hypothetical body | fits |
+|---|---|
+| 0402 1.48 × 0.68 | **0** |
+| 0201 ~0.94 × 0.44 | **5** |
+| 01005 ~0.64 × 0.34 | 11 |
+
+**5 fit and 3 are needed — two spare.** And these three are the *best*
+shrink candidates on the board, which is why this is the right part to give
+up rather than the BLE module:
+
+* **R8 (330 Ω)** carries only the PCM's 3 µA typ / 4.5 µA max quiescent
+  → **6.7 nW**. Voltage across it is microvolts.
+* **R9 (2.7 kΩ)** is the V−-to-S2 sense resistor. Current flows only during a
+  fault, briefly, and the spec's own test conditions use it.
+* **C14 (0.1 µF)** is a fluctuation cap at ≤4.3 V; 0201 X5R 16 V is standard.
+
+No heat, no power stress, no voltage stress. Compare the alternative — swapping
+U1 for a narrower module — which frees 42.75 mm² but puts the **antenna** at
+risk and forces re-verification of the whole board. Shrinking three
+zero-current passives is a far smaller bet than moving the radio.
+
+> [!warning] **NOT DONE — the 0201 land pattern is not sourced yet.**
+> The probe courtyards above are **hypothetical** and must never become a land
+> pattern. 0402/0603 lands in `fp_chip()` were fetched from
+> `easyeda.com/api/products/<LCSC>/components` because **JLCPCB assembles to
+> ITS OWN library**. The 0201 land must come from the same place, and real
+> LCSC part numbers are needed for 330 Ω / 2.7 kΩ / 0.1 µF in 0201.
+> The sandbox can no longer reach easyeda.com (403), so this goes through the
+> browser. **`build_pcb_v3.py` deliberately stops with the diagnostic above
+> until then** — it does not silently build a board with an invented land.
+
+---
+
+## Superseded — the original (wrong) feasibility note
+
 
 **U5 does not fit anywhere on the current board.** Scanning every 0.1 mm
 position against pads, component bodies, all F.Cu tracks and vias:
