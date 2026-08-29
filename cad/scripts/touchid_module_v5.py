@@ -116,16 +116,45 @@ sensor_flange_t  = 0.20    # sits proud of the top face by this much
 # ---------------- v5: riser column + cell seat ----------------
 # Riser is a plain annulus standing on the square top plate. Its wall is
 #   (18.37 - 15.60)/2 = 1.385 mm, the same wall the v4 top plate already has.
-riser_h    = 4.50               # NEXT-SESSION Task B
+# ==== v5.2 2026-08-28 — riser 4.50 -> 6.50, cell -> a PROTECTED assembly ====
+# DELIBERATELY OVERSIZED. Build tall enough that a real, protected, pre-wired
+# cell fits, prove the electronics, and shrink later. The cost is that the
+# module grows to 14.86 mm total against the 8.36 mm knob module it replaces,
+# on a slot depth NOBODY HAS MEASURED (DESIGN-SPEC, open questions). Growing
+# the riser helps the CELL fit and makes the KEYBOARD fit harder -- opposite
+# directions. If the slot turns out shallow this is the first thing to give.
+riser_h    = 6.50               # was 4.50; +2.00 to clear a protected assembly
 riser_od   = body_w             # 18.37 — flush with the top tier
 riser_id   = sensor_window_d    # 15.60 — continuous with the barrel window
-top_h      = body_h + riser_h   # 11.66 — new top face / sensor flange seat
+top_h      = body_h + riser_h   # 13.66 — new top face / sensor flange seat
 
-# VARTA CP1254 A4 — PART-LIBRARY.md §5, VARTA data sheet 2020-02-18
-cell_d_max = 12.1               # 12.1 +0.0/-0.3  -> 12.1 is the max
-cell_h_max = 5.6                # 5.4  +0.2/-0.1  -> 5.6 is the max  <-- NOT 5.4
-cell_fit   = 0.40               # radial+diametral clearance for the pocket
-cell_pocket_d = cell_d_max + cell_fit          # 12.50
+# ---- the cell is now an ASSEMBLY, not a bare cell ----
+# Target: LiPol LPM1254, 65-80 mAh Li-ion coin, supplied WITH PCM AND WIRES.
+#   bare cell   O12.0 x 5.4
+#   assembled   O12.5 x 8.4   <- PCM adds ~+0.5 dia / ~+3.0 thickness
+# A bare CP1254 was O12.1 x 5.6. These numbers are the FINISHED assembly, which
+# is what actually has to fit -- the old ones described a cell you are not
+# allowed to attach wires to (CoinPower handbook 8.7). See BUY-YOURSELF.md.
+# LIPOL CONTRADICT THEMSELVES ON DIAMETER, so this is built to the WORSE one:
+#   website rule  "+0.5 mm dia"        -> assembled O12.5
+#   LPM1254 datasheet drawing          -> finished pack **O13 +-0.5 -> 13.5 max**
+# O13.5 is modelled. A pocket cut for 12.5 would not close on the datasheet
+# part, and this is a 3D print -- being 1 mm generous costs nothing, being 1 mm
+# short costs a reprint and a wait. Resolve it with LiPol before production.
+#
+# The datasheet publishes NO assembled thickness, so 8.4 is still the website's
+# "+3.0 mm" blanket adder on a 5.4 cell -- NOT a per-model figure. There is
+# 0.81 mm of slack above it, so an assembly up to 9.2 still fits.
+#
+# It DOES publish the protection, and the numbers are good for this cell:
+#   over-charge   4.25 V +-50 mV (release 4.00)   <- VBAT_OV 3.912 sits clear
+#   over-discharge 2.75 V +-50 mV (restore 3.50)
+#   over-current  0.2 .. 0.75 A                   <- right-sized for 140 mA
+#   charge        4.2 V +-50 mV
+cell_d_max = 13.5               # LPM1254 ASSEMBLED dia, datasheet worst case
+cell_h_max = 8.4                # LPM1254 ASSEMBLED height (website adder)
+cell_fit   = 0.50               # radial+diametral clearance for the pocket
+cell_pocket_d = cell_d_max + cell_fit          # 14.00
 
 # The cell has to clear the BLE module's metal lid. The lid is grounded and
 # the cell can is live, so this gap is electrical, not just mechanical.
