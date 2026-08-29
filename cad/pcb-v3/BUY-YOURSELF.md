@@ -205,3 +205,37 @@ product page is behind a bot check, so open it yourself.
 **Shipping:** every one of these is a lithium cell — dangerous goods. Expect
 surface-only shipping and longer transit into Vancouver, and expect some
 sellers to refuse the route outright.
+
+### Alibaba — checked 2026-08-28
+
+The 1254 form factor is everywhere. **Not one listing includes a PCM.** Lowest
+minimums found:
+
+| supplier | what | price | MOQ |
+|---|---|---|---|
+| Shenzhen Dali Technology (10 yr, 5.0) | LIR1254 etc., "customize various specifications" | $0.49–0.97 | **10** |
+| Hunan Hualai (7 yr, 4.9, 79 rev) | claims genuine **Varta CP1254 A4** 70 mAh | $4.37–4.90 | **10** |
+| Shenzhen Qiyun (4.8, 392 sold) | LIR1254 **with wires** | $0.73–1.01 | **20** |
+| Zhuhai Xiangzhou Sanbai | CP1254 for Powerbeats Pro | $3.50 | 20 |
+
+**Three catches, in order of how much they matter:**
+
+1. **"With wires" means the SELLER attached them.** A Shenzhen trader spot-
+   welding tabs onto CoinPower cells is the exact scenario handbook §8.7 voids
+   warranty, performance *and* safety claims for. It defeats the entire reason
+   a factory-wired cell was wanted. Only VARTA's own `63125201334` assembly
+   satisfies §8.7 — and none of these are that.
+2. **Authenticity.** Genuine A4X retails ~€15. A trader offering "Varta
+   CP1254 A4" at $4.37 is selling something else, and the same supplier's other
+   listing says "Varta CP1254 A3/A4 … **replace lir1254**" — i.e. a clone. For
+   a lithium cell in a sealed housing under a finger, this is not a corner to
+   cut.
+3. **MOQ 10–20**, so ~$10–50 plus DG shipping. Cheap, but you are buying ten.
+
+**The one genuinely useful thing Alibaba offers here** is the *supplier chat*.
+These are pack assemblers, and Alibaba is where low-MOQ custom assembly lives —
+so the move is not to buy a listing, it is to **message a supplier and ask them
+to build cell + PCM + leads to the envelope** (Ø ≤ 14.0, height + PCM inside
+5.6 + 1.61 mm, 2 flying leads). Ask which protection IC they fit and for its
+over-charge trip; that number sets `VBAT_OV`. Same route that worked for the
+ZW0905.
