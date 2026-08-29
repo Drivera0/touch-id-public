@@ -107,10 +107,27 @@ wall_t = 0.8           # was 1.4. Thinning the lip wall widens the cavity from
 # leave 0.135 mm of wall. So: NO COUNTERBORE. The barrel locates in the window,
 # the 0.20 mm flange bears flat on the top face, and the flange is bonded down.
 # Press load still lands on plastic, which was the point of the original seat.
-sensor_module_d  = 18.00   # ZW0905 flange OD (reference)
-sensor_barrel_d  = 15.50   # ZW0905 barrel OD
+# ==== 2026-08-28: ZW0905 is DISCONTINUED. Replacement = HLK-ZW0922. ====
+# The ZW0922 is a DROP-IN and these numbers are unchanged. From its own §2.3
+# dimensions drawing (spec V1.0 2024-11-20) -- NOT from its spec table, which
+# repeats the same "Dimensions O12.8mm" trap the ZW0905 table had: that is the
+# sensor PACKAGE, not the module. See cad/pcb-v3/SENSOR-ZW0922.md.
+#   <2> O18.00 +-0.05  metal ring outline  = flange   (was 18.00)  MATCH
+#   <1> O15.50 +-0.05  metal ring protrusion = barrel (was 15.50)  MATCH
+#   <4> 0.20 +-0.05    step thickness       = flange  (was 0.20)   MATCH
+#   <5> 2.15 +-0.20    metal ring + PCB total thickness (was 2.40) THINNER
+# Modelling 2.40 is the CONSERVATIVE choice: a thinner sensor lifts the barrel
+# bottom and gains clearance above the cell (+0.86 at 2.35, +1.06 at 2.15), so
+# leaving it at 2.40 keeps the model pessimistic. Do not "correct" it down
+# without re-checking the cell stack.
+sensor_module_d  = 18.00   # ZW0922 flange OD, O18.00 +-0.05 -> 18.05 max
+sensor_barrel_d  = 15.50   # ZW0922 barrel OD, O15.50 +-0.05 -> 15.55 max
 sensor_window_d  = sensor_barrel_d + 0.10     # 15.60 locating fit
-sensor_thk       = 2.40    # total, flange included
+                           # WARNING: only 0.05 mm DIAMETRAL at worst case.
+                           # SLA will not hold that -- expect to ream the
+                           # window on the first print. The barrel locates,
+                           # it does not seal, so widening this is cheap.
+sensor_thk       = 2.40    # total, flange included (ZW0922 is 2.15 +-0.20)
 sensor_flange_t  = 0.20    # sits proud of the top face by this much
 
 # ---------------- v5: riser column + cell seat ----------------

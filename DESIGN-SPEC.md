@@ -547,10 +547,18 @@ on module presence. Harvesting therefore does not depend on the setting.
       No press-wake trick needed; the sensor can sit in detect mode permanently.
 - [x] ~~Sensor active current~~ — **15 mA typ / 25 mA max**, not the 50 mA assumed.
       Halves the per-scan energy.
-- [ ] **ZW0905 availability.** Hi-Link's product pages `id=1225`/`id=1226` return
-      empty while every sibling page renders — consistent with it being delisted.
-      Confirm distributor stock before the housing is committed, since **no other
-      module on the market has a verified outline under 18.1 mm.**
+- [x] ~~**ZW0905 availability.**~~ **CLOSED 2026-08-28 — it happened. The seller
+      confirms the ZW0905 is DISCONTINUED. Replacement: HLK-ZW0922.**
+      This item was right to be open, and the delisted product pages were the
+      tell. **The ZW0922 is a drop-in** — flange Ø18.00 ±0.05, barrel
+      Ø15.50 ±0.05, step 0.20 ±0.05, identical 6-pin order
+      (sensor_3.3V / WAKEUP / MCU_3.3V / TX / RX / GND), identical electricals
+      (10 µA standby, 15–25 mA active, 200 mA × 4 µs FD peak, <200 mV ripple).
+      It is 2.15 ±0.20 thick vs the 2.40 modelled, which *adds* clearance above
+      the cell. **No board change, no housing change.** Full analysis:
+      `cad/pcb-v3/SENSOR-ZW0922.md`.
+      **The Φ12.8 mm trap is in the ZW0922 spec table too** — that is the sensor
+      package, not the module. Read the §2.3 drawing, never the table.
 - [ ] **Slot depth / clearance above the pogo blocks — NOW THE HIGHEST-VALUE
       MEASUREMENT IN THE PROJECT.** v5 stands **12.86 mm** tall against the
       **8.36 mm** knob module it replaces, so it is already spending 4.50 mm of
