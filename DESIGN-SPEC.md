@@ -6,7 +6,7 @@ tags:
   - hardware
   - spec
   - master
-updated: 2026-08-20
+updated: 2026-08-29
 ---
 
 # TouchID — master design spec
@@ -20,10 +20,20 @@ Read this before changing anything. Sources of truth, in order:
 
 | Thing | Authoritative file |
 |---|---|
-| The board | `cad/pcb-v2/pcb-v2.kicad_pcb` |
-| The housing | `cad/scripts/touchid_module_v4.py` → `cad/exports/touchid_housing_v4_*.step` |
-| What was actually manufactured | `cad/pcb-v2/production-file-old-version.zip` (order Y6, scrap) |
-| Outstanding work | `cad/pcb-v2/OPEN-ISSUES.md` |
+| **Status: what is decided, ordered, open** | **`CURRENT-STATE.md`** |
+| The board | `cad/pcb-v3/pcb-v3-handoff.kicad_pcb` |
+| The housing | `cad/scripts/touchid_module_v5.py` → `cad/v3-handoff/housing/` |
+| The netlist | `cad/pcb-v3/netlist_v3.py` — **`NETLIST-V3.md` is generated, do not hand-edit** |
+| Sourcing / BOM | `cad/pcb-v3/make_bom_cpl.py` → `cad/v3-handoff/assembly/` |
+| The sensor | `cad/pcb-v3/SENSOR-ZW0922.md` |
+| The cell | `cad/pcb-v3/CELL-DECIDED.md` |
+| Go/no-go before ordering | `cad/pcb-v3/preflight.py` |
+| Superseded notes — **do not take numbers from here** | `_archive/` |
+
+> The v2-era pointers this table used to carry (`pcb-v2.kicad_pcb`,
+> `touchid_module_v4.py`, `pcb-v2/OPEN-ISSUES.md`) were **three revisions stale**.
+> Those files still exist and are deliberately untouched, but they are history,
+> not authority.
 
 > [!warning] Sections 2, 3 and 6 describe a board that is being replaced
 > Every dimension in them is still correct **as a record of what was drawn**, and the
@@ -61,23 +71,26 @@ toward the screen.
 `z = +7.16`; total module height **8.36 mm**". That is **v4**. v5 added the riser
 column and the numbers moved:
 
-| | v4 (what this spec used to say) | **v5, as built** |
-|---|---|---|
-| top face | z 7.16 | **z 11.66** |
-| total module height incl. PCB | 8.36 mm | **12.86 mm** |
-| sensor barrel bottom | z 4.96 | z 9.46 |
+| | v4 (what this spec used to say) | v5.0 | **v5.2, as built** |
+|---|---|---|---|
+| riser | — | 4.50 | **6.50 mm** |
+| top face | z 7.16 | z 11.66 | **z 13.66** |
+| total module height incl. PCB | 8.36 mm | 12.86 mm | **14.86 mm** |
+| sensor barrel bottom | z 4.96 | z 9.46 | **z 11.46** |
+| cell pocket | — | Ø12.50 | **Ø14.00** |
+| clearance above cell | — | 1.61 mm | **0.81 mm** |
 
-> [!danger] **v5 is 4.50 mm taller than the module it replaces, and nobody has
+> [!danger] **v5.2 is 6.50 mm taller than the module it replaces, and nobody has
 > measured the slot.**
 > 8.36 mm is the **caliper-measured** height of the knob module that occupies
-> this slot today. The v5 riser spends **4.50 mm of headroom that has never been
-> confirmed to exist** — `riser_h = 4.50` came from a task brief, not from a
-> measurement. **"Slot depth / clearance above the pogo blocks" is still an open
-> item in §Open questions.**
+> this slot today. The riser spends **6.50 mm of headroom that has never been
+> confirmed to exist** — `riser_h` came from a task brief, not from a
+> measurement, and was then raised again on 2026-08-28 to clear a protected
+> cell. **"Slot depth / clearance above the pogo blocks" is still open.**
 >
-> This gates the whole v5 architecture. The cell only fits *because* of the
-> riser; if the slot is 8.36 mm deep, there is nowhere for the cell to go and the
-> layout has to change. **Measure the slot before spending any more height.**
+> This gates the whole architecture. The cell only fits *because* of the riser;
+> if the slot is 8.36 mm deep there is nowhere for the cell to go and the layout
+> has to change. **Measure the slot before spending any more height.**
 
 **Altium ↔ KiCad Gerber transform** (verified, do not re-derive):
 ```
@@ -559,21 +572,13 @@ on module presence. Harvesting therefore does not depend on the setting.
       `cad/pcb-v3/SENSOR-ZW0922.md`.
       **The Φ12.8 mm trap is in the ZW0922 spec table too** — that is the sensor
       package, not the module. Read the §2.3 drawing, never the table.
-- [ ] **Slot depth / clearance above the pogo blocks — NOW THE HIGHEST-VALUE
-      MEASUREMENT IN THE PROJECT.** v5 stands **12.86 mm** tall against the
-      **8.36 mm** knob module it replaces, so it is already spending 4.50 mm of
-      unverified headroom, and every remaining cell option wants more:
-
-      | extra riser | column for the cell | total module | protected cell that then fits |
-      |---|---|---|---|
-      | +0.0 (now) | 7.21 mm | 12.86 mm | LPM1040 **40 mAh** |
-      | **+0.1** | 7.31 mm | 12.96 mm | + LPM1240 **60 mAh** |
-      | **+1.2** | 8.41 mm | 14.06 mm | + LPM1254 **65–80 mAh** |
-
-      **+1.2 mm buys back essentially the full CP1254 capacity, protected and
-      pre-wired.** Measure: slot depth from the keyboard's top surface to
-      whatever the PCB seats on, and whether the top face must sit flush or may
-      stand proud.
+- [ ] **Slot depth / clearance above the pogo blocks — THE HIGHEST-VALUE
+      MEASUREMENT IN THE PROJECT.** The module now stands **14.86 mm** tall
+      against the **8.36 mm** knob module it replaces — 6.50 mm of headroom
+      nobody has confirmed exists. Measure: slot depth from the keyboard's top
+      surface to whatever the PCB seats on, and whether the top face must sit
+      flush or may stand proud. Every cell option and the housing print both
+      depend on the answer.
 - [ ] Pogo pad positions re-verified now the outline is square
 - [ ] If harvest fails: trace **J4-2 and J4-6** for a keyboard-battery tap
 

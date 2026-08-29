@@ -275,5 +275,7 @@ single go/no-go, and the checks it wraps have each been wrong on their own.
 
 * **BT1's cell** — a hand-wired protected assembly, not a placed part. See
   `../pcb-v3/BUY-YOURSELF.md`.
-* **The ZW0905 sensor** — solders to J2 by hand. Same file.
+* **The HLK-ZW0922 sensor** — solders to J2 by hand. Same file.
+  *(The ZW0905 is discontinued; the ZW0922 is a drop-in — same flange, barrel,
+  step and pin order. See `../pcb-v3/SENSOR-ZW0922.md`.)*
 * **Gerbers** — next step.

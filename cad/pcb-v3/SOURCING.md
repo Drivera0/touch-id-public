@@ -3,7 +3,12 @@ title: TouchID v3 — sourcing
 type: project
 ---
 
-# Sourcing — all 21 BOM lines, checked 2026-08-28
+# Sourcing — all 20 BOM lines, checked 2026-08-28
+
+> [!info] **Current status lives in `CURRENT-STATE.md`.**
+> Two things below have since changed and are annotated in place:
+> **C1/C2** are now `C77000` (10 µF), and **U1's stock blocker is gone** —
+> the module is consigned to JLC's warehouse by the customer.
 
 Every part number below was read from **JLCPCB's own assembly library**, not
 from LCSC's shop and not from a datasheet.
@@ -17,7 +22,12 @@ Machine-readable version: `cad/exports/touchid-v3-BOM.csv`.
 Re-verify the lands with `python verify_sourcing.py`, the whole order with
 `python preflight.py pcb-v3-handoff.kicad_pcb` (check 21).
 
-## The blocker: U1 has no assembly stock anywhere
+## ~~The blocker: U1 has no assembly stock anywhere~~ — RESOLVED
+
+> **2026-08-28: U1 is CONSIGNED.** The customer ships the MDBT50Q to JLC's
+> warehouse and JLC place it, so JLC's own stock of 0 no longer blocks the
+> order. The analysis below is kept because it explains *why* that was the
+> option taken. Row three of the table is the one that happened.
 
 **Every MDBT50Q variant in JLCPCB's library reads stock 0 — all 19 of them**,
 Raytac's own and JLC's internal entries alike. This is not a variant problem
@@ -66,9 +76,11 @@ The rest of the board is fully assemblable today.
 | U2 | TI BQ25505RGRR | `C882746` | 829 |
 | U3, U4 | TI TPS7A2033DQNR | `C46459900` | 4 371 |
 | L1 | DMBJ PNLS252012-220M 22 µH | `C2849435` | 2 288 |
-| C1, C2 | Murata GRM155R61E475ME15D 4.7 µF **25 V** | `C2858031` | 184 764 |
+| C1, C2 | Murata GRM155R61A106ME44D **10 µF 10 V** | `C77000` | 543 698 |
+|  | *(was GRM155R61E475ME15D 4.7 µF 25 V, `C2858031` — changed 2026-08-28, see below)* | | |
 | C4 | Murata GRM1555C1H103JE01D 10 nF **C0G** | `C22400107` | 72 632 |
-| C5 | 10 µF 16 V X5R 0603 | `C18164635` | 1.13 M |
+| C5 | 10 µF 16 V X5R 0603 | `C70225` | 479 335 |
+|  | *(was `C18164635` — JLC's BOM matcher would not auto-select it)* | | |
 | C7 | 22 µF **10 V** X5R 0603 | `C20416425` | 1.17 M |
 | R4 | 4.7 MΩ 1 % | `C3013173` | 263 891 |
 | ROK1 | 4.53 MΩ 1 % | `C137964` | 9 229 |
@@ -85,8 +97,8 @@ DC bias can lose half its value, which is the *same trap* already documented
 for C7 — and unlike C7 it would show up as boost instability at cold start,
 not as ripple. The Murata part (`GRM155R61E475ME15D`) is chosen because
 **Murata publishes the DC-bias curve**, so the requirement can be *verified*
-instead of assumed. **That verification has still not been done** — it needs
-SimSurfing and a human.
+instead of assumed. **That verification WAS done on 2026-08-28 — see below.
+The 4.7 µF part failed it and C1/C2 are now the 10 µF `C77000`.**
 
 > [!warning] **Corrected 2026-08-28 — this item is riskier than written, and
 > the bias figure was stale.**
@@ -140,12 +152,17 @@ is roughly 2× ; being "somewhat better" does not close it.
 
 ### What follows, and it does not need the curve
 
-**Fit the 10 µF (`C6119763`) regardless.** The logic is decision-independent:
+**Fit the 10 µF regardless.** The logic is decision-independent:
 
 * 0603 does not fit (12 / 62 collisions), so the land is fixed at 0402.
 * Within an 0402, more nominal capacitance is strictly better here.
 * So the 10 µF is the best part available in the only footprint that fits —
   whatever its own curve says.
+
+**DONE — C1/C2 are now `C77000`, Murata GRM155R61A106ME44D 10 µF 10 V 0402,
+543 698 in JLC's assembly library.** Not the `C6119763` this file first
+suggested: that is HRE, an unknown brand publishing no DC-bias curve, which
+would have thrown away the exact property that made C1/C2 a Murata part.
 
 The curve would only tell us *whether to also worry about cold start*, not
 whether to change the part. **This is a BOM-line change. No respin.**
@@ -167,11 +184,16 @@ inside the datasheet's 9–11 nF window.
 
 **ROV1/ROV2 — thin, single-sourced, and they set the charge voltage.**
 2 040 and 2 674 pieces, one manufacturer each. These are the pair that gives
-`VBAT_OV = 3.912 V` (3.955 V worst case) against the CP1254's 4.00 V limit.
+`VBAT_OV = 3.912 V` (3.955 V worst case). **The cell's charge voltage is
+4.30 V, not 4.00** — 4.00 is the datasheets' *rapid-charge* footnote and does
+not apply at harvest currents. The binding ceiling is the PCM's over-charge
+trip minus 150 mV (4.25 V on the LiPol cell, so the cap is 4.10 V).
 **Do not let anyone substitute these blind** — a "close enough" value here
 walks the charger back toward the 4.246 V that was the original overcharge
 bug. If either goes out of stock, recompute from
-`VBAT_OV = 1.5 × 1.21 × (1 + ROV2/ROV1)` and keep the worst case under 4.00 V.
+`VBAT_OV = 1.5 × 1.21 × (1 + ROV2/ROV1)` and keep the worst case **150 mV
+below the fitted PCM's over-charge trip** — not under 4.00 V, which was never
+the right number.
 ROK1 (9 229) and ROK2 (4 637) are also single-sourced but only set the
 VBAT_OK thresholds, where being a little off is harmless.
 

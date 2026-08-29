@@ -5,13 +5,29 @@ type: project
 
 # The two parts you buy yourself
 
+> [!warning] **SUPERSEDED IN PART — read `CURRENT-STATE.md` first.**
+> * **The sensor is now the HLK-ZW0922**; the ZW0905 in §1 is **discontinued**.
+>   The ZW0922 is a drop-in — see `SENSOR-ZW0922.md`.
+> * **The cell is now the LiPol LPM1254 with PCM + wires** — see
+>   `CELL-DECIDED.md`. §2 below is the *archaeology* of why VARTA failed, and
+>   its Ø12.50 pocket and 1.61 mm clearance figures are **stale** (now Ø14.00
+>   and 0.81 mm after the riser went to 6.50 mm).
+>
+> Kept because the reasoning — no protected CP1254 exists, you may not attach
+> leads yourself, no NA distribution — is what rules VARTA out permanently.
+
 JLCPCB assembles the board. **These two are not on the BOM and never will be** —
 the sensor mounts to pads (J2) and the cell is hand-wired to BT1. Checked
 2026-08-28.
 
 ---
 
-## 1. Fingerprint sensor — HLK-ZW0905
+## 1. Fingerprint sensor — ~~HLK-ZW0905~~ → **HLK-ZW0922**
+
+> **The ZW0905 is DISCONTINUED (confirmed by the seller, 2026-08-28).** The
+> ZW0922 replaces it and is mechanically and electrically identical where it
+> matters. Everything below about *which* module and *why the diameter matters*
+> still applies — only the part number changed. See `SENSOR-ZW0922.md`.
 
 **It must be the ZW0905 exactly.** Hi-Link sell the ZW0901, ZW0906, ZW0623,
 ZW0642, ZW0919 and ZW0608 alongside it. They look nearly identical and have
@@ -77,8 +93,8 @@ The drawing gives the FINISHED envelope, which Texim's spec block does not:
 
 | | drawing (finished) | housing has | verdict |
 |---|---|---|---|
-| diameter incl. kapton overlap | **Ø12.8 +0.10/−0.30** → **12.9 max** | Ø12.50 pocket | **FAILS by 0.40 mm** |
-| height incl. tags | **5.6 ±0.3** → **5.9 max** | 5.6 + 1.61 above | fits, eats 0.30 of the 1.61 |
+| diameter incl. kapton overlap | **Ø12.8 +0.10/−0.30** → **12.9 max** | Ø12.50 pocket *(as of 2026-08-28; **now Ø14.00**)* | failed by 0.40 mm **then** |
+| height incl. tags | **5.6 ±0.3** → **5.9 max** | 5.6 + 1.61 above *(**now 0.81** above)* | fitted |
 | leads | AWG 30 UL 1571, red +, black −, **42 ±3 mm**, twisted, lead-free tinned | ±X wire windows | fine |
 | weight | 2.0 g | — | — |
 | shipped state | **SOC 30 %** | — | arrives part-charged |
@@ -109,10 +125,13 @@ the top layer is free and none of it can take a via), and it is **not on the
 cell** either. That is now the open item, and it is a design decision, not a
 purchase.
 
-**Does A4X still cap at 4.00 V?** `preflight.py` check 15 hard-codes
-`CELL_V_CHARGE_MAX = 4.00` from the **A4** datasheet (2020-02-18). The part in
-stock is **A4X** (2023-06-26). If A4X moved that number, check 15 is grading
-against a stale limit — get the A4X figure and update the constant.
+**~~Does A4X still cap at 4.00 V?~~ ANSWERED 2026-08-28 — it never did.**
+Both the A4 (2020-02-18) and A4X (2023-06-26) datasheets give **Charge Voltage
+4.30 ±0.05 V**. The 4.00 V figure is **footnote 3**, attached only to *Rapid
+Charge: 140 mA*, with a 20 °C minimum. TouchID charges at microamps, so it
+never applies. `preflight.py` check 15 had 4.00 hard-coded as the cell limit
+and graded every revision against it; corrected to `CELL_V_CHARGE_MAX = 4.30`.
+The real ceiling is the fitted PCM's trip minus 150 mV.
 
 ### The A4X change matters more than VARTA make it sound
 
@@ -169,8 +188,9 @@ The pocket has plenty of room to grow. Collar OD is 17.17, so:
 Bosses sit 10.255 mm from the axis and the filleted cavity corner 7.995 mm, so
 neither is reached. **Any of these is fine.**
 
-The tight dimension is the **1.61 mm axial gap** (cell top z 7.85 → barrel
-bottom z 9.46), and it has to swallow both the PCM *and* VARTA's venting
+The tight dimension is the axial gap — **1.61 mm as this was written; the
+riser has since gone to 6.50 mm and the gap is now 0.81 mm** (cell top
+z 10.65 → barrel bottom z 11.46). It has to swallow both the PCM *and* VARTA's venting
 allowance — the handbook says *"under abusive conditions the cell may vent; to
 ensure safe venting, up to __ mm of additional space in axial direction is
 necessary"*, and drawing note 3 repeats it as "cell deflection space". **The
