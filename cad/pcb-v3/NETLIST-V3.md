@@ -57,50 +57,27 @@ Edit the Python and re-run, or the two will disagree.
 
 ## Parts, pin by pin
 
-### BT1 — VARTA CP1254 A4X, wire pads (NOT a cell footprint)
+### BT1 — Cell wire pads — LiPol LPM1254 w/ PCM (was VARTA CP1254 A4X)
 
-> 3.0 V discharge cut-off, **4.30 ±0.05 V charge voltage**, 210 mA pulse.
->
-> **4.30 is correct — this line was right all along.** A4 and A4X data sheets
-> both give "Charge Voltage 4.30 ±0.05 V". The **4.00 V** figure that appears
-> in B6b is **footnote 3, which hangs off *Rapid Charge: 140 mA* only** — a
-> rapid-charge derating with a 20 °C minimum temperature, not the cell ceiling.
-> TouchID charges from harvest at microamps, so it never applies.
->
-> The real ceiling on `VBAT_OV` is the **PCM's trip**, not the cell: the charger
-> must never end up doing the safety device's job. Preflight check 15 keeps the
-> worst case 150 mV clear of a 4.30 V trip, so **4.15 V is the cap**.
-
-**BT1 is two Ø1.4 wire-landing pads, 1.6 mm pitch, at (-7.61, -4.30) and
-(-7.61, -5.90).** The cell does not touch this board: it sits in the housing
-pocket at z 2.25 .. 7.85, above the MCU lid, and reaches BT1 through 42 mm
-factory-attached AWG 30 leads routed out of the +-X wire windows.
-
-**You solder the cell's LEADS here. You never put an iron on the cell.**
-CoinPower handbook 8.7 prohibits soldering or welding connectors directly to
-the cell — only the manufacturer may do that — which is why the cell must be
-bought pre-wired. See `BUY-YOURSELF.md`.
-
-`solder_mask_margin -0.1` on both pads: a 0.4 mm mask dam, not the 0.2 mm the
-default gave. Guarded by preflight check 16.
+> 3.0 V discharge cut-off, 4.30 +-0.05 V charge, 210 mA pulse (CP1254 A4X figures). Two O1.4 wire-landing pads on 1.6 mm pitch — NOT a cell footprint. Solder the cell's LEADS here; never put an iron on the cell (CoinPower handbook 8.7). 4.30 V is the cell's charge voltage; the 4.00 V in some notes is the RAPID-charge footnote and does not apply here.
 
 | Pin | Net |
 |---|---|
 | 1 | `VBAT` |
 | 2 | `GND` |
 
-### C1 — 4.7uF 0603
+### C1 — 4.7uF 0402
 
-> CIN, datasheet minimum
+> CIN, datasheet minimum. VERIFY C_eff on Murata's DC-bias curve before ordering — cannot grow to 0603 in place (12 collisions).
 
 | Pin | Net |
 |---|---|
 | 1 | `VIN_DC` |
 | 2 | `GND` |
 
-### C2 — 4.7uF 0603
+### C2 — 4.7uF 0402
 
-> CSTOR
+> CSTOR. VERIFY C_eff on Murata's DC-bias curve before ordering — cannot grow to 0603 in place (62 collisions).
 
 | Pin | Net |
 |---|---|
@@ -125,7 +102,7 @@ default gave. Guarded by preflight check 16.
 | 1 | `VREF_SAMP` |
 | 2 | `GND` |
 
-### C5 — 10uF 0805
+### C5 — 10uF 16V X5R 0603
 
 > CBAT bulk beside the cell
 
@@ -143,16 +120,9 @@ default gave. Guarded by preflight check 16.
 | 1 | `SENSOR_3V3` |
 | 2 | `GND` |
 
-### C7 — 22uF **10 V** X5R 0603
+### C7 — 22uF 10V X5R 0603
 
-> ZW0905 200 mA / 4 us scan transient. The requirement is Hi-Link's
-> **ripple < 200 mV**, not the 36 mV once quoted here — 36 mV was merely what a
-> *full* 22 uF gives, and quoting it hid the real margin. 200 mA x 4 us = 0.8 uC,
-> so **C_eff at 3.3 V bias must be >= 4 uF; target >= 8 uF.**
-> A 22 uF **6.3 V** 0603 keeps only ~20–30 % at 3.3 V DC bias and lands on the
-> 4 uF floor once tolerance and temperature are counted. The **10 V** rating in
-> the same 0603 case derates far less, for no area and no height.
-> **Specify this part by C_eff at 3.3 V, never by the marked value.**
+> ZW0905 200 mA / 4 us scan transient. REQUIREMENT: ripple < 200 mV (Hi-Link), so C_eff at 3.3 V bias must be >= 4 uF, target >= 8 uF. Do NOT substitute a 6.3 V part -- it derates onto the floor.
 
 | Pin | Net |
 |---|---|
@@ -200,9 +170,9 @@ default gave. Guarded by preflight check 16.
 | 1 | `BL_FLAG` |
 | 2 | `GND` |
 
-### J2 — Sensor pads, HLK-ZW0905 (CORRECTED pinout)
+### J2 — Sensor pads, HLK-ZW0922 (was ZW0905 — discontinued)
 
-> DESIGN-SPEC §5 as corrected 2026-08-27. The old table was the ZW0901's, reversed end-for-end.
+> DESIGN-SPEC §5 as corrected 2026-08-27. The old table was the ZW0901's, reversed end-for-end. **2026-08-28: the ZW0905 is DISCONTINUED; the replacement HLK-ZW0922 has this SAME pin order** (spec V1.0 §4.3), so no board change. See cad/pcb-v3/SENSOR-ZW0922.md.
 
 | Pin | Net |
 |---|---|
@@ -338,17 +308,16 @@ default gave. Guarded by preflight check 16.
 | 1 | `VRDIV` |
 | 2 | `OK_HYST` |
 
-### ROV1 — 5.6M 0402
+### ROV1 — 6.04M 0402 1%
 
-> VBAT_OV = 1.5*1.21*(1+6.98/6.04) = **3.912 V** (was 4.246 V, which
-> overcharged a cell rated 4.00 V — see B6b)
+> VBAT_OV = 1.5*1.21*(1+6.98/6.04) = 3.912 V  (CP1254 limit 4.00)
 
 | Pin | Net |
 |---|---|
 | 1 | `VBAT_OV_SET` |
 | 2 | `GND` |
 
-### ROV2 — 7.5M 0402
+### ROV2 — 6.98M 0402 1%
 
 | Pin | Net |
 |---|---|
@@ -565,70 +534,13 @@ These print on every run of `netlist_v3.py`. They are not cosmetic.
 
 NEXT-SESSION specifies '1M/220k' on J11-4. The MEASUREMENTS say that cannot work: J11-4 reads 0.316 V awake and 0.000 V asleep (Pin Test Results, 3-6 ohm source). Both are below any digital V_IL, so a GPIO cannot tell them apart, and a 1M/220k divider would shrink 0.32 V to 0.06 V. This netlist uses a 100k series resistor into an SAADC pin and reads it as an ANALOG value, threshold ~0.15 V.
 
-### B6  BT1 PCM — resolved as a PROCUREMENT item; it cannot go on this board
+### B6  BT1 PCM — RESOLVED AS A PROCUREMENT ITEM. It cannot go on this board.
 
-VARTA's CoinPower handbook 6.3 requires a PCM giving **over-charge, over-discharge,
-over-current and short-circuit** protection, and names acceptable parts (SGM41100V,
-Ricoh R5613L, Seiko S8211CAY/S8200A, Mitsumi MM3077LY, TI BQ29700/29707, Diodes
-AP9211).
+VARTA CoinPower handbook 6.3: a CoinPower cell MUST run with a PCM providing over-charge, over-discharge, over-current AND short-circuit protection. It names acceptable parts: SGM41100V, Ricoh R5613L, Seiko S8211CAY/S8200A, Mitsumi MM3077LY, TI BQ29700/29707, Diodes AP9211. MEASURED on pcb-v3: 9.1 % of the top layer is free, and there is NO free spot anywhere -- not even 1.3 x 1.3 mm -- where a VIA IS LEGAL. Every remaining gap sits over a J4/J11 pogo pad, and a through-hole via there exits through the mating contact. The AP9211 (2.0 x 3.0, the only single-chip option, FETs included) does not fit at all. So the PCM goes ON THE CELL: buy the CP1254 as a protected, tabbed assembly and solder its two leads to BT1's wire pads. That also retires the 'VARTA publishes no tab geometry' warning, because the assembly's leads are specified by whoever builds it. IF a future revision puts the PCM on the board instead, it needs ~2.0 x 3.0 mm WITH via access, which means freeing area -- most plausibly a narrower BLE module, since U1 is 10.5 x 15.5 on a 19.3 mm square.
 
-**Measured on pcb-v3: 9.1 % of the top layer is free, and none of it can take a
-via.** Every remaining gap sits over a J4/J11 pogo pad, where a through-hole via
-would exit through the mating contact. Even a 1.3 x 1.3 mm patch with via access
-does not exist. The AP9211 — the only single-chip option, FETs included, at
-2.0 x 3.0 mm — does not fit at all.
+### B6b VBAT_OV WAS OVERCHARGING THE CELL — FIXED
 
-**So the PCM goes on the cell.** Buy the CP1254 as a *protected, tabbed assembly*
-and solder its two leads to BT1's wire pads. This also retires the old "VARTA
-publishes no tab geometry" warning: the assembly's leads are specified by whoever
-builds it, so there is no VARTA dimension left to guess.
-
-A future revision could host the PCM on-board, but only by freeing ~2.0 x 3.0 mm
-**with via access** — most plausibly via a narrower BLE module, since U1 is
-10.5 x 15.5 mm on a 19.3 mm square.
-
-### B6b  VBAT_OV — half of this was wrong, corrected 2026-08-28
-
-**What was right:** ROV1/ROV2 were 5.6M/7.5M => **VBAT_OV = 4.246 V**, worst
-case **4.295 V**, which sat *on* the **4.30 V** over-charge trip of the PCM.
-That makes the safety device the working regulator, which the CoinPower
-handbook explicitly warns against. **That reason alone justified the change.**
-
-**What was wrong:** the claim that the cell's maximum charging voltage is
-**4.00 ±0.05 V**. It is not. Both the A4 (2020-02-18) and A4X (2023-06-26) data
-sheets give **"Charge Voltage 4.30 ±0.05 V"**. The 4.00 V number is **footnote
-3**, and footnote 3 is attached to **"Rapid Charge: 140 mA"**:
-
-> "*CoinPower A4-Version Charging Document* must be observed. **Max. charging
-> voltage: 4.00 V ±0.05 V; min. charging temperature: 20 °C.**"
-
-It is the **rapid-charge derating**. TouchID charges from harvested energy at
-**microamps** — three orders of magnitude below even the 35 mA standard charge
-— so the rapid-charge clause never applies and **4.30 V governs**.
-
-**A footnote was read as the headline spec, and it went into a safety gate.**
-`preflight.py` check 15 then graded every later revision against the wrong
-constant. It never produced an unsafe board — the error was in the conservative
-direction — but a gate that is right by accident is not a gate.
-
-**Where that leaves the design.** With `CELL_V_CHARGE_MAX = 4.30`, the binding
-constraint is check 15's other test: worst case must stay **150 mV clear of the
-PCM trip**, so the cap on `VBAT_OV` worst case is **4.15 V**.
-
-| | |
-|---|---|
-| current | **6.04M / 6.98M => 3.912 V** nom, **3.955 V** wc |
-| cap | 4.15 V wc |
-| unused headroom | **~195 mV** |
-
-3.912 V is legal and **buys real cycle life** — Li-ion cycle count rises sharply
-as the charge ceiling drops, which matters for a cell that harvests slowly and
-must last years. So the value may well be the right one. **But it is now a
-deliberate trade, not a limit.**
-
-**Do not retune the divider yet.** The true ceiling is set by the PCM's actual
-trip voltage, and the PCM is not chosen (see B6). Pick the PCM first, then set
-`VBAT_OV` 150 mV below its trip.
+ROV1/ROV2 were 5.6M/7.5M, giving VBAT_OV = 4.246 V. The CP1254 A4's maximum charging voltage is 4.00 +-0.05 V, so the charger was set 246 mV ABOVE the cell limit -- and only 54 mV under the 4.30 V over-charge trip of the very PCM that B6 adds, which would have made the safety device the working regulator. Now 6.04M/6.98M = 3.912 V nominal, 3.955 V worst case with 1 % parts.
 
 ### Load budget grew — 3.3 -> 4.0 mWh/day
 

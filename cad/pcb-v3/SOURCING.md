@@ -80,14 +80,41 @@ The rest of the board is fully assemblable today.
 ## Three choices that are not arbitrary
 
 **C1/C2 — Murata 25 V, and the reason is the curve, not the rating.**
-These are CIN and CSTOR; the BQ25505 wants **≥ 4.7 µF**. A 4.7 µF 0402 at
-4.3 V DC bias can lose half its value, which is the *same trap* already
-documented for C7 — and unlike C7 it would show up as boost instability at
-cold start, not as ripple. The Murata part is chosen because **Murata
-publishes the DC-bias curve**, so the requirement can be *verified* instead of
-assumed. **That verification has not been done** — it needs SimSurfing and a
-human. If the curve gives under 4.7 µF effective at 4.3 V, step to a 10 µF
-nominal in the same 0402 land (`C6119763`, 10 V, 185 596 in stock).
+These are CIN and CSTOR; the BQ25505 wants **≥ 4.7 µF**. A 4.7 µF 0402 under
+DC bias can lose half its value, which is the *same trap* already documented
+for C7 — and unlike C7 it would show up as boost instability at cold start,
+not as ripple. The Murata part (`GRM155R61E475ME15D`) is chosen because
+**Murata publishes the DC-bias curve**, so the requirement can be *verified*
+instead of assumed. **That verification has still not been done** — it needs
+SimSurfing and a human.
+
+> [!warning] **Corrected 2026-08-28 — this item is riskier than written, and
+> the bias figure was stale.**
+>
+> **The bias is lower than "4.3 V".** That number dates from when `VBAT_OV`
+> was 4.246 V. It is now **3.912 V (3.955 worst case)**, and C1 sits on
+> `VIN_DC`, whose source maxes at ~3.68 V. Less bias, less loss — so the
+> situation is *better* than this section implied.
+>
+> **But the fallback may not be a drop-in.** Stepping to a 10 µF nominal in
+> the same 0402 land (`C6119763`, 10 V) is a BOM-line change with no board
+> impact — *if it clears 4.7 µF effective*. A 10 V part has a thinner
+> dielectric than the 25 V one, so it can lose a **larger** fraction at the
+> same voltage. It is not automatically the safer part.
+>
+> **If no 0402 clears 4.7 µF, this becomes a respin.** Measured on the routed
+> board: growing C1 or C2 from an 0402 land (1.34 × 0.54) to an 0603 land
+> (2.20 × 1.00) collides with **12** and **62** neighbouring pads/tracks
+> respectively. Neither can grow in place. That is a re-place and re-route.
+>
+> **What narrows the risk:** the cell sits on `VBAT_SEC` and the BQ25505 ties
+> it to `VSTOR` in normal operation, so the battery provides bulk on that rail.
+> The 4.7 µF matters most at **cold start with a flat cell**, when there is no
+> battery to help. This is a cold-start robustness question, not a
+> normal-running one.
+>
+> **Do the SimSurfing check before ordering boards.** It is free and takes
+> minutes, and it decides between a one-line BOM edit and a respin.
 
 **C4 — C0G on purpose.** CREF sets the BQ25505's internal reference droop, so
 this is a leakage-critical part, not a decoupling cap. The ±5 % tolerance sits

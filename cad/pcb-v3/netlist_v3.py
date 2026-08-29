@@ -122,7 +122,7 @@ part("J4", "Keyboard slot, 6-pin pogo block (LEFT)", 6, {
 }, "J4-1/3/4 must stay unconnected: loading them in knob mode generated "
    "volume/mute events (session 3).")
 
-part("J2", "Sensor pads, HLK-ZW0905 (CORRECTED pinout)", 6, {
+part("J2", "Sensor pads, HLK-ZW0922 (was ZW0905 — discontinued)", 6, {
     1: "SENSOR_3V3",
     2: "SENSOR_WAKEUP",
     3: "SENSOR_MCU_3V3",
@@ -130,10 +130,34 @@ part("J2", "Sensor pads, HLK-ZW0905 (CORRECTED pinout)", 6, {
     5: "SENSOR_RX",
     6: "GND",
 }, "DESIGN-SPEC §5 as corrected 2026-08-27. The old table was the ZW0901's, "
-   "reversed end-for-end.")
+   "reversed end-for-end. **2026-08-28: the ZW0905 is DISCONTINUED; the "
+   "replacement HLK-ZW0922 has this SAME pin order** (spec V1.0 §4.3), so no "
+   "board change. See cad/pcb-v3/SENSOR-ZW0922.md.")
 
-part("BT1", "VARTA CP1254 A4", 2, {1: "VBAT", 2: "GND"},
-     "3.0 V discharge cut-off, 4.30 +-0.05 V charge, 210 mA pulse.")
+# BT1 IS TWO WIRE-LANDING PADS, NOT A CELL FOOTPRINT. O1.4 at (-7.61, -4.30)
+# and (-7.61, -5.90), 1.6 mm pitch, solder_mask_margin -0.1 for a 0.4 mm dam
+# (preflight check 16). The cell never touches this board -- it sits in the
+# housing pocket and reaches BT1 through its leads.
+# YOU SOLDER THE CELL'S LEADS HERE. YOU NEVER PUT AN IRON ON THE CELL:
+# CoinPower handbook 8.7 prohibits attaching connectors to the cell; only the
+# manufacturer may. Hence a pre-wired assembly. See BUY-YOURSELF.md.
+#
+# 4.30 V IS CORRECT and has always been. A 2026-08-28 "correction" to 4.00 V
+# was WRONG: 4.00 is footnote 3 of the A4/A4X datasheets and applies only to
+# RAPID charge at 140 mA. TouchID charges from harvest at microamps, so it
+# never applies. The real ceiling on VBAT_OV is the PCM's trip minus 150 mV.
+#
+# PART IS CHANGING: the protected+wired CP1254 does not exist (VARTA's "IP W"
+# assembly has no PCM). Front-runner is the LiPol LPM1254 with PCM + wires --
+# O13 +-0.5 x 6.5 +-0.3 assembled, 65-80 mAh, over-charge 4.25 V +-50 mV.
+# Awaiting their quote. See CELL-DECIDED.md.
+part("BT1", "Cell wire pads — LiPol LPM1254 w/ PCM (was VARTA CP1254 A4X)", 2,
+     {1: "VBAT", 2: "GND"},
+     "3.0 V discharge cut-off, 4.30 +-0.05 V charge, 210 mA pulse (CP1254 A4X "
+     "figures). Two O1.4 wire-landing pads on 1.6 mm pitch — NOT a cell "
+     "footprint. Solder the cell's LEADS here; never put an iron on the cell "
+     "(CoinPower handbook 8.7). 4.30 V is the cell's charge voltage; the 4.00 V "
+     "in some notes is the RAPID-charge footnote and does not apply here.")
 
 # ---- SWD + test points ----
 part("J3", "SWD pads", 5, {
@@ -180,8 +204,19 @@ rc("ROK2", "7.15M 0402", "OK_HYST", "OK_PROG")
 rc("ROK3", "1.33M 0402", "VRDIV", "OK_HYST", "VBAT_OK rising = 3.47 V")
 
 rc("L1", "22uH", "LX", "VIN_DC", "LBOOST -> VIN_DC. Package NOT verified.")
-rc("C1", "4.7uF 0402", "VIN_DC", "GND", "CIN, datasheet minimum")
-rc("C2", "4.7uF 0402", "VSTOR", "GND", "CSTOR")
+# C1/C2 DC BIAS IS AN OPEN ITEM AND IT IS NOT A FREE FIX. Measured on the
+# routed board 2026-08-28: neither can grow from its 0402 land (1.34 x 0.54)
+# to an 0603 land (2.20 x 1.00) in place -- C1 collides with 12 neighbouring
+# pads/tracks, C2 with 62. So if no 0402 part clears 4.7 uF EFFECTIVE, this
+# stops being a BOM swap and becomes a re-place and re-route.
+# Real bias is 3.912 V max on VSTOR (not the 4.3 V older notes assumed -- that
+# dated from VBAT_OV = 4.246) and ~3.68 V on VIN_DC. See SOURCING.md.
+rc("C1", "4.7uF 0402", "VIN_DC", "GND",
+   "CIN, datasheet minimum. VERIFY C_eff on Murata's DC-bias curve before "
+   "ordering — cannot grow to 0603 in place (12 collisions).")
+rc("C2", "4.7uF 0402", "VSTOR", "GND",
+   "CSTOR. VERIFY C_eff on Murata's DC-bias curve before ordering — cannot "
+   "grow to 0603 in place (62 collisions).")
 rc("C3", "0.1uF 0402", "VSTOR", "GND", "CSTOR HF")
 rc("C4", "10nF 0402 low-leak", "VREF_SAMP", "GND", "CREF, 9-11 nF window")
 rc("C5", "10uF 16V X5R 0603", "VBAT", "GND", "CBAT bulk beside the cell")

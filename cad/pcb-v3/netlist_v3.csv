@@ -1,20 +1,20 @@
 ref,pin,net,part,note
-BT1,1,VBAT,VARTA CP1254 A4,"3.0 V discharge cut-off, 4.30 +-0.05 V charge, 210 mA pulse."
-BT1,2,GND,VARTA CP1254 A4,"3.0 V discharge cut-off, 4.30 +-0.05 V charge, 210 mA pulse."
-C1,1,VIN_DC,4.7uF 0603,"CIN, datasheet minimum"
-C1,2,GND,4.7uF 0603,"CIN, datasheet minimum"
-C2,1,VSTOR,4.7uF 0603,CSTOR
-C2,2,GND,4.7uF 0603,CSTOR
+BT1,1,VBAT,Cell wire pads — LiPol LPM1254 w/ PCM (was VARTA CP1254 A4X),"3.0 V discharge cut-off, 4.30 +-0.05 V charge, 210 mA pulse (CP1254 A4X figures). Two O1.4 wire-landing pads on 1.6 mm pitch — NOT a cell footprint. Solder the cell's LEADS here; never put an iron on the cell (CoinPower handbook 8.7). 4.30 V is the cell's charge voltage; the 4.00 V in some notes is the RAPID-charge footnote and does not apply here."
+BT1,2,GND,Cell wire pads — LiPol LPM1254 w/ PCM (was VARTA CP1254 A4X),"3.0 V discharge cut-off, 4.30 +-0.05 V charge, 210 mA pulse (CP1254 A4X figures). Two O1.4 wire-landing pads on 1.6 mm pitch — NOT a cell footprint. Solder the cell's LEADS here; never put an iron on the cell (CoinPower handbook 8.7). 4.30 V is the cell's charge voltage; the 4.00 V in some notes is the RAPID-charge footnote and does not apply here."
+C1,1,VIN_DC,4.7uF 0402,"CIN, datasheet minimum. VERIFY C_eff on Murata's DC-bias curve before ordering — cannot grow to 0603 in place (12 collisions)."
+C1,2,GND,4.7uF 0402,"CIN, datasheet minimum. VERIFY C_eff on Murata's DC-bias curve before ordering — cannot grow to 0603 in place (12 collisions)."
+C2,1,VSTOR,4.7uF 0402,CSTOR. VERIFY C_eff on Murata's DC-bias curve before ordering — cannot grow to 0603 in place (62 collisions).
+C2,2,GND,4.7uF 0402,CSTOR. VERIFY C_eff on Murata's DC-bias curve before ordering — cannot grow to 0603 in place (62 collisions).
 C3,1,VSTOR,0.1uF 0402,CSTOR HF
 C3,2,GND,0.1uF 0402,CSTOR HF
 C4,1,VREF_SAMP,10nF 0402 low-leak,"CREF, 9-11 nF window"
 C4,2,GND,10nF 0402 low-leak,"CREF, 9-11 nF window"
-C5,1,VBAT,10uF 0805,CBAT bulk beside the cell
-C5,2,GND,10uF 0805,CBAT bulk beside the cell
+C5,1,VBAT,10uF 16V X5R 0603,CBAT bulk beside the cell
+C5,2,GND,10uF 16V X5R 0603,CBAT bulk beside the cell
 C6,1,SENSOR_3V3,1uF 0402,LDO input side of U3 is VSTOR; this is OUT
 C6,2,GND,1uF 0402,LDO input side of U3 is VSTOR; this is OUT
-C7,1,SENSOR_3V3,22uF 0805,holds the ZW0905's 200 mA / 4 us scan transient to 36 mV. 1.25 mm TALL.
-C7,2,GND,22uF 0805,holds the ZW0905's 200 mA / 4 us scan transient to 36 mV. 1.25 mm TALL.
+C7,1,SENSOR_3V3,22uF 10V X5R 0603,"ZW0905 200 mA / 4 us scan transient. REQUIREMENT: ripple < 200 mV (Hi-Link), so C_eff at 3.3 V bias must be >= 4 uF, target >= 8 uF. Do NOT substitute a 6.3 V part -- it derates onto the floor."
+C7,2,GND,22uF 10V X5R 0603,"ZW0905 200 mA / 4 us scan transient. REQUIREMENT: ripple < 200 mV (Hi-Link), so C_eff at 3.3 V bias must be >= 4 uF, target >= 8 uF. Do NOT substitute a 6.3 V part -- it derates onto the floor."
 C8,1,SENSOR_MCU_3V3,1uF 0402,
 C8,2,GND,1uF 0402,
 C9,1,NRF_VDD,1uF 0402,REG0 output decoupling
@@ -25,12 +25,12 @@ C12,1,VBAT_SENSE,10nF 0402,SAADC sampling reservoir
 C12,2,GND,10nF 0402,SAADC sampling reservoir
 C13,1,BL_FLAG,10nF 0402,
 C13,2,GND,10nF 0402,
-J2,1,SENSOR_3V3,"Sensor pads, HLK-ZW0905 (CORRECTED pinout)","DESIGN-SPEC §5 as corrected 2026-08-27. The old table was the ZW0901's, reversed end-for-end."
-J2,2,SENSOR_WAKEUP,"Sensor pads, HLK-ZW0905 (CORRECTED pinout)","DESIGN-SPEC §5 as corrected 2026-08-27. The old table was the ZW0901's, reversed end-for-end."
-J2,3,SENSOR_MCU_3V3,"Sensor pads, HLK-ZW0905 (CORRECTED pinout)","DESIGN-SPEC §5 as corrected 2026-08-27. The old table was the ZW0901's, reversed end-for-end."
-J2,4,SENSOR_TX,"Sensor pads, HLK-ZW0905 (CORRECTED pinout)","DESIGN-SPEC §5 as corrected 2026-08-27. The old table was the ZW0901's, reversed end-for-end."
-J2,5,SENSOR_RX,"Sensor pads, HLK-ZW0905 (CORRECTED pinout)","DESIGN-SPEC §5 as corrected 2026-08-27. The old table was the ZW0901's, reversed end-for-end."
-J2,6,GND,"Sensor pads, HLK-ZW0905 (CORRECTED pinout)","DESIGN-SPEC §5 as corrected 2026-08-27. The old table was the ZW0901's, reversed end-for-end."
+J2,1,SENSOR_3V3,"Sensor pads, HLK-ZW0922 (was ZW0905 — discontinued)","DESIGN-SPEC §5 as corrected 2026-08-27. The old table was the ZW0901's, reversed end-for-end. **2026-08-28: the ZW0905 is DISCONTINUED; the replacement HLK-ZW0922 has this SAME pin order** (spec V1.0 §4.3), so no board change. See cad/pcb-v3/SENSOR-ZW0922.md."
+J2,2,SENSOR_WAKEUP,"Sensor pads, HLK-ZW0922 (was ZW0905 — discontinued)","DESIGN-SPEC §5 as corrected 2026-08-27. The old table was the ZW0901's, reversed end-for-end. **2026-08-28: the ZW0905 is DISCONTINUED; the replacement HLK-ZW0922 has this SAME pin order** (spec V1.0 §4.3), so no board change. See cad/pcb-v3/SENSOR-ZW0922.md."
+J2,3,SENSOR_MCU_3V3,"Sensor pads, HLK-ZW0922 (was ZW0905 — discontinued)","DESIGN-SPEC §5 as corrected 2026-08-27. The old table was the ZW0901's, reversed end-for-end. **2026-08-28: the ZW0905 is DISCONTINUED; the replacement HLK-ZW0922 has this SAME pin order** (spec V1.0 §4.3), so no board change. See cad/pcb-v3/SENSOR-ZW0922.md."
+J2,4,SENSOR_TX,"Sensor pads, HLK-ZW0922 (was ZW0905 — discontinued)","DESIGN-SPEC §5 as corrected 2026-08-27. The old table was the ZW0901's, reversed end-for-end. **2026-08-28: the ZW0905 is DISCONTINUED; the replacement HLK-ZW0922 has this SAME pin order** (spec V1.0 §4.3), so no board change. See cad/pcb-v3/SENSOR-ZW0922.md."
+J2,5,SENSOR_RX,"Sensor pads, HLK-ZW0922 (was ZW0905 — discontinued)","DESIGN-SPEC §5 as corrected 2026-08-27. The old table was the ZW0901's, reversed end-for-end. **2026-08-28: the ZW0905 is DISCONTINUED; the replacement HLK-ZW0922 has this SAME pin order** (spec V1.0 §4.3), so no board change. See cad/pcb-v3/SENSOR-ZW0922.md."
+J2,6,GND,"Sensor pads, HLK-ZW0922 (was ZW0905 — discontinued)","DESIGN-SPEC §5 as corrected 2026-08-27. The old table was the ZW0901's, reversed end-for-end. **2026-08-28: the ZW0905 is DISCONTINUED; the replacement HLK-ZW0922 has this SAME pin order** (spec V1.0 §4.3), so no board change. See cad/pcb-v3/SENSOR-ZW0922.md."
 J3,1,SWDIO,SWD pads,"Pads, not a connector. Pin 4 is the rail, so a programmer can see target voltage."
 J3,2,SWCLK,SWD pads,"Pads, not a connector. Pin 4 is the rail, so a programmer can see target voltage."
 J3,3,RESET,SWD pads,"Pads, not a connector. Pin 4 is the rail, so a programmer can see target voltage."
@@ -68,10 +68,10 @@ ROK2,1,OK_HYST,7.15M 0402,
 ROK2,2,OK_PROG,7.15M 0402,
 ROK3,1,VRDIV,1.33M 0402,VBAT_OK rising = 3.47 V
 ROK3,2,OK_HYST,1.33M 0402,VBAT_OK rising = 3.47 V
-ROV1,1,VBAT_OV_SET,5.6M 0402,VBAT_OV = 1.5*1.21*13.1/5.6 = 4.246 V
-ROV1,2,GND,5.6M 0402,VBAT_OV = 1.5*1.21*13.1/5.6 = 4.246 V
-ROV2,1,VRDIV,7.5M 0402,
-ROV2,2,VBAT_OV_SET,7.5M 0402,
+ROV1,1,VBAT_OV_SET,6.04M 0402 1%,VBAT_OV = 1.5*1.21*(1+6.98/6.04) = 3.912 V  (CP1254 limit 4.00)
+ROV1,2,GND,6.04M 0402 1%,VBAT_OV = 1.5*1.21*(1+6.98/6.04) = 3.912 V  (CP1254 limit 4.00)
+ROV2,1,VRDIV,6.98M 0402 1%,
+ROV2,2,VBAT_OV_SET,6.98M 0402 1%,
 TP1,1,VIN_DC,"test point, B.Cu",keep on the -Y half — the +Y half is the antenna keep-out
 TP2,1,VSTOR,"test point, B.Cu",keep on the -Y half — the +Y half is the antenna keep-out
 TP3,1,VBAT,"test point, B.Cu",keep on the -Y half — the +Y half is the antenna keep-out
