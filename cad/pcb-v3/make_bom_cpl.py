@@ -106,6 +106,21 @@ SRC = {
     # Rail is 3.912 V max, so 10 V is 2.5x derating.
     "C1":   ("C77000",    "extended",  543698, "Murata GRM155R61A106ME44D 10uF 10V X5R 0402"),
     "C2":   ("C77000",    "extended",  543698, "Murata GRM155R61A106ME44D 10uF 10V X5R 0402"),
+    # ---- the cell-protection block (PCM), added 2026-08-29 ----
+    # U5 is CONSIGNED from Digi-Key (2508-MC3651DF1AAMCT-ND, cut tape, in stock
+    # at qty 1), because JLC's own stock for C6989585 is 0 with a minimum of 5.
+    "U5":   ("C6989585",  "extended",       0, "Mitsumi MC3651DF1AAM 1S protection, PLP-4E -- CONSIGNED from Digi-Key"),
+    # R8/R9/C14 are 0201, not 0402. The board is at capacity: 26 slots for 25
+    # parts and U5's courtyard costs 4. These three carry the PCM's 3 uA
+    # quiescent and fault-sense current -- no heat, no voltage stress -- so
+    # they are the safest parts on the board to shrink. 0201 needs Standard
+    # PCBA (Economic stops at 0402), which this order already is, panelised to
+    # 71.3 mm with rails and fiducials. See PCM-ONBOARD.md.
+    "R8":   ("C274872",   "extended",  993538, "YAGEO RC0201FR-07330RL 330R 1% 0201"),
+    "R9":   ("C273271",   "extended",   12827, "YAGEO RC0201FR-072K7L 2.7k 1% 0201"),
+    # 25 V, NOT the cheaper 10 V part. DC bias already forced C1/C2 from 4.7uF
+    # to 10uF once; at 4.3 V a 10 V X5R gives most of its capacitance away.
+    "C14":  ("C76939",    "extended", 2377451, "Murata GRM033R61E104KE14D 100nF 25V X5R 0201"),
     "C3":   ("C1525",     "BASIC",   35834447, "Samsung CL05B104KO5NNNC 100nF 16V X7R 0402"),
     "C10":  ("C1525",     "BASIC",   35834447, "Samsung CL05B104KO5NNNC 100nF 16V X7R 0402"),
     "C4":   ("C22400107", "extended",   72632, "Murata GRM1555C1H103JE01D 10nF 50V C0G 0402"),
