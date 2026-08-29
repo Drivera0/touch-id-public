@@ -96,9 +96,24 @@ straight through. So `BT1` pin 2 stops being GND and becomes a new net
 
 ## BLOCKED — the land pattern
 
-**I have the body size (1.25 × 2.85 × 0.50) and the pinout, but not the pad
-positions or sizes.** The package drawing is an image in the datasheet with no
-extractable dimensions, and EasyEDA's public API returns 404 for `C6989585`.
+**Mitsumi do not publish a land pattern. Confirmed by reading the drawing, not
+by failing to find it.** Page 3 of the Digi-Key mirror renders as: PIN
+CONFIGURATION table, then PACKAGE DIMENSION with a **Top View** (body outline
+1.25 ±0.05 × 2.85 ±0.05) and a **Side View** (0.50 max) — and the page ends.
+There is **no bottom view, no pad dimensions and no recommended land pattern**
+anywhere in the document.
+
+What IS confirmed from the drawing:
+
+* body **1.25 ±0.05 × 2.85 ±0.05 × 0.50 max**
+* pin layout, TOP view: **1 top-left, 4 top-right, 2 bottom-left, 3
+  bottom-right**, with **D as the large centre pad**
+* the schematic pin sketch is *not* dimensioned, so pad sizes cannot be scaled
+  off it
+
+EasyEDA's public API also 404s for `C6989585`, and its `/svgs` endpoint returns
+*"schematic not drawn"* — so JLC's "symbol and footprint available in EasyEDA"
+line may be generic text rather than a promise about this part.
 
 **The standing rule is never to invent a land pattern**, so the placement stops
 here until one of these produces it:
