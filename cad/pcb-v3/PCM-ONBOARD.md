@@ -276,7 +276,35 @@ zero-current passives is a far smaller bet than moving the radio.
 > ITS OWN library**. The 0201 land must come from the same place, and real
 > LCSC part numbers are needed for 330 Ω / 2.7 kΩ / 0.1 µF in 0201.
 > The sandbox can no longer reach easyeda.com (403), so this goes through the
-> browser. **`build_pcb_v3.py` deliberately stops with the diagnostic above
+> browser.
+
+### 0201 costs NOTHING in process terms — checked, not assumed
+
+JLCPCB's assembly capability table draws the line here:
+
+| | Economic PCBA | Standard PCBA |
+|---|---|---|
+| **Minimum package** | **0402** | **0201** |
+| single PCB size | 10×10 – 470×500 mm | **70×70** – 460×500 mm |
+| edge rails | not necessary | **necessary** |
+| fiducials | not necessary | **necessary** |
+| min IC pin spacing | 0.40 mm | 0.35 mm |
+
+So 0201 forces **Standard PCBA**, which demands a board at least 70 mm a side —
+against our 19.30 mm. That looked like a real obstacle.
+
+**It is already paid for.** This board is *already* ordered as Standard PCBA
+(`v3-handoff/README.md`: "Standard PCBA, assemble top side, qty 5, $91.25"),
+and **JLC already auto-panelises it to 71.3 × 71.3 mm and adds the rails and
+fiducials** (`CURRENT-STATE.md`, `JLCPCB DFM Report.md`). Every precondition
+for 0201 — the service tier, the 70 mm minimum, rails, fiducials — is met by
+the order that already exists.
+
+JLC also state they assemble **01005**, so 0201 is not near their limit.
+
+That is what makes this the right answer rather than merely a clever one: it
+changes three zero-current passives and **nothing else** — not the module, not
+the antenna, not the outline, not the service tier, not the panel. **`build_pcb_v3.py` deliberately stops with the diagnostic above
 > until then** — it does not silently build a board with an invented land.
 
 ---
