@@ -53,10 +53,31 @@ toward the screen.
 **Housing (CadQuery):**
 - `Z = 0` is the housing back plane **and** the PCB top face
 - PCB occupies `z −1.2 … 0`
-- Flush top face at `z = +7.16`; total module height **8.36 mm** including the PCB
 - **Nothing on the housing may go below z = 0.** The PCB underside at −1.2 is the
   module's lowest plane, so the pogo pads are the only things that can touch the
   keyboard.
+
+**Height — this section was STALE until 2026-08-28.** It read "flush top face at
+`z = +7.16`; total module height **8.36 mm**". That is **v4**. v5 added the riser
+column and the numbers moved:
+
+| | v4 (what this spec used to say) | **v5, as built** |
+|---|---|---|
+| top face | z 7.16 | **z 11.66** |
+| total module height incl. PCB | 8.36 mm | **12.86 mm** |
+| sensor barrel bottom | z 4.96 | z 9.46 |
+
+> [!danger] **v5 is 4.50 mm taller than the module it replaces, and nobody has
+> measured the slot.**
+> 8.36 mm is the **caliper-measured** height of the knob module that occupies
+> this slot today. The v5 riser spends **4.50 mm of headroom that has never been
+> confirmed to exist** — `riser_h = 4.50` came from a task brief, not from a
+> measurement. **"Slot depth / clearance above the pogo blocks" is still an open
+> item in §Open questions.**
+>
+> This gates the whole v5 architecture. The cell only fits *because* of the
+> riser; if the slot is 8.36 mm deep, there is nowhere for the cell to go and the
+> layout has to change. **Measure the slot before spending any more height.**
 
 **Altium ↔ KiCad Gerber transform** (verified, do not re-derive):
 ```
@@ -530,7 +551,21 @@ on module presence. Harvesting therefore does not depend on the setting.
       empty while every sibling page renders — consistent with it being delisted.
       Confirm distributor stock before the housing is committed, since **no other
       module on the market has a verified outline under 18.1 mm.**
-- [ ] Slot depth / clearance above the pogo blocks
+- [ ] **Slot depth / clearance above the pogo blocks — NOW THE HIGHEST-VALUE
+      MEASUREMENT IN THE PROJECT.** v5 stands **12.86 mm** tall against the
+      **8.36 mm** knob module it replaces, so it is already spending 4.50 mm of
+      unverified headroom, and every remaining cell option wants more:
+
+      | extra riser | column for the cell | total module | protected cell that then fits |
+      |---|---|---|---|
+      | +0.0 (now) | 7.21 mm | 12.86 mm | LPM1040 **40 mAh** |
+      | **+0.1** | 7.31 mm | 12.96 mm | + LPM1240 **60 mAh** |
+      | **+1.2** | 8.41 mm | 14.06 mm | + LPM1254 **65–80 mAh** |
+
+      **+1.2 mm buys back essentially the full CP1254 capacity, protected and
+      pre-wired.** Measure: slot depth from the keyboard's top surface to
+      whatever the PCB seats on, and whether the top face must sit flush or may
+      stand proud.
 - [ ] Pogo pad positions re-verified now the outline is square
 - [ ] If harvest fails: trace **J4-2 and J4-6** for a keyboard-battery tap
 
