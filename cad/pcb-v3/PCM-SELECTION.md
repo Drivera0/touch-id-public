@@ -5,6 +5,84 @@ type: project
 
 # Choosing the PCM
 
+> ## 2026-08-28 — THE PCM IS NO LONGER A PART YOU BUY
+>
+> Two findings changed the architecture. **Read this before the rest of the
+> file, which is now background.**
+>
+> **1. Nothing fits on the board.** Scanning the routed board against pads,
+> component BODIES, all 288 F.Cu tracks, vias and the F.Cu keepouts: the
+> largest free square anywhere on the top layer is **0.9 mm**. The smallest
+> integrated-FET PCM in existence is 1.0 mm die / ~1.3 mm land. **B6 was right.**
+> (Two earlier scans of mine said otherwise — one read the *unrouted* file, one
+> silently parsed zero of 288 tracks, and neither excluded component bodies.
+> U1 alone is 10.5 × 15.5 on a 19.3 mm square: **44 % of the board**.)
+>
+> **2. So it goes in the battery assembly, not on a carrier you solder.** Hand-
+> building an inline module is per-unit labour and does not scale to a product.
+> Buying a *protected pack* instead is what every earbud manufacturer does, it
+> needs no board change, and the assembly step stays "solder two wires to BT1".
+>
+> **The MC3651 recommendation below is therefore now a SPEC LINE to hand a pack
+> assembler, not a part to order.** Its 0.315 A trip is still the reason it is
+> the right answer — see below.
+
+## The cell that actually fits — and it is a compromise
+
+Searched 2026-08-28 for a cell that is **already protected AND factory-wired**.
+
+**Nothing at any maker or catalogue distributor fits.** Not Adafruit, SparkFun,
+TinyCircuits, PowerStream, Digi-Key or Mouser. The reason is geometric: the
+pocket is round, so a Ø14.0 limit caps a rectangular pouch at about **9.9 × 9.9
+mm** footprint, and the smallest protected LiPo any of them sell is ~3× that.
+
+The column available is **z 2.25 → 9.46 = 7.21 mm** (cell bottom sits on the
+MCU lid through the insulator; the sensor barrel starts at 9.46).
+
+**A fitted PCM adds about +3 mm of thickness and +0.5 mm of diameter** — that
+adder, published by LiPol Battery across their micro coin line, is what kills
+almost everything:
+
+| part | cell | **assembled, incl. PCM + wires** | verdict |
+|---|---|---|---|
+| **LiPol LPM1040, 40 mAh** | Ø10.0 × 4.0 | **Ø10.5 × 7.0** | **FITS** — 0.21 mm spare |
+| LiPol LPM1240, 60 mAh | Ø12.0 × 4.3 | Ø12.5 × 7.3 | misses by **0.1 mm** |
+| LiPol LPM1254, 65–80 mAh | Ø12.0 × 5.4 | Ø12.5 × 8.4 | misses by 1.2 mm |
+| LPM1140 48 mAh / LPM1045 46 mAh | — | Ø11.5 × 7.3 / Ø10.5 × 7.5 | miss by 0.1 / 0.3 mm |
+| **VARTA CP1254 A4X** | Ø12.1 × 5.4 | **no PCM available at all** | — |
+
+Supplier: **LiPol Battery Co. Ltd**, Shenzhen — `lipobattery.us` /
+`lipolbattery.com`. MOQ 5, PayPal/card, worldwide DHL/FedEx/UPS. They publish
+real trip data per model (their LP221620 datasheet gives **over-charge 4.275 V
+±50 mV, over-discharge 2.75 V ±50 mV, over-current 2–2.5 A**) — but **not for
+the LPM line**, so those numbers must be requested, not assumed.
+
+### What 40 mAh costs
+
+Against the 4.0 mWh/day load budget, charging only to 3.912 V and cutting at
+3.12 V:
+
+| cell | nameplate | usable (approx) | reserve with zero harvest |
+|---|---|---|---|
+| CP1254 A4X 77 mAh | 285 mWh | ~142 mWh | **~36 days** |
+| LPM1240 60 mAh | 222 mWh | ~133 mWh | ~33 days |
+| **LPM1040 40 mAh** | 148 mWh | ~89 mWh | **~22 days** |
+
+Harvest still covers the daily load ~4.7× on four hours of backlight, so the
+cell is only a dark-period buffer. **Three weeks of not touching the keyboard**
+is the real question, and that is a product decision, not an engineering one.
+
+### Two things to settle with LiPol before ordering
+
+1. **Ask for the LPM1240 stack-up.** The "+3 mm" is a round-number blanket
+   figure across the series. If the real number for that model lands at 7.2 mm
+   it fits, and it carries **50 % more capacity** than the LPM1040. One email.
+2. **LPM1040 has 0.21 mm of margin, and the cell's own +0.2 mm thickness
+   tolerance eats all of it** — worst case is exactly 7.2 mm. Ask for the
+   assembled max, not the typical, **and** ask what axial venting clearance
+   they require. VARTA demand one for CoinPower; a Li-ion coin from anyone
+   needs the lid free to lift.
+
 Researched 2026-08-28. The PCM cannot go on the board (B6: 9.1 % of the top
 layer free, none of it via-capable) and does not come on the cell (the VARTA
 "IP W" assembly is kapton + tags + wires only). **So it goes inline on the
