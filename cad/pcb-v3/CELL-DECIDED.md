@@ -5,6 +5,49 @@ type: project
 
 # The cell: LiPol LPM1254 with PCM + wires
 
+## Ranking — enquiry sent 2026-08-28, awaiting reply
+
+| # | option | mAh | reserve* | fits Ø14.00 × 9.21? | specs? | buy how |
+|---|---|---|---|---|---|---|
+| **1** | **LPM1254 80 mAh** + PCM + wires | **80** | **~44 d** | **YES, as built** | **full datasheet** | LiPol, MOQ 5, PayPal |
+| 2 | LPM1454 105 mAh + PCM + wires | 105 | ~58 d | needs Ø15.0 pocket | assembled dims unknown | LiPol, MOQ 5 |
+| 3 | LPM1254 65 mAh + PCM + wires | 65 | ~36 d | YES | full datasheet | LiPol, MOQ 5 |
+| 4 | AliExpress LIR1254 + PCM | ~57 | ~32 d | **unknown** | **none** | 1 click, C$7.09 |
+| — | VARTA CP1254 A4X "IP Wires" | 77 | ~43 d | yes | full datasheet | **DEAD — no PCM** |
+
+\* days of zero-harvest reserve against the 4.0 mWh/day budget, charging to
+3.912 V and cutting at 3.12 V. Approximate.
+
+### Why #1
+
+**The 80 mAh LPM1254 already beats the CP1254 we started with** — 80 mAh
+against 77, ~44 days against ~43 — while adding everything the VARTA never
+had: a factory PCM, factory wires, and published trip voltages. It fits the
+housing **exactly as built**, no reprint. It is strictly better than the
+original target on every axis that matters.
+
+### What would change the order
+
+* **If LiPol confirm the LPM1454 assembles to ≤ Ø14.5 mm** → it moves to #1.
+  105 mAh is a 31 % capacity gain for a pocket change from Ø14.00 to Ø15.00,
+  which leaves a 1.085 mm collar wall and costs one C$0.43 reprint.
+* **If the 80 mAh variant is out of stock** → take the 65 mAh. Still fits, same
+  datasheet, and ~36 days is the same reserve the CP1254 would have given.
+* **If max continuous discharge comes back as 30 mA** (datasheet) rather than
+  65 mA (product page) → not disqualifying, but the firmware must not scan and
+  transmit at the same instant. Ask which variant carries which figure.
+
+### #4 is a bench sample, not a candidate
+
+Buy the AliExpress cell anyway — C$7.09, arrives while LiPol are still
+quoting, and it converts the unknowns into caliper measurements plus a
+bench-supply reading of the over-charge trip. **Do not design around it**: no
+published dimensions, and the seller states the protection board "maybe
+different color or types … according to our stock".
+
+---
+
+
 Decided 2026-08-28. **Protected at the factory, wired at the factory, full
 published datasheet, MOQ 5, PayPal or credit card, DHL door-to-door.**
 Nothing to solder, nothing to assemble, no RFQ black box.
