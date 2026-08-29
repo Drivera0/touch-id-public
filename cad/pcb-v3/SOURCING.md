@@ -116,6 +116,51 @@ SimSurfing and a human.
 > **Do the SimSurfing check before ordering boards.** It is free and takes
 > minutes, and it decides between a one-line BOM edit and a respin.
 
+### Curve read 2026-08-28 — the 4.7 µF part does NOT hold up
+
+SimSurfing itself sits behind a software licence agreement, so this reading is
+from **Murata's own published characteristics data** for
+**`GRM155R61C475ME15`** — the **16 V** sibling of our part, same 4.7 µF, same
+0402, same X5R. Section 5, *Capacitance – DC Voltage Characteristics*:
+
+| bias | capacitance | change |
+|---|---|---|
+| 0 V | ~4.7 µF | 0 % |
+| **5 V** | **~2.0 µF** | **≈ −57 %** |
+| 10 V | ~1.0 µF | ≈ −80 % |
+| 15 V | ~0.5 µF | ≈ −90 % |
+
+**At our ~3.9 V bias that interpolates to roughly 2.3–2.8 µF, against a 4.7 µF
+requirement.** The concern was real, not theoretical.
+
+**Two honest caveats.** Our part is the **25 V** `61E`, not this 16 V `61C` —
+a thicker dielectric, so ours will do somewhat better than the table above. And
+these are values read off a printed graph, not tabulated numbers. But the gap
+is roughly 2× ; being "somewhat better" does not close it.
+
+### What follows, and it does not need the curve
+
+**Fit the 10 µF (`C6119763`) regardless.** The logic is decision-independent:
+
+* 0603 does not fit (12 / 62 collisions), so the land is fixed at 0402.
+* Within an 0402, more nominal capacitance is strictly better here.
+* So the 10 µF is the best part available in the only footprint that fits —
+  whatever its own curve says.
+
+The curve would only tell us *whether to also worry about cold start*, not
+whether to change the part. **This is a BOM-line change. No respin.**
+
+### The residual risk, stated plainly
+
+If even the 10 µF lands under 4.7 µF effective, the consequence is confined to
+**cold start from a fully flat cell** — the BQ25505's boost may need more than
+one attempt to bring VSTOR up. In normal running the cell sits on `VBAT_SEC`
+tied to `VSTOR`, so the battery is the bulk and 4.7 µF is irrelevant.
+
+That is a *robustness* question, not a *works/doesn't* one, and it is
+measurable on the first board: run the cell flat, then see whether it restarts
+from harvest alone.
+
 **C4 — C0G on purpose.** CREF sets the BQ25505's internal reference droop, so
 this is a leakage-critical part, not a decoupling cap. The ±5 % tolerance sits
 inside the datasheet's 9–11 nF window.
