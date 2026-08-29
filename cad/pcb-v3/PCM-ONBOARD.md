@@ -96,12 +96,68 @@ straight through. So `BT1` pin 2 stops being GND and becomes a new net
 
 ## BLOCKED — the land pattern
 
-**Mitsumi do not publish a land pattern. Confirmed by reading the drawing, not
-by failing to find it.** Page 3 of the Digi-Key mirror renders as: PIN
-CONFIGURATION table, then PACKAGE DIMENSION with a **Top View** (body outline
-1.25 ±0.05 × 2.85 ±0.05) and a **Side View** (0.50 max) — and the page ends.
-There is **no bottom view, no pad dimensions and no recommended land pattern**
-anywhere in the document.
+> **RESOLVED 2026-08-29 — I was wrong that there is no bottom view.** I said
+> page 3 "ends after the Side View". It does not; my browser screenshot was
+> clipped. The user supplied the PDF, and rendered locally at 600 dpi the page
+> carries a **full dimensioned Bottom View**. Lesson repeated: a screenshot of
+> a PDF viewer is not the document.
+
+## PLP-4E terminal geometry — read from the Mitsumi drawing
+
+Rendered from `datasheets/MC3651_SeriesSpecifications.pdf` page 3; the image is
+archived as `datasheets/MC3651-PLP-4E-bottom-view.png`.
+
+**Controlled (toleranced):**
+
+| | |
+|---|---|
+| terminal height | **0.20 ±0.05** |
+| wide terminal width | **0.65 ±0.05** |
+| small terminal width | **0.20 ±0.05** |
+| terminal spacing | **0.725 BASIC** (boxed) |
+| corner chamfer | **C0.05** — this is the **pin 1 indicator** |
+| positional tolerance | ⌖ 0.05 (M) |
+
+**Reference only — in parentheses on the drawing, so NOT controlled:**
+D centre pad **(1.15) × (1.80)**; edge offsets (0.075), (0.25), (0.05).
+
+Body **1.25 ±0.05 × 2.85 ±0.05 × 0.50 max**.
+
+**Layout:** four terminals in two rows — one **wide (0.65)** and one **small
+(0.20)** per row — plus the large centre **D** pad. The 0.725 reading is
+self-consistent: wide-pad centre 0.375 from the left edge, small-pad centre at
+1.100, whose far edge lands 0.050 from the right edge, matching the drawing's
+(0.05) edge offset exactly.
+
+> **Pin numbering is given in the TOP view** (1 top-left, 4 top-right,
+> 2 bottom-left, 3 bottom-right). The drawing above is the **BOTTOM** view, so
+> it is mirrored left-to-right. **Get this wrong and the part is reversed** —
+> exactly the failure mode that hit the sensor pinout once already.
+
+## What still has to happen
+
+This is the **package** outline, not a vendor **land pattern** — Mitsumi
+publish no recommended land. Deriving one per **IPC-7351** for a no-lead
+package is standard, defensible practice (terminal size plus a small toe
+extension, no side extension), but it is a derivation and should be labelled as
+one. The alternative is to ask Mitsumi for their recommended land.
+
+**Do not connect the D pad.** See the warning above.
+
+### Also learned while checking
+
+* **EasyEDA has no library for `C6989585`.** JLC's own page says so outright:
+  *"Currently, there is no library. You can request free CAD model design at
+  EasyEDA."* So the footprint would have to be drawn either way.
+* **The AP6683 (`C2849565`) does have one** — symbol and footprint both render
+  on its JLC page — and it is **103,743 in stock, minimum 1, C$0.0465**, versus
+  the MC3651's stock 0 / minimum 5 / C$12.72 pre-order. That is a real
+  practical advantage the earlier ranking did not weigh.
+* **Unresolved conflict on the AP6683:** JLC's attribute table lists
+  *"Charging Saturation Voltage 4.1 V"* and *"Supply Current (Iq) 100 nA"*,
+  against the 4.30 V / 0.7 µA from earlier research. If the over-charge trip
+  really is 4.1 V, the margin over `VBAT_OV` (3.955 V worst case) is **145 mV**
+  — just under preflight's 150 mV guard. **Resolve before choosing it.**
 
 What IS confirmed from the drawing:
 
