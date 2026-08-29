@@ -57,9 +57,32 @@ Edit the Python and re-run, or the two will disagree.
 
 ## Parts, pin by pin
 
-### BT1 — VARTA CP1254 A4
+### BT1 — VARTA CP1254 A4X, wire pads (NOT a cell footprint)
 
-> 3.0 V discharge cut-off, 4.30 +-0.05 V charge, 210 mA pulse.
+> 3.0 V discharge cut-off, **4.30 ±0.05 V charge voltage**, 210 mA pulse.
+>
+> **4.30 is correct — this line was right all along.** A4 and A4X data sheets
+> both give "Charge Voltage 4.30 ±0.05 V". The **4.00 V** figure that appears
+> in B6b is **footnote 3, which hangs off *Rapid Charge: 140 mA* only** — a
+> rapid-charge derating with a 20 °C minimum temperature, not the cell ceiling.
+> TouchID charges from harvest at microamps, so it never applies.
+>
+> The real ceiling on `VBAT_OV` is the **PCM's trip**, not the cell: the charger
+> must never end up doing the safety device's job. Preflight check 15 keeps the
+> worst case 150 mV clear of a 4.30 V trip, so **4.15 V is the cap**.
+
+**BT1 is two Ø1.4 wire-landing pads, 1.6 mm pitch, at (-7.61, -4.30) and
+(-7.61, -5.90).** The cell does not touch this board: it sits in the housing
+pocket at z 2.25 .. 7.85, above the MCU lid, and reaches BT1 through 42 mm
+factory-attached AWG 30 leads routed out of the +-X wire windows.
+
+**You solder the cell's LEADS here. You never put an iron on the cell.**
+CoinPower handbook 8.7 prohibits soldering or welding connectors directly to
+the cell — only the manufacturer may do that — which is why the cell must be
+bought pre-wired. See `BUY-YOURSELF.md`.
+
+`solder_mask_margin -0.1` on both pads: a 0.4 mm mask dam, not the 0.2 mm the
+default gave. Guarded by preflight check 16.
 
 | Pin | Net |
 |---|---|
@@ -564,16 +587,48 @@ A future revision could host the PCM on-board, but only by freeing ~2.0 x 3.0 mm
 **with via access** — most plausibly via a narrower BLE module, since U1 is
 10.5 x 15.5 mm on a 19.3 mm square.
 
-### B6b  VBAT_OV was overcharging the cell — FIXED
+### B6b  VBAT_OV — half of this was wrong, corrected 2026-08-28
 
-ROV1/ROV2 were 5.6M/7.5M => **VBAT_OV = 4.246 V**, against a CP1254 A4 whose
-maximum charging voltage is **4.00 +-0.05 V**. The charger was set 246 mV above
-the cell's limit, and its worst case (4.295 V) sat *on* the 4.30 V over-charge
-trip of the very PCM that B6 adds — which would have made the safety device the
-working regulator, exactly what the CoinPower handbook warns against.
+**What was right:** ROV1/ROV2 were 5.6M/7.5M => **VBAT_OV = 4.246 V**, worst
+case **4.295 V**, which sat *on* the **4.30 V** over-charge trip of the PCM.
+That makes the safety device the working regulator, which the CoinPower
+handbook explicitly warns against. **That reason alone justified the change.**
 
-Now **6.04M / 6.98M => 3.912 V** nominal, 3.955 V worst case with 1 % parts.
-Costs ~10 % of usable capacity and buys cycle life.
+**What was wrong:** the claim that the cell's maximum charging voltage is
+**4.00 ±0.05 V**. It is not. Both the A4 (2020-02-18) and A4X (2023-06-26) data
+sheets give **"Charge Voltage 4.30 ±0.05 V"**. The 4.00 V number is **footnote
+3**, and footnote 3 is attached to **"Rapid Charge: 140 mA"**:
+
+> "*CoinPower A4-Version Charging Document* must be observed. **Max. charging
+> voltage: 4.00 V ±0.05 V; min. charging temperature: 20 °C.**"
+
+It is the **rapid-charge derating**. TouchID charges from harvested energy at
+**microamps** — three orders of magnitude below even the 35 mA standard charge
+— so the rapid-charge clause never applies and **4.30 V governs**.
+
+**A footnote was read as the headline spec, and it went into a safety gate.**
+`preflight.py` check 15 then graded every later revision against the wrong
+constant. It never produced an unsafe board — the error was in the conservative
+direction — but a gate that is right by accident is not a gate.
+
+**Where that leaves the design.** With `CELL_V_CHARGE_MAX = 4.30`, the binding
+constraint is check 15's other test: worst case must stay **150 mV clear of the
+PCM trip**, so the cap on `VBAT_OV` worst case is **4.15 V**.
+
+| | |
+|---|---|
+| current | **6.04M / 6.98M => 3.912 V** nom, **3.955 V** wc |
+| cap | 4.15 V wc |
+| unused headroom | **~195 mV** |
+
+3.912 V is legal and **buys real cycle life** — Li-ion cycle count rises sharply
+as the charge ceiling drops, which matters for a cell that harvests slowly and
+must last years. So the value may well be the right one. **But it is now a
+deliberate trade, not a limit.**
+
+**Do not retune the divider yet.** The true ceiling is set by the PCM's actual
+trip voltage, and the PCM is not chosen (see B6). Pick the PCM first, then set
+`VBAT_OV` 150 mV below its trip.
 
 ### Load budget grew — 3.3 -> 4.0 mWh/day
 

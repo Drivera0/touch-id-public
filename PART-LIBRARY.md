@@ -315,6 +315,18 @@ Three things the brief did not have:
    "max 4.00 V" figure that appears in search results is footnote 3 and applies only
    to the **rapid charge** rate of 140 mA, which this design cannot approach —
    harvest current is on the order of 1 mA.
+
+   > **This paragraph was right, and a later session overrode it anyway.**
+   > `NETLIST-V3.md` §B6b (2026-08-28) asserted the cell's limit was 4.00 V —
+   > the exact misreading this paragraph warns about — and put 4.00 into
+   > `preflight.py` check 15, where it graded every later revision. Corrected
+   > 2026-08-28: `CELL_V_CHARGE_MAX = 4.30`.
+   >
+   > The change B6b made was still *justified*, just not for the stated reason:
+   > the old 4.246 V nominal had a **4.295 V worst case sitting on a PCM's
+   > 4.30 V trip**. That is the real constraint. **The ceiling on `VBAT_OV` is
+   > the PCM's trip minus 150 mV, not the cell** — so it cannot be finalised
+   > until the PCM is chosen. See `cad/pcb-v3/NETLIST-V3.md` §B6 and §B6b.
 3. **"Cell must not be used without external safety electronics (PCM)."** VARTA states
    this on the face of the datasheet. There is no PCM in the brief's architecture.
    See §9 item 4.

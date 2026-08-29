@@ -487,13 +487,28 @@ except Exception as e:
 
 # ------------------------------------------------------ 14 provisional BOM --
 # ------------------- 15 the charger may not overcharge the cell ------------
-# This board once shipped VBAT_OV = 4.246 V against a cell rated 4.00 V. The
-# geometry checks all passed while it did -- copper cannot tell you that a
-# resistor divider is cooking the battery. So the ELECTRICAL limits are a gate
-# too, derived from the same netlist the board is built from.
-CELL_V_CHARGE_MAX = 4.00        # VARTA CP1254 A4 data sheet
+# The geometry checks all pass while a resistor divider cooks the battery --
+# copper cannot tell you the charger is set wrong. So the ELECTRICAL limits are
+# a gate too, derived from the same netlist the board is built from.
+#
+# 2026-08-28 CORRECTION -- this constant was 4.00 and that was a MISREAD.
+# CP1254 A4 and A4X data sheets both give "Charge Voltage 4.30 +-0.05 V" as the
+# spec. The 4.00 V figure is FOOTNOTE 3, and footnote 3 hangs off "Rapid Charge:
+# 140 mA" only: "Max. charging voltage: 4.00V +-0.05V; min. charging temperature
+# 20 C" (15 C on the A4). It is the rapid-charge derating, not the cell ceiling.
+# TouchID charges from harvest at microamps -- three orders of magnitude below
+# even the 35 mA standard charge -- so the rapid-charge footnote never applies
+# and the governing limit is 4.30.
+#
+# The binding constraint is therefore the PCM trip, not the cell: the charger
+# must never become the safety device's job. That is the second test below.
+CELL_V_CHARGE_MAX = 4.30        # VARTA CP1254 A4/A4X data sheet, Charge Voltage
 CELL_V_FLOOR      = 2.50        # CoinPower handbook: do not go below
 PCM_OV_TRIP       = 4.30        # what a fitted PCM trips at -- must stay clear
+# => with the 150 mV guard below, the ceiling on VBAT_OV worst case is 4.15 V.
+# Current design is 3.912 V nominal / 3.955 wc: legal, and deliberately low for
+# cycle life, but ~195 mV of headroom is being left unused. DO NOT retune this
+# until the PCM is chosen -- its actual trip voltage sets the real ceiling.
 VBIAS             = 1.21        # BQ25505 internal reference
 try:
     import importlib.util as _il
