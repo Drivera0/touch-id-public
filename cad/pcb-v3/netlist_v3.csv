@@ -1,10 +1,10 @@
 ref,pin,net,part,note
 BT1,1,VBAT,Cell wire pads — LiPol LPM1254 w/ PCM (was VARTA CP1254 A4X),"3.0 V discharge cut-off, 4.30 +-0.05 V charge, 210 mA pulse (CP1254 A4X figures). Two O1.4 wire-landing pads on 1.6 mm pitch — NOT a cell footprint. Solder the cell's LEADS here; never put an iron on the cell (CoinPower handbook 8.7). 4.30 V is the cell's charge voltage; the 4.00 V in some notes is the RAPID-charge footnote and does not apply here."
 BT1,2,GND,Cell wire pads — LiPol LPM1254 w/ PCM (was VARTA CP1254 A4X),"3.0 V discharge cut-off, 4.30 +-0.05 V charge, 210 mA pulse (CP1254 A4X figures). Two O1.4 wire-landing pads on 1.6 mm pitch — NOT a cell footprint. Solder the cell's LEADS here; never put an iron on the cell (CoinPower handbook 8.7). 4.30 V is the cell's charge voltage; the 4.00 V in some notes is the RAPID-charge footnote and does not apply here."
-C1,1,VIN_DC,4.7uF 0402,"CIN, datasheet minimum. VERIFY C_eff on Murata's DC-bias curve before ordering — cannot grow to 0603 in place (12 collisions)."
-C1,2,GND,4.7uF 0402,"CIN, datasheet minimum. VERIFY C_eff on Murata's DC-bias curve before ordering — cannot grow to 0603 in place (12 collisions)."
-C2,1,VSTOR,4.7uF 0402,CSTOR. VERIFY C_eff on Murata's DC-bias curve before ordering — cannot grow to 0603 in place (62 collisions).
-C2,2,GND,4.7uF 0402,CSTOR. VERIFY C_eff on Murata's DC-bias curve before ordering — cannot grow to 0603 in place (62 collisions).
+C1,1,VIN_DC,10uF 10V X5R 0402,"CIN. Was 4.7uF — Murata's DC-bias curve showed that part delivering only ~2.3-2.8 uF at this board's 3.9 V, against the BQ25505's 4.7 uF minimum. Specify by C_eff, never by marked value."
+C1,2,GND,10uF 10V X5R 0402,"CIN. Was 4.7uF — Murata's DC-bias curve showed that part delivering only ~2.3-2.8 uF at this board's 3.9 V, against the BQ25505's 4.7 uF minimum. Specify by C_eff, never by marked value."
+C2,1,VSTOR,10uF 10V X5R 0402,"CSTOR. Same change as C1. 0603 was not an option — it collides with 62 neighbouring pads/tracks here (12 at C1), so the land is fixed at 0402 and more nominal capacitance in the same land was the only lever."
+C2,2,GND,10uF 10V X5R 0402,"CSTOR. Same change as C1. 0603 was not an option — it collides with 62 neighbouring pads/tracks here (12 at C1), so the land is fixed at 0402 and more nominal capacitance in the same land was the only lever."
 C3,1,VSTOR,0.1uF 0402,CSTOR HF
 C3,2,GND,0.1uF 0402,CSTOR HF
 C4,1,VREF_SAMP,10nF 0402 low-leak,"CREF, 9-11 nF window"
@@ -68,8 +68,8 @@ ROK2,1,OK_HYST,7.15M 0402,
 ROK2,2,OK_PROG,7.15M 0402,
 ROK3,1,VRDIV,1.33M 0402,VBAT_OK rising = 3.47 V
 ROK3,2,OK_HYST,1.33M 0402,VBAT_OK rising = 3.47 V
-ROV1,1,VBAT_OV_SET,6.04M 0402 1%,VBAT_OV = 1.5*1.21*(1+6.98/6.04) = 3.912 V  (CP1254 limit 4.00)
-ROV1,2,GND,6.04M 0402 1%,VBAT_OV = 1.5*1.21*(1+6.98/6.04) = 3.912 V  (CP1254 limit 4.00)
+ROV1,1,VBAT_OV_SET,6.04M 0402 1%,"VBAT_OV = 1.5*1.21*(1+6.98/6.04) = 3.912 V, 3.955 V worst case. The cell's charge voltage is 4.30 V, NOT the 4.00 V some notes claimed — 4.00 is the rapid-charge footnote. The binding ceiling is the PCM's over-charge trip minus 150 mV, so pick the cell's PCM before retuning this divider."
+ROV1,2,GND,6.04M 0402 1%,"VBAT_OV = 1.5*1.21*(1+6.98/6.04) = 3.912 V, 3.955 V worst case. The cell's charge voltage is 4.30 V, NOT the 4.00 V some notes claimed — 4.00 is the rapid-charge footnote. The binding ceiling is the PCM's over-charge trip minus 150 mV, so pick the cell's PCM before retuning this divider."
 ROV2,1,VRDIV,6.98M 0402 1%,
 ROV2,2,VBAT_OV_SET,6.98M 0402 1%,
 TP1,1,VIN_DC,"test point, B.Cu",keep on the -Y half — the +Y half is the antenna keep-out

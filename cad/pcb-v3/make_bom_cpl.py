@@ -82,8 +82,30 @@ SRC = {
     "U4":   ("C46459900", "extended",    4371, "TI TPS7A2033DQNR, X2SON-4 1x1"),
     "L1":   ("C2849435",  "extended",    2288, "DMBJ PNLS252012-220M 22uH, 1008, 1.02R, 500mA"),
 
-    "C1":   ("C2858031",  "extended",  184764, "Murata GRM155R61E475ME15D 4.7uF 25V X5R 0402"),
-    "C2":   ("C2858031",  "extended",  184764, "Murata GRM155R61E475ME15D 4.7uF 25V X5R 0402"),
+    # C1/C2 WERE C2858031 (Murata GRM155R61E475ME15D, 4.7uF 25V X5R 0402).
+    # Changed 2026-08-28 because 4.7 uF NOMINAL does not deliver 4.7 uF EFFECTIVE.
+    # Murata's own characteristics data for the 16 V sibling GRM155R61C475ME15
+    # (same 4.7uF, same 0402, same X5R), section 5 DC Voltage Characteristics:
+    #     0 V ~4.7 uF | 5 V ~2.0 uF (-57%) | 10 V ~1.0 uF | 15 V ~0.5 uF
+    # At this board's ~3.9 V bias that is roughly 2.3-2.8 uF against the
+    # BQ25505's 4.7 uF requirement. Our 25 V part biases somewhat better than
+    # that 16 V curve, but not by the ~2x needed to close the gap.
+    #
+    # 0603 IS NOT AVAILABLE AS A FIX: growing either from the 0402 land
+    # (1.34 x 0.54) to 0603 (2.20 x 1.00) collides with 12 neighbouring
+    # pads/tracks at C1 and 62 at C2. The land is fixed, so the only lever is
+    # more nominal capacitance in the SAME 0402 -- which makes this a BOM
+    # change with ZERO board impact.
+    #
+    # Chose C77000 over the C6119763 that SOURCING.md originally suggested:
+    # C6119763 is HRE CGA0402X5R106M100GT, an unknown brand that publishes no
+    # DC-bias curve -- and "Murata because Murata publishes the curve" was the
+    # entire reason C1/C2 was a Murata part. C77000 keeps that, keeps the 10 V
+    # rating (biases better than the 6.3 V 0J parts), and has 543,698 in JLC's
+    # assembly library against HRE's 157,884.
+    # Rail is 3.912 V max, so 10 V is 2.5x derating.
+    "C1":   ("C77000",    "extended",  543698, "Murata GRM155R61A106ME44D 10uF 10V X5R 0402"),
+    "C2":   ("C77000",    "extended",  543698, "Murata GRM155R61A106ME44D 10uF 10V X5R 0402"),
     "C3":   ("C1525",     "BASIC",   35834447, "Samsung CL05B104KO5NNNC 100nF 16V X7R 0402"),
     "C10":  ("C1525",     "BASIC",   35834447, "Samsung CL05B104KO5NNNC 100nF 16V X7R 0402"),
     "C4":   ("C22400107", "extended",   72632, "Murata GRM1555C1H103JE01D 10nF 50V C0G 0402"),
@@ -119,9 +141,12 @@ LCSC = {r: v[0] for r, v in SRC.items()}
 
 # Per-line warnings that survive into the BOM so they cannot be forgotten.
 WARN = {
-    "U1": "JLC ASSEMBLY STOCK 0 - backorder ~11 days, backlog -75. CHECK BEFORE ORDERING.",
-    "C1": "VERIFY C_eff at 4.3 V on Murata's DC-bias curve; BQ25505 wants >=4.7 uF.",
-    "C2": "VERIFY C_eff at 4.3 V on Murata's DC-bias curve; BQ25505 wants >=4.7 uF.",
+    "U1": "CONSIGNED - customer ships MDBT50Q to JLC's warehouse, so JLC's own "
+           "stock of 0 does not block the order. Confirm receipt before build.",
+    "C1": "10uF NOMINAL, ~4-5 uF effective at 3.9 V bias. Was 4.7uF, which "
+           "measured only ~2.3-2.8 uF. Specify by C_eff, never by marked value.",
+    "C2": "10uF NOMINAL, ~4-5 uF effective at 3.9 V bias. Was 4.7uF, which "
+           "measured only ~2.3-2.8 uF. Specify by C_eff, never by marked value.",
     "C7": "10 V rating is REQUIRED, not a preference. Do not substitute 6.3 V.",
     "C4": "C0G on purpose - CREF leakage sets the BQ25505's reference droop.",
     "ROV1": "Sets VBAT_OV. Only 2040 in stock, single source. Do not substitute blind.",

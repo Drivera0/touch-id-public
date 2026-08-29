@@ -66,18 +66,18 @@ Edit the Python and re-run, or the two will disagree.
 | 1 | `VBAT` |
 | 2 | `GND` |
 
-### C1 — 4.7uF 0402
+### C1 — 10uF 10V X5R 0402
 
-> CIN, datasheet minimum. VERIFY C_eff on Murata's DC-bias curve before ordering — cannot grow to 0603 in place (12 collisions).
+> CIN. Was 4.7uF — Murata's DC-bias curve showed that part delivering only ~2.3-2.8 uF at this board's 3.9 V, against the BQ25505's 4.7 uF minimum. Specify by C_eff, never by marked value.
 
 | Pin | Net |
 |---|---|
 | 1 | `VIN_DC` |
 | 2 | `GND` |
 
-### C2 — 4.7uF 0402
+### C2 — 10uF 10V X5R 0402
 
-> CSTOR. VERIFY C_eff on Murata's DC-bias curve before ordering — cannot grow to 0603 in place (62 collisions).
+> CSTOR. Same change as C1. 0603 was not an option — it collides with 62 neighbouring pads/tracks here (12 at C1), so the land is fixed at 0402 and more nominal capacitance in the same land was the only lever.
 
 | Pin | Net |
 |---|---|
@@ -310,7 +310,7 @@ Edit the Python and re-run, or the two will disagree.
 
 ### ROV1 — 6.04M 0402 1%
 
-> VBAT_OV = 1.5*1.21*(1+6.98/6.04) = 3.912 V  (CP1254 limit 4.00)
+> VBAT_OV = 1.5*1.21*(1+6.98/6.04) = 3.912 V, 3.955 V worst case. The cell's charge voltage is 4.30 V, NOT the 4.00 V some notes claimed — 4.00 is the rapid-charge footnote. The binding ceiling is the PCM's over-charge trip minus 150 mV, so pick the cell's PCM before retuning this divider.
 
 | Pin | Net |
 |---|---|

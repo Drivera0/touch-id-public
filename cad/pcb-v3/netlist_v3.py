@@ -197,7 +197,10 @@ rc("R3", "1k 0402", "HARV_3", "VIN_DC")
 # life -- charging a Li-ion to a lower ceiling is the single biggest lever on
 # how many cycles it survives.
 rc("ROV1", "6.04M 0402 1%", "VBAT_OV_SET", "GND",
-   "VBAT_OV = 1.5*1.21*(1+6.98/6.04) = 3.912 V  (CP1254 limit 4.00)")
+   "VBAT_OV = 1.5*1.21*(1+6.98/6.04) = 3.912 V, 3.955 V worst case. The cell's "
+   "charge voltage is 4.30 V, NOT the 4.00 V some notes claimed — 4.00 is the "
+   "rapid-charge footnote. The binding ceiling is the PCM's over-charge trip "
+   "minus 150 mV, so pick the cell's PCM before retuning this divider.")
 rc("ROV2", "6.98M 0402 1%", "VRDIV", "VBAT_OV_SET")
 rc("ROK1", "4.53M 0402", "OK_PROG", "GND", "VBAT_OK falling = 3.12 V")
 rc("ROK2", "7.15M 0402", "OK_HYST", "OK_PROG")
@@ -211,12 +214,14 @@ rc("L1", "22uH", "LX", "VIN_DC", "LBOOST -> VIN_DC. Package NOT verified.")
 # stops being a BOM swap and becomes a re-place and re-route.
 # Real bias is 3.912 V max on VSTOR (not the 4.3 V older notes assumed -- that
 # dated from VBAT_OV = 4.246) and ~3.68 V on VIN_DC. See SOURCING.md.
-rc("C1", "4.7uF 0402", "VIN_DC", "GND",
-   "CIN, datasheet minimum. VERIFY C_eff on Murata's DC-bias curve before "
-   "ordering — cannot grow to 0603 in place (12 collisions).")
-rc("C2", "4.7uF 0402", "VSTOR", "GND",
-   "CSTOR. VERIFY C_eff on Murata's DC-bias curve before ordering — cannot "
-   "grow to 0603 in place (62 collisions).")
+rc("C1", "10uF 10V X5R 0402", "VIN_DC", "GND",
+   "CIN. Was 4.7uF — Murata's DC-bias curve showed that part delivering only "
+   "~2.3-2.8 uF at this board's 3.9 V, against the BQ25505's 4.7 uF minimum. "
+   "Specify by C_eff, never by marked value.")
+rc("C2", "10uF 10V X5R 0402", "VSTOR", "GND",
+   "CSTOR. Same change as C1. 0603 was not an option — it collides with 62 "
+   "neighbouring pads/tracks here (12 at C1), so the land is fixed at 0402 "
+   "and more nominal capacitance in the same land was the only lever.")
 rc("C3", "0.1uF 0402", "VSTOR", "GND", "CSTOR HF")
 rc("C4", "10nF 0402 low-leak", "VREF_SAMP", "GND", "CREF, 9-11 nF window")
 rc("C5", "10uF 16V X5R 0603", "VBAT", "GND", "CBAT bulk beside the cell")
