@@ -255,6 +255,20 @@ def blocked_masks(net, halo, ko="tracks"):
     board that already contains 105 vias. Copper obstacles (pads, tracks,
     vias) still apply on every layer for both kinds.
     """
+    # GRID GUARD. The mask answers a question about a POINT -- may this cell
+    # centre hold the feature -- but the router then draws a SEGMENT between
+    # two legal centres, and that segment can pass closer to an obstacle than
+    # either endpoint does. On a 0.05 grid a diagonal step strays up to
+    # 0.0354 mm off the cells it joins.
+    #
+    # That is not a rounding curiosity, it shipped real violations: close_open
+    # put a GND track 0.0853 mm from a RESET via and 0.0920 mm from a
+    # SENSOR_WAKEUP via against a 0.100 rule -- short by 0.0147 and 0.0080,
+    # both inside the half-diagonal, both invisible to a centre-only test.
+    #
+    # Inflating every obstacle by the half-diagonal makes the guarantee cover
+    # the whole segment rather than its ends.
+    halo = halo + STEP * 0.70710678
     m = {L: np.zeros((N, N), bool) for L in ALL_CU}
     for p in pads:
         if p["net"] == net:
