@@ -46,12 +46,13 @@ import sys
 
 import numpy as np
 
-if len(sys.argv) < 4:
-    sys.exit(__doc__)
-
-SRC, DST = sys.argv[1], sys.argv[2]
+# Importable as a library: the search/unwind/h2h helpers are reused by other
+# scripts, and exiting at IMPORT time when argv is short made that impossible.
+SRC = sys.argv[1] if len(sys.argv) > 2 else None
+DST = sys.argv[2] if len(sys.argv) > 2 else None
 TARGETS = sys.argv[3:]
-os.environ.setdefault("BOARD", os.path.abspath(SRC))
+if SRC:
+    os.environ.setdefault("BOARD", os.path.abspath(SRC))
 
 import handroute as H          # noqa: E402  (must follow $BOARD)
 import pour_truth as pt        # noqa: E402
@@ -292,4 +293,6 @@ def main():
 
 
 if __name__ == "__main__":
+    if len(sys.argv) < 4:
+        sys.exit(__doc__)
     sys.exit(main())

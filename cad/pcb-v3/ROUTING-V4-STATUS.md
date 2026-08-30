@@ -573,3 +573,43 @@ Found while porting it, all silent failures:
 Plus a board-edge band computed with `TRACK/2` for every mask, giving vias a
 track-sized margin. Obstacle map now sees 145/145 pads, matching `pour_truth`
 independently.
+
+---
+
+## U4.2 and U4.5 closed by moving ONE track (7 -> 5)
+
+Island 4 -- the 0.931 mm2 scrap of F.Cu GND holding U4.2 and U4.5 -- had no
+legal via site, and the diagnostic named a single cause: every candidate was
+blocked by **one In1.Cu SENSOR_3V3 segment** running diagonally underneath.
+The F.Cu island shape was never the problem; the island is fine. A through via
+pierces In1.Cu, and that is where the track was.
+
+Rerouting the whole SENSOR_3V3 net is not available: `handroute` cannot rebuild
+it at all (it fails with "no path to U3.1"), and the CONTROL confirmed that
+failure is nothing to do with the keep-out being added -- the net simply cannot
+be re-created in the current congestion.
+
+So only the offending segment was moved:
+
+    was   (-7.250,-1.150) -> (-9.000, 0.600)   2.47 mm diagonal, straight
+                                               through the island
+    now   a detour around it, 7.80 mm, 2 vias
+
+**Kept at the full 0.400 mm width.** SENSOR_3V3 is the sensor supply, and
+quietly re-laying a power net at the 0.127 mm signal width to make it fit would
+have been a real electrical change disguised as a routing fix. The extra 5.3 mm
+at 0.4 mm wide on 1 oz copper is about **6.5 mOhm** -- roughly 1.3 mV at
+200 mA, against a 25 mV budget. Check 10 still reports 1.2 mV.
+
+Then one GND via in the freed island connects both pads.
+
+Result: **5 open pads**, clearance 0, router DRC clean, pogo contacts clear, no
+dangling ends, IR drop unchanged.
+
+### The five that remain are still placement problems
+
+R9.2 and U5.4 (islands 10 and 18 microns too narrow), C7.2 (island wholly
+inside J11.2's pogo ring, and its one route out needs a via 0.025 mm inside the
+board-edge rule), and U2.18/U2.19 (no via site anywhere in the QFN pin row).
+Nothing about the U4 fix generalises to them -- U4's blocker was removable
+copper on another layer, theirs is the position of the parts themselves.
