@@ -389,3 +389,48 @@ changes** (C5 as 0402, the GND/pogo ban, the pin-targeted 0201 objective). It
 is the 7-open-pad revision with every other check passing. Regenerating from
 the current script is not worth doing until U5's placement question above is
 settled, because the result would be worse: `PCM_VM` unrouted.
+
+---
+
+## FINAL STATE, end of 2026-08-29
+
+### 2 blockers — the fewest reached, down from 5
+
+| check | |
+|---|---|
+| 2 copper clearance | **PASS** 0 violating pairs |
+| 4 netlist ↔ board | **PASS** 134 pins — U5, R8/R9/C14, `CELL_NEG` all correct |
+| 5 dangling nets | PASS |
+| 6b router DRC @ 0.10 | **PASS** clean |
+| 7 antenna keep-out | **PASS** 0 objects inside |
+| 18 zones filled | PASS — In2.Cu, F.Cu, B.Cu |
+| 20 dangling track ends | **PASS** 1392 ends, all landed |
+| 21 every part sourced | PASS 23 LCSC codes |
+| 22 no via pierces a pogo contact | **PASS** 101 vias vs 10 pads |
+| **6** | **BLOCKER — 8 open pads** |
+| **17** | **BLOCKER — GND, the same pads** |
+
+### The 8, and what each needs
+
+| pad | net | |
+|---|---|---|
+| U2.18, U2.19 | VBAT, VSTOR | the 0.5 mm-pitch QFN escape. Predates the PCM work; `ROUTING-RESULT.md` named it in August |
+| J4.5 | GND | the pogo pad itself, on B.Cu. The B.Cu pour should reach it — worth checking why it does not |
+| R9.2, U3.x, U4.x | GND | left strip. `stitch_open` "routed" three of these with 0.10–0.24 mm tracks and the count did not move: **those stitches connect nothing** |
+
+### Do not trust a short stitch
+
+`stitch_open` reported `ROUTED 1 seg, 0 via, 0.10 mm` for U4.2, U4.5 and U3.2
+and all three are still open. A sub-0.25 mm track with no via is almost always
+a stitch to copper that is not actually on the net's connected island. **Check
+the count moved before believing a stitch.** Its ROUTED tally is not evidence —
+this is the second distinct way that script has misreported today.
+
+### Where the effort should go next
+
+1. **J4.5** first — it is one pad, on the B.Cu pour, on the net that matters
+   most, and "the pour does not reach a same-net pad" is a bounded question.
+2. **U2** next, and it is a placement question, not a routing one: 20 pins at
+   0.5 mm pitch inside a 4.32 mm strip leaves ~0.21 mm of escape ring per side.
+3. The left-strip GND pads last — they are the least critical of the three and
+   the most entangled with everything else.
