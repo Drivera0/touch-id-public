@@ -17,7 +17,7 @@ import heapq, math, os, re, sys
 import numpy as np
 
 HERE = os.path.dirname(os.path.abspath(__file__))
-BOARD = os.path.join(HERE, "pcb-v3-handoff.kicad_pcb")
+BOARD = os.environ.get("BOARD") or os.path.join(HERE, "pcb-v3-handoff.kicad_pcb")
 STEP = 0.05
 def _rules():
     """Read the design rules from fab_floor_touchid.txt -- do NOT hard-code.
@@ -58,8 +58,36 @@ def g2mm(i):  return round(ORG + i * STEP, 4)
 def mm2g(v):  return int(round((v - ORG) / STEP))
 
 t = open(BOARD, encoding="utf-8", errors="replace").read()
+# KiCad 8 wrote a top-level table -- (net 2 "GND") -- and referenced it from
+# every item as (net 2). KiCad 10 dropped the table and writes the NAME inline
+# on each item: (net "GND"). This file was built entirely on the KiCad 8 form,
+# so on a KiCad 10 board every regex below missed, every pad and track read as
+# net "", and emit() would have written (net None) into the board. It would
+# have produced a corrupt file rather than an error.
+#
+# KICAD10 tells emit() which dialect to write back. Never guess it from the
+# KiCad version string: what matters is the encoding THIS file uses.
 nn = dict(re.findall(r'\(net (\d+) "([^"]*)"\)', t))
+KICAD10 = not nn
+if KICAD10:
+    nn = {}
 name2id = {v: k for k, v in nn.items()}
+
+# one matcher for both dialects: (net 2 "GND") | (net 2) | (net "GND")
+_NET_RE = re.compile(r'\(net (?:(\d+)(?: "([^"]*)")?|"([^"]*)")\)')
+
+
+def netname(block):
+    """Net NAME of an item, whichever dialect the file uses."""
+    m = _NET_RE.search(block)
+    if not m:
+        return ""
+    num, inline_name, only_name = m.group(1), m.group(2), m.group(3)
+    if only_name is not None:
+        return only_name
+    if inline_name is not None:
+        return inline_name
+    return nn.get(num, "")
 
 def rot(px, py, a):
     r = math.radians(a); c, s = math.cos(r), math.sin(r)
@@ -71,21 +99,32 @@ for fm in re.finditer(r'\(footprint "touchid:([^"]+)"(.*?)\n\t\)', t, re.S):
     blk = fm.group(2)
     at = re.search(r'\(at ([-\d.]+) ([-\d.]+)(?: ([-\d.]+))?\)', blk)
     fx, fy, fa = float(at.group(1)), float(at.group(2)), float(at.group(3) or 0)
-    for pm in re.finditer(r'\(pad "([^"]+)" \w+ (\w+)(.*?)\n\t\t\)', blk, re.S):
+    # "([^"]*)" not "([^"]+)": mounting holes are written (pad "" np_thru_hole
+    # circle ...) with an EMPTY number, so requiring one character dropped both
+    # MH pads -- 1.3 mm holes the router was free to route straight through.
+    for pm in re.finditer(r'\(pad "([^"]*)" \w+ (\w+)(.*?)\n\t\t\)', blk, re.S):
         pb = pm.group(3)
-        a_ = re.search(r'\(at ([-\d.]+) ([-\d.]+)\)', pb)
+        # (at X Y) OR (at X Y ROT). Demanding exactly two numbers made every
+        # ROTATED pad fail this match and hit the `continue` below -- so the
+        # router never saw them at all and would happily route straight
+        # through one. On this board that silently hid U3.5 and U4.5, the
+        # X2SON thermal pads at (at 0 0 45), one of which is an open pad we
+        # are trying to fix.
+        a_ = re.search(r'\(at ([-\d.]+) ([-\d.]+)(?: ([-\d.]+))?\)', pb)
         s_ = re.search(r'\(size ([\d.]+) ([\d.]+)\)', pb)
         l_ = re.search(r'\(layers ([^)]*)\)', pb)
-        n_ = re.search(r'\(net \d+ "([^"]*)"\)', pb)
+        pad_net = netname(pb)
         if not (a_ and s_):
             continue
         dx, dy = rot(float(a_.group(1)), float(a_.group(2)), fa)
         lays = set((l_.group(1).replace('"', '').split()) if l_ else [])
         if "*.Cu" in lays:
             lays |= set(LAYERS) | {"In2.Cu"}
-        pads.append(dict(net=n_.group(1) if n_ else "", layers=lays,
+        prot = fa + float(a_.group(3) or 0)
+        pads.append(dict(net=pad_net, layers=lays,
                          x=fx + dx, y=fy + dy,
                          w=float(s_.group(1)), h=float(s_.group(2)),
+                         rot=prot,
                          shape=pm.group(2), ref=fm.group(1), num=pm.group(1)))
 
 tracks = []
@@ -95,9 +134,8 @@ for m in re.finditer(r'\(segment\b(.*?)\n\t\)', t, re.S):
     e_ = re.search(r'\(end ([-\d.]+) ([-\d.]+)\)', b)
     w_ = re.search(r'\(width ([\d.]+)\)', b)
     l_ = re.search(r'\(layer "([^"]+)"\)', b)
-    n_ = re.search(r'\(net (\d+)\)', b)
     if s_ and e_ and w_ and l_:
-        tracks.append(dict(net=nn.get(n_.group(1), "") if n_ else "",
+        tracks.append(dict(net=netname(b),
                            x1=float(s_.group(1)), y1=float(s_.group(2)),
                            x2=float(e_.group(1)), y2=float(e_.group(2)),
                            w=float(w_.group(1)), layer=l_.group(1)))
@@ -106,9 +144,8 @@ for m in re.finditer(r'\(via\b(.*?)\n\t\)', t, re.S):
     b = m.group(1)
     a_ = re.search(r'\(at ([-\d.]+) ([-\d.]+)\)', b)
     s_ = re.search(r'\(size ([\d.]+)\)', b)
-    n_ = re.search(r'\(net (\d+)\)', b)
     if a_ and s_:
-        vias.append(dict(net=nn.get(n_.group(1), "") if n_ else "",
+        vias.append(dict(net=netname(b),
                          x=float(a_.group(1)), y=float(a_.group(2)),
                          d=float(s_.group(1))))
 
@@ -150,11 +187,22 @@ def blocked_masks(net, halo):
         for L in LAYERS:
             if L not in p["layers"]:
                 continue
+            r = round(p.get("rot", 0)) % 180
             if p["shape"] == "circle":
                 m[L] |= ((XX - p["x"])**2 + (YY - p["y"])**2) <= (p["w"]/2 + halo)**2
+            elif r == 0 or r == 90:
+                # 90 swaps width and height. Ignoring that hid a real
+                # 0.0915 mm violation at C9.1 once already.
+                pw, ph = (p["w"], p["h"]) if r == 0 else (p["h"], p["w"])
+                m[L] |= (np.abs(XX - p["x"]) <= pw/2 + halo) & \
+                        (np.abs(YY - p["y"]) <= ph/2 + halo)
             else:
-                m[L] |= (np.abs(XX - p["x"]) <= p["w"]/2 + halo) & \
-                        (np.abs(YY - p["y"]) <= p["h"]/2 + halo)
+                # Off-axis pad (the X2SON thermals sit at 45 deg). Block the
+                # CIRCUMSCRIBED circle. That over-blocks the corners slightly,
+                # which costs a little routing room and can never let a track
+                # through copper -- the right way round for an obstacle map.
+                rad = math.hypot(p["w"], p["h"]) / 2
+                m[L] |= ((XX - p["x"])**2 + (YY - p["y"])**2) <= (rad + halo)**2
     for s in tracks:
         if s["net"] == net:
             continue
@@ -285,7 +333,13 @@ def route(net, verbose=True):
     return (laid, via_pts), None
 
 def emit(net, laid, via_pts):
-    nid = name2id.get(net)
+    # Write back in the dialect THIS file uses. On a KiCad 10 board there is no
+    # net table, name2id is empty, and the old code emitted the literal string
+    # "None" as the net id -- a corrupt board that still parses.
+    nid = ('"%s"' % net) if KICAD10 else name2id.get(net)
+    if nid is None:
+        raise SystemExit("net %r not in the board's net table -- refusing to "
+                         "emit copper with no net" % net)
     out = []
     # merge collinear runs
     runs = []
