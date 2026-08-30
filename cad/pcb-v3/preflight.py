@@ -545,7 +545,7 @@ rec(silk_hits == 0, "11 silkscreen text clear of pads",
 
 # ------------------------------------------------------- 12 housing sync ----
 try:
-    hb = open(os.path.join(HERE, "..", "scripts", "touchid_module_v5.py"), encoding="utf-8").read()
+    hb = open(os.path.join(HERE, "..", "scripts", "touchid_module_v6.py"), encoding="utf-8").read()
     mc = re.search(r"mcu_center = \(([-\d.]+), ([-\d.]+)\)", hb)
     bb = open(os.path.join(HERE, "build_pcb_v3.py"), encoding="utf-8").read()
     cx = float(re.search(r"^U1_CX = ([-\d.]+)", bb, re.M).group(1))
@@ -786,7 +786,7 @@ else:
             _lam += _v
     _want = None
     try:
-        _hs = open(os.path.join(HERE, "..", "scripts", "touchid_module_v5.py"),
+        _hs = open(os.path.join(HERE, "..", "scripts", "touchid_module_v6.py"),
                    encoding="utf-8").read()
         _hm = re.search(r"^pcb_t_ref\s*=\s*([\d.]+)", _hs, re.M)
         _want = float(_hm.group(1)) if _hm else None

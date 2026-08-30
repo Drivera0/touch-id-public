@@ -193,14 +193,31 @@ check(set(omitted) == expect_omitted, "CPL omits exactly the hand-worked parts",
       "omitted=%s" % ", ".join(("<no ref>" if r == "" else r) for r in omitted))
 
 # ...and the unreferenced ones must be the two NPTH mounting holes, in the
-# places the housing puts its screw bosses. This is the only check that ties
-# the board's holes to the printed part.
-BOSSES = [(8.10, -8.10), (-8.10, 8.10)]        # touchid_module_v5.py
+# places the housing puts its PINS. This is the only check that ties the
+# board's holes to the printed part, so it is also the only thing that would
+# have caught the mounting changing underneath it.
+#
+# It nearly did not. These were the v5 SCREW BOSSES on the corner diagonal,
+# (8.10,-8.10)/(-8.10,8.10), and the board moved to press-fit pins on the side
+# centres because the corner positions overlapped the pogo pads. Left alone,
+# this check would have validated a fab package against mounting geometry that
+# no longer exists anywhere.
+#
+# READ FROM THE HOUSING, do not retype it. A constant copied from another file
+# is a constant that drifts.
+import re as _re
+_hb = open(os.path.join(HERE, "..", "scripts", "touchid_module_v6.py"),
+           encoding="utf-8").read()
+_pp = _re.search(r"pcb_pin_pos = \[([^\]]*)\]", _hb)
+if not _pp:
+    sys.exit("cannot read pcb_pin_pos from touchid_module_v6.py -- refusing to guess")
+BOSSES = [(float(a), float(b)) for a, b in
+          _re.findall(r"\(([-\d.]+),\s*([-\d.]+)\)", _pp.group(1))]
 mh = [(v["x"], v["y"]) for v in unref]
 holes_ok = (len(mh) == 2
             and all(any(math.hypot(hx - bx, hy - by) < 0.01 for hx, hy in mh)
                     for bx, by in BOSSES))
-check(holes_ok, "NPTH holes sit on the housing's screw bosses",
+check(holes_ok, "NPTH holes sit on the housing's press-fit pins",
       "%d hole(s) %s vs housing %s" % (len(mh), sorted(mh), sorted(BOSSES)))
 
 # ---- 8. rotation can only be wrong on parts with >2 pads ------------------
