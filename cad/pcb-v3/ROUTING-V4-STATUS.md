@@ -712,3 +712,63 @@ U2's own neighbours and L1 immediately north.
 
 All three need parts moved. These are the charger's battery and storage rails;
 **the board is not manufacturable until they connect.**
+
+---
+
+## R9 moved; PCM_VM rerouted. 3 -> 2 open, and the ground plane is CONNECTED
+
+R9.2's island had 12 cells that fit a 0.40 via and **every one was inside
+J4.1's pogo ring** -- R9's ground pad sat 0.62 mm from the centre of a 2.20 mm
+pogo pad. No track detour reaches that; the part had to move.
+
+Swept every 0.05 mm position and both rotations for a spot where both pads
+clear all foreign copper AND the ground pad has a legal via site: 11151 legal
+positions, nearest at **(2.50, -9.00) rot 0**, 5.8 mm from U5.3. Moved there,
+ripped PCM_VM entirely, rerouted it.
+
+The distance is fine: R9 is a 2.7k high-impedance sense resistor, so a few
+milliohms of extra trace is nothing against 2700 ohms.
+
+    check 17  ground plane is connected  -- PASS, first time
+    check 6   2 open pads (U2.18, U2.19)
+    clearance 0 | router DRC clean | pogo contacts clear | no dangling ends
+
+### pour_truth had the same blind spot it was written to fix
+
+Ripping PCM_VM made the net vanish from the report, and `close_open` said
+"total open pads now: 2" while a completely UNROUTED net sat there. The cause:
+`analyse` only considered nets that already had copper, so a net with **zero**
+copper read as zero open pads. Fixed -- it now walks every net with two or more
+pads and reports a copper-less net as all-pads-stray. That is exactly the
+silent under-reporting this file exists to replace, reproduced inside it.
+
+Also fixed: `handroute` wrote the board back in LF, turning a few added tracks
+into an 18000-line diff. It now restores whatever endings the file used.
+
+### U2.18 and U2.19 -- what is actually true
+
+Tested by deleting parts from the obstacle map:
+
+* removing **L1** (and C1, and C5): reach stays at exactly **265 cells, 0 via
+  sites.** L1 was never the constraint. The earlier "wall" reading blamed it
+  because it sits on the frontier, not because it binds.
+* removing **U2's own other pins**: reach jumps to **127136 cells, 16827 via
+  sites.**
+
+So the cage is U2's own pin field, and nothing outside U2 can open it. On a
+0.5 mm pitch with 0.24 mm pads the gap between neighbours is 0.26 mm, which
+takes neither a via nor a track at this fab floor.
+
+The remaining routes are:
+
+**A. Via-in-pad.** JLC supports it (epoxy filled and plated over, "compatible
+with via diameters from 0.15 to 0.55 mm"). It is the standard answer for an
+interior pin on a fine-pitch QFN. Note the arithmetic: their minimum via
+diameter is 0.25 mm against a 0.24 mm pad, so this needs confirming with JLC
+rather than assuming -- and it is an extra process step with a cost.
+
+**B. Move U2 or change its escape.** Rotating the part, or widening those two
+pads, changes the land pattern and needs a deliberate decision.
+
+Not something to pick unilaterally: A costs money on every board, B changes a
+footprint. Both need the user.

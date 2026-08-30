@@ -261,9 +261,16 @@ def analyse(pads, segs, vias, polys, nets=None):
     all_cu = sorted({s["layer"] for s in segs} |
                     {p["layer"] for p in polys} |
                     {"F.Cu", "In1.Cu", "In2.Cu", "B.Cu"})
-    live = sorted({p["net"] for p in pads if p["net"]} &
-                  ({s["net"] for s in segs} | {v["net"] for v in vias} |
-                   {q["net"] for q in polys}))
+    # EVERY net with two or more pads -- NOT only nets that already have
+    # copper. Intersecting with "nets that have copper" meant a net whose
+    # copper had just been ripped up vanished from the report entirely, and a
+    # completely UNROUTED net read as zero open pads. That is the same class of
+    # silent under-reporting this file exists to replace.
+    _cnt = {}
+    for p in pads:
+        if p["net"]:
+            _cnt[p["net"]] = _cnt.get(p["net"], 0) + 1
+    live = sorted(n for n, c in _cnt.items() if c >= 2)
     if nets:
         live = [n for n in live if n in nets]
 
@@ -274,6 +281,11 @@ def analyse(pads, segs, vias, polys, nets=None):
         nv = [v for v in vias if v["net"] == net]
         nz = [q for q in polys if q["net"] == net]
         if len(np_) < 2:
+            continue
+        if not ns and not nv and not nz:
+            # no copper at all: every pad is its own island
+            report[net] = dict(pads=np_, polys=[], groups=len(np_),
+                               stray=np_[1:], main_segs=[], main_vias=[])
             continue
 
         uf = UF()

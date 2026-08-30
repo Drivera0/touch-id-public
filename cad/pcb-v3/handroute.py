@@ -409,5 +409,12 @@ if __name__ == "__main__":
         body = t.rstrip()
         assert body.endswith(")")
         body = body[:-1].rstrip("\n") + "\n" + "\n".join(add) + "\n)\n"
-        open(BOARD, "w", encoding="utf-8", newline="").write(body)
+        # Read in text mode means CRLF arrives as \n; writing it straight back
+        # converts the WHOLE FILE to LF, so a few added tracks show up as an
+        # 18000-line diff and sexp_check flags mixed endings. Restore what the
+        # file actually used.
+        with open(BOARD, "rb") as _fh:
+            _crlf = b"\r\n" in _fh.read(65536)
+        open(BOARD, "w", encoding="utf-8",
+             newline="\r\n" if _crlf else "\n").write(body)
         print("  wrote %s" % os.path.basename(BOARD))
