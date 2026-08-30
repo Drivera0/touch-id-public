@@ -152,9 +152,16 @@ SRC = {
     "R4":   ("C3013173",  "extended",  263891, "FOJAN FRC0402F4704TS 4.7M 1% 0402"),
     "R5":   ("C26083",    "BASIC",    3470670, "UNI-ROYAL 0402WGF1004TCE 1M 1% 0402"),
     "R6":   ("C25741",    "BASIC",   14849306, "UNI-ROYAL 0402WGF1003TCE 100k 1% 0402"),
-    "ROK1": ("C137964",   "extended",    9229, "YAGEO RC0402FR-074M53L 4.53M 1% 0402"),
-    "ROK2": ("C477783",   "extended",    4637, "YAGEO RC0402FR-077M15L 7.15M 1% 0402"),
-    "ROK3": ("C5713265",  "extended",  103945, "FOJAN FRC0402F1334TS 1.33M 1% 0402"),
+    # ---- OK divider, moved to 0201 2026-08-29 ----
+    # Stock checked at LCSC AND in JLCPCB's own assembly library, because they
+    # are different numbers and the assembly one is what binds. 4.53M and 7.15M
+    # in 0201 exist from six manufacturers between them and every single one is
+    # 0 in stock, pre-order only -- so the values were re-derived, not just the
+    # package. 4.3M/6.8M/1.33M hold VBAT_OK at 3.123/3.498 V (was 3.120/3.470).
+    # All three are "Standard Only" PCBA, which this order already is.
+    "ROK1": ("C423523",   "extended",    7293, "UNI-ROYAL 0201WMF4304TEE 4.3M 1% 0201"),
+    "ROK2": ("C423449",   "extended",   14404, "UNI-ROYAL 0201WMF6804TEE 6.8M 1% 0201"),
+    "ROK3": ("C423747",   "extended",    3250, "UNI-ROYAL 0201WMF1334TEE 1.33M 1% 0201"),
     "ROV1": ("C172106",   "extended",    2040, "Walsin WR04W6044FTL 6.04M 1% 0402"),
     "ROV2": ("C137942",   "extended",    2674, "YAGEO RC0402FR-076M98L 6.98M 1% 0402"),
 }

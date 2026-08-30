@@ -206,9 +206,16 @@ rc("ROV1", "6.04M 0402 1%", "VBAT_OV_SET", "GND",
    "rapid-charge footnote. The binding ceiling is the PCM's over-charge trip "
    "minus 150 mV, so pick the cell's PCM before retuning this divider.")
 rc("ROV2", "6.98M 0402 1%", "VRDIV", "VBAT_OV_SET")
-rc("ROK1", "4.53M 0402", "OK_PROG", "GND", "VBAT_OK falling = 3.12 V")
-rc("ROK2", "7.15M 0402", "OK_HYST", "OK_PROG")
-rc("ROK3", "1.33M 0402", "VRDIV", "OK_HYST", "VBAT_OK rising = 3.47 V")
+# The OK divider was re-derived onto 0201 values JLC actually stocks. The old
+# 4.53M/7.15M pair exists in 0201 from six manufacturers and NONE of them stock
+# it -- 0 at LCSC retail and 0 in JLC's assembly library, pre-order only.
+# 4.3M/6.8M/1.33M are in stock (C423523 / C423449 / C423747) and hold the
+# thresholds: falling 3.123 V, rising 3.498 V, chain 12.43 M (was 13.01 M).
+rc("ROK1", "4.3M 0201", "OK_PROG", "GND",
+   "VBAT_OK falling = 1.21*(1+6.8/4.3) = 3.123 V (was 3.120 at 4.53M/7.15M)")
+rc("ROK2", "6.8M 0201", "OK_HYST", "OK_PROG")
+rc("ROK3", "1.33M 0201", "VRDIV", "OK_HYST",
+   "VBAT_OK rising = 1.21*(1+(6.8+1.33)/4.3) = 3.498 V (was 3.470)")
 
 rc("L1", "22uH", "LX", "VIN_DC", "LBOOST -> VIN_DC. Package NOT verified.")
 # C1/C2 DC BIAS IS AN OPEN ITEM AND IT IS NOT A FREE FIX. Measured on the
