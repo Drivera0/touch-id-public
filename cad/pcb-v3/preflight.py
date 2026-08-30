@@ -545,15 +545,29 @@ rec(silk_hits == 0, "11 silkscreen text clear of pads",
 
 # ------------------------------------------------------- 12 housing sync ----
 try:
+    t_board = open(BOARD, encoding="utf-8", errors="replace").read()
     hb = open(os.path.join(HERE, "..", "scripts", "touchid_module_v6.py"), encoding="utf-8").read()
     mc = re.search(r"mcu_center = \(([-\d.]+), ([-\d.]+)\)", hb)
-    bb = open(os.path.join(HERE, "build_pcb_v3.py"), encoding="utf-8").read()
-    cx = float(re.search(r"^U1_CX = ([-\d.]+)", bb, re.M).group(1))
-    cy = float(re.search(r"^U1_CY = ([-\d.]+)", bb, re.M).group(1))
+    # READ U1 FROM THE BOARD, not from build_pcb_v3.py.
+    #
+    # This used to compare the housing's source against the GENERATOR's source
+    # and call it "housing == board". Both files agreed, so it passed -- while
+    # the actual routed board still carried U1 at the old y=1.00, because a
+    # build had failed check() and silently not written, and the stale file got
+    # routed. A check that never opens the board cannot see a stale board, and
+    # this one had "board" in its own name.
+    _fp = None
+    for _m in re.finditer(r"\(footprint[\s\S]{0,600}?\(property \"Reference\" \"U1\"", t_board):
+        _a = re.search(r"\(at ([-\d.]+) ([-\d.]+)", _m.group(0))
+        if _a:
+            _fp = (float(_a.group(1)), float(_a.group(2)))
+    if _fp is None:
+        raise RuntimeError("U1 footprint not found on the board")
+    cx, cy = _fp
     hx, hy = float(mc.group(1)), float(mc.group(2))
     ok = abs(hx - cx) < 1e-6 and abs(hy - cy) < 1e-6
     rec(ok, "12 housing mcu_center == board U1",
-        "housing (%.2f, %.2f) vs board (%.2f, %.2f)" % (hx, hy, cx, cy))
+        "housing (%.2f, %.2f) vs board file (%.2f, %.2f)" % (hx, hy, cx, cy))
 except Exception as e:
     rec(False, "12 housing mcu_center == board U1", str(e))
 

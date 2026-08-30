@@ -55,8 +55,30 @@ import sexp
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 BOARD = os.path.join(HERE, "pcb-v6-handoff.kicad_pcb")
-OUT = os.path.join(HERE, "..", "exports")
-HALF = 9.65                      # board is 19.30 square, centred on the origin
+OUT = os.path.join(HERE, "..", "v6-handoff", "assembly")
+os.makedirs(OUT, exist_ok=True)
+# WAS `HALF = 9.65` FOR BOTH AXES, hard-coded, "board is 19.30 square".
+# The board is 20.00 x 19.00 now, so that put every part in the CPL 0.35 mm out
+# in X and 0.15 mm out in Y -- a silent, uniform placement error on all 33
+# parts, in a file no visual check ever looks at. Read the real outline instead
+# of trusting a comment.
+#
+# KiCad is Y-DOWN: the board spans kicad-y -9.50 (top) .. +9.50 (bottom), and
+# JLCPCB wants Y measured UP from the bottom-left corner. So
+#     X_jlc = x - min_x        Y_jlc = max_y - y
+def _outline_origin(path):
+    import re as _re
+    xs, ys = [], []
+    for m in _re.finditer(r"\(gr_(?:line|arc)[\s\S]{0,400}?\(layer \"Edge\.Cuts\"\)", 
+                          open(path, encoding="utf-8", errors="replace").read()):
+        for a, b in _re.findall(r"\((?:start|end|mid) ([-\d.]+) ([-\d.]+)\)", m.group(0)):
+            xs.append(float(a)); ys.append(float(b))
+    if not xs:
+        raise SystemExit("no Edge.Cuts geometry in %s -- refusing to guess an origin" % path)
+    return -min(xs), max(ys)
+
+HALF_X, HALF_Y = _outline_origin(BOARD)
+HALF = HALF_X                    # legacy name; prefer the axis
 
 # Not machine-placed. Everything here is a pad, a hole, or hand-wired.
 SKIP_PREFIX = ("TP", "J", "MH")
@@ -222,8 +244,8 @@ def main():
         lay = kd(fp, "layer")
         side = "Bottom" if lay and s(lay[1]).startswith("B.") else "Top"
         rows.append(dict(ref=ref,
-                         X=round(x + HALF, 4),        # -> board lower-left
-                         Y=round(HALF - y, 4),        # KiCad Y-down -> Y up
+                         X=round(x + HALF_X, 4),      # -> board lower-left
+                         Y=round(HALF_Y - y, 4),      # KiCad Y-down -> Y up
                          rot=round(rot % 360, 2),
                          side=side,
                          value=val.get(ref, "")))
@@ -231,7 +253,7 @@ def main():
                              int(re.sub(r"\D", "", r["ref"]) or 0)))
 
     os.makedirs(OUT, exist_ok=True)
-    cpl = os.path.join(OUT, "touchid-v3-CPL.csv")
+    cpl = os.path.join(OUT, "touchid-v6-CPL.csv")
     with open(cpl, "w", newline="", encoding="utf-8") as fh:
         w = csv.writer(fh)
         w.writerow(["Designator", "Mid X", "Mid Y", "Layer", "Rotation"])
@@ -263,7 +285,7 @@ def main():
     groups = _named
     # TWO FILES, and the difference matters.
     #
-    # touchid-v3-BOM.csv is the one JLCPCB gets: EXACTLY the four columns their
+    # touchid-v6-BOM.csv is the one JLCPCB gets: EXACTLY the four columns their
     # template defines, nothing else. The previous version carried four extra
     # metadata columns (library, stock, part fitted, note) because they are
     # useful to a human -- and JLCPCB's matcher, which has to work out which
@@ -271,8 +293,8 @@ def main():
     # single upload even though C18164635 was sitting right there with 1.1 M in
     # stock. Do not put anything in the upload file that the template does not
     # ask for; the annotated copy below keeps all of it for us.
-    bom = os.path.join(OUT, "touchid-v3-BOM.csv")
-    bom_note = os.path.join(OUT, "touchid-v3-BOM-annotated.csv")
+    bom = os.path.join(OUT, "touchid-v6-BOM.csv")
+    bom_note = os.path.join(OUT, "touchid-v6-BOM-annotated.csv")
     unsourced, zero_stock, extended = [], [], set()
     fh2 = open(bom_note, "w", newline="", encoding="utf-8")
     w2 = csv.writer(fh2)
@@ -336,9 +358,10 @@ def main():
     if not unsourced and not zero_stock:
         print("  every line sourced and in stock.")
     print()
-    print("placement extents: X %.3f..%.3f   Y %.3f..%.3f   (board is 0..19.30)"
+    print("placement extents: X %.3f..%.3f   Y %.3f..%.3f   (board is 0..%.2f x 0..%.2f)"
           % (min(r["X"] for r in rows), max(r["X"] for r in rows),
-             min(r["Y"] for r in rows), max(r["Y"] for r in rows)))
+             min(r["Y"] for r in rows), max(r["Y"] for r in rows),
+             HALF_X * 2, HALF_Y * 2))
     sides = collections.Counter(r["side"] for r in rows)
     print("sides:", dict(sides))
     print("rotations in use:", sorted({r["rot"] for r in rows}))
