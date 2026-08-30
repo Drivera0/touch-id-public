@@ -80,17 +80,27 @@ column and the numbers moved:
 | cell pocket | — | Ø12.50 | **Ø14.00** |
 | clearance above cell | — | 1.61 mm | **0.81 mm** |
 
-> [!danger] **v5.2 is 6.50 mm taller than the module it replaces, and nobody has
-> measured the slot.**
-> 8.36 mm is the **caliper-measured** height of the knob module that occupies
-> this slot today. The riser spends **6.50 mm of headroom that has never been
-> confirmed to exist** — `riser_h` came from a task brief, not from a
-> measurement, and was then raised again on 2026-08-28 to clear a protected
-> cell. **"Slot depth / clearance above the pogo blocks" is still open.**
+> [!success] **The riser costs nothing — the module stands proud by design.**
+> **Corrected 2026-08-29.** This box previously called the riser height "the
+> biggest open risk in the project" and demanded a slot measurement. It was
+> wrong, and it stood for nine days.
 >
-> This gates the whole architecture. The cell only fits *because* of the riser;
-> if the slot is 8.36 mm deep there is nowhere for the cell to go and the layout
-> has to change. **Measure the slot before spending any more height.**
+> The module does not sit *in* a slot. It **seats on the pogo pins**; the
+> housing lip props against the keyboard's enclosure; the rear retention shelf
+> slides under the metal top case as a pivot; and a countersunk **M2** screw
+> through the mounting arm holds the opposite corner down. There is nothing
+> above the module to run out of.
+>
+> **The 8.36 mm comparison was the wrong question.** That is the knob module's
+> height, and the knob sat flush because it had nothing on top of it. Ours
+> carries a fingerprint sensor that has to be reachable, so standing proud is
+> the intended geometry, not an overrun.
+>
+> The dimensions that actually locate the module were caliper-measured from the
+> start and are unchanged: top tier **18.52**, lip **19.66**, rear shelf
+> **11.00 × 1.18 × 2.62**, arm width **5.12**, arm-tip-to-opposite-lip-corner
+> diagonal **30.14**. `riser_h` is free to be chosen on cell fit and ergonomics
+> alone.
 
 **Altium ↔ KiCad Gerber transform** (verified, do not re-derive):
 ```
@@ -572,13 +582,24 @@ on module presence. Harvesting therefore does not depend on the setting.
       `cad/pcb-v3/SENSOR-ZW0922.md`.
       **The Φ12.8 mm trap is in the ZW0922 spec table too** — that is the sensor
       package, not the module. Read the §2.3 drawing, never the table.
-- [ ] **Slot depth / clearance above the pogo blocks — THE HIGHEST-VALUE
-      MEASUREMENT IN THE PROJECT.** The module now stands **14.86 mm** tall
-      against the **8.36 mm** knob module it replaces — 6.50 mm of headroom
-      nobody has confirmed exists. Measure: slot depth from the keyboard's top
-      surface to whatever the PCB seats on, and whether the top face must sit
-      flush or may stand proud. Every cell option and the housing print both
-      depend on the answer.
+- [x] **Slot depth — RESOLVED 2026-08-29, and it was never a constraint.**
+      The module does **not** drop into a deep slot. It **seats on the pogo
+      pins and stands PROUD**: the housing lip props against the keyboard's
+      enclosure, the rear retention shelf slides under the metal top case as a
+      pivot, and the mounting arm's countersunk M2 screw holds the opposite
+      corner down. Nothing constrains `riser_h` from above.
+
+      The geometry that DOES locate the module was measured off the knob module
+      all along and is unchanged: top tier **18.52**, lip **19.66**, rear shelf
+      11.00 x 1.18 x 2.62, arm width 5.12, arm-tip-to-opposite-lip-corner
+      diagonal 30.14. Those are the numbers that matter, and they are calipers,
+      not estimates.
+
+      This retires the "highest-value measurement in the project" framing that
+      sat here for nine days. The height comparison against the 8.36 mm knob
+      module was never the right question -- the knob sat flush because it had
+      nothing on top of it; ours has a sensor you have to touch.
+
 - [ ] Pogo pad positions re-verified now the outline is square
 - [ ] If harvest fails: trace **J4-2 and J4-6** for a keyboard-battery tap
 

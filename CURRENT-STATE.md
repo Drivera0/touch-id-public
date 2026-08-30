@@ -94,11 +94,18 @@ Corner walls were fixed from **0.150 mm to 0.810–1.050** by filleting the cavi
 corners r1.6 **at the first cut** — the cavity is cut twice and a later cut
 cannot restore material.
 
-> [!danger] **The slot has never been measured, and this is the biggest open risk.**
-> The module is **14.86 mm** tall against the **8.36 mm** knob module it
-> replaces. `riser_h` came from a task brief, not a measurement. If the slot is
-> shallow, the riser shrinks, the cell no longer fits, and the cell search
-> restarts. **Measure it before ordering housings or committing to a cell.**
+> [!success] **Slot depth is NOT a constraint — resolved 2026-08-29.**
+> The module seats on the pogo pins and **stands proud**. The housing lip props
+> against the keyboard's enclosure, the rear shelf slides under the metal top
+> case as a pivot, and a countersunk M2 screw through the mounting arm holds
+> the opposite corner. Nothing limits `riser_h` from above.
+>
+> The locating geometry was measured off the knob module from the start — top
+> tier 18.52, lip 19.66, shelf 11.00 x 1.18 x 2.62, arm 5.12, arm-tip diagonal
+> 30.14. **This was carried as "the biggest open risk" for nine days and it was
+> never a risk.** The height comparison against the flush 8.36 mm knob was the
+> wrong question: that module had nothing on top of it, and ours has a sensor
+> you have to reach.
 
 ---
 
@@ -139,7 +146,7 @@ Ranking and the enquiry text: `cad/pcb-v3/CELL-DECIDED.md`,
 
 **Blocking an order:**
 
-1. **Slot depth** — see the housing warning above. Highest value, five minutes.
+1. ~~Slot depth~~ — **resolved, was never a constraint.** See above.
 2. **J4/J11 pogo geometry** — preflight WARN 14. Measurement, not a datasheet.
 3. **JLCPCB customs "Product Description"** — a legal declaration, yours to make.
 
