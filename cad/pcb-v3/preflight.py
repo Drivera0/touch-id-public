@@ -853,6 +853,43 @@ try:
     _unsourced = sorted({r for r in _placed if r not in _SRC})
     _thin = sorted({(_SRC[r][0], _SRC[r][2], _need[r])
                     for r in _placed if r in _SRC and _SRC[r][2] < _need[r]})
+    # ---------------------------------------- 22 no via through a pogo pad --
+    # THIS CHECK EXISTS BECAUSE THE BOARD IN THE CART FAILS IT.
+    # pcb-v3-handoff.kicad_pcb -- the revision priced at $115.38 and waiting on
+    # U1 -- carries two vias drilled through J11's contacts, at (2.95,-4.05)
+    # into J11.3 and (2.40,-7.00) into J11.1.
+    #
+    # The rule is old and well understood here: J4/J11 are the pads the
+    # keyboard's sprung pogo pins press against, and a through-hole via comes
+    # out of the underside in the middle of that contact face. It is not a
+    # clearance question -- the pad stops being a contact. gnd_taps.py has
+    # refused to place one since it was written, and stitch_open.py was taught
+    # the same rule today after it welded GND J4.5 with a via 0.382 mm inside
+    # J4.5's own pad.
+    #
+    # But the ROUTER never knew the rule, and nothing checked its output for
+    # it. Two vias walked past every gate this project has, into the file that
+    # was one click from being manufactured. A rule enforced by the generators
+    # and not by the gate is a rule you are relying on luck for.
+    _pogo_pads = [p for p in _sx.pads(t) if p.get("ref") in ("J4", "J11")]
+    _vias_all = []
+    for _m in re.finditer(r'\(via[\s\S]{0,200}?\(at ([-\d.]+) ([-\d.]+)\)'
+                          r'[\s\S]{0,120}?\(size ([\d.]+)\)', t):
+        _vias_all.append(dict(x=float(_m.group(1)), y=float(_m.group(2)),
+                              d=float(_m.group(3))))
+    _pierce = []
+    for _v in _vias_all:
+        for _p in _pogo_pads:
+            _gap = (math.hypot(_v["x"] - _p["x"], _v["y"] - _p["y"])
+                    - (max(_p["w"], _p["h"]) / 2 + _v["d"] / 2))
+            if _gap < 0:
+                _pierce.append("via (%.2f,%.2f) %.3f mm into %s.%s"
+                               % (_v["x"], _v["y"], -_gap, _p["ref"], _p["pad"]))
+    rec(not _pierce, "22 no via pierces a pogo contact",
+        ("%d: %s" % (len(_pierce), "; ".join(_pierce[:3]))) if _pierce
+        else "%d via(s) checked against %d pogo pads, all clear"
+             % (len(_vias_all), len(_pogo_pads)))
+
     rec(not _unsourced and bool(_placed), "21 every placed part has an LCSC code",
         ("%d designator(s) with no part number: %s"
          % (len(_unsourced), ", ".join(_unsourced))) if _unsourced

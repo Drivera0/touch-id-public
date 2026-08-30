@@ -30,13 +30,18 @@ KRT = os.environ.get("KRT") or os.path.normpath(os.path.join(
 LAYERS = ["F.Cu", "In1.Cu", "B.Cu"]
 BOARD_SZ, EDGE = 19.30, 0.30
 STEP = 0.025
-VIA_D, VIA_DRILL = 0.60, 0.30
 VIA_COST_MM = 1.0            # a via is worth about a millimetre of detour
 
 
 def read_rules():
-    """TRACK / CLEARANCE from the fab floor file -- one source of truth."""
+    """TRACK / CLEARANCE / VIA geometry from the fab floor -- one source.
+
+    The via pair used to be hard-coded at 0.60/0.30 while the floor file said
+    otherwise, so stitched vias came out a different size from every other via
+    on the board. Same drift that bit gnd_taps and handroute.
+    """
     tw, cl = 0.127, 0.10
+    vd, vk = 0.45, 0.20
     p = os.path.join(HERE, "fab_floor_touchid.txt")
     if os.path.exists(p):
         for line in open(p):
@@ -47,10 +52,14 @@ def read_rules():
                 tw = float(v)
             elif k == "clearance":
                 cl = float(v)
-    return tw, cl
+            elif k == "via_diameter":
+                vd = float(v)
+            elif k == "via_drill":
+                vk = float(v)
+    return tw, cl, vd, vk
 
 
-TRACK, CLR = read_rules()
+TRACK, CLR, VIA_D, VIA_DRILL = read_rules()
 N = int(round(BOARD_SZ / STEP)) + 1
 ORG = -BOARD_SZ / 2.0
 g2mm = lambda i: ORG + i * STEP
@@ -367,6 +376,18 @@ def main():
         for z in zones:
             if z["no_vias"]:
                 via_ok &= ~poly_mask(z["pts"])
+        # NO VIA MAY PIERCE A POGO CONTACT.
+        # gnd_taps has enforced this from the start; stitch_open never knew
+        # about it, and duly welded GND J4.5 with a via at (-7.475,-3.200) --
+        # 0.382 mm INSIDE J4.5's own pad. A through-hole via there comes out
+        # of the underside in the middle of the face that presses against the
+        # keyboard's spring pin. It is not a clearance question: the pad stops
+        # being a contact. True even for J4.5, which is itself GND.
+        for p_ in pads:
+            if p_["ref"] not in ("J4", "J11"):
+                continue
+            via_ok &= ~((XX - p_["x"]) ** 2 + (YY - p_["y"]) ** 2
+                        <= (max(p_["w"], p_["h"]) / 2 + VIA_D / 2 + CLR) ** 2)
 
         own = own_copper(net, pads, tracks + new_seg, vias + new_via, orph)
         goal = [own[L] & ~tmask[L] for L in LAYERS]

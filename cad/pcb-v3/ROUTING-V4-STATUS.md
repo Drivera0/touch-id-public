@@ -77,3 +77,59 @@ away from working evidence.
 3. Fix the 4 clearance violations.
 4. If it will not converge, the BLE-module swap is back on the table — but on
    *routing corridor* evidence, which is what this exercise was for.
+
+---
+
+## 2026-08-29 (later) — the pogo-via finding
+
+> [!error] **`pcb-v3-handoff.kicad_pcb` — the board priced at $115.38 and
+> waiting only on U1 — has TWO VIAS DRILLED THROUGH J11's POGO CONTACTS.**
+> `(2.95,-4.05)` 0.580 mm into J11.3, and `(2.40,-7.00)` 0.331 mm into J11.1.
+> This is pre-existing. It is not caused by the PCM work.
+
+J4/J11 are the pads the keyboard's sprung pogo pins press against. A
+through-hole via there exits the underside **in the middle of the contact
+face**: the pad stops being a contact. The rule is old and documented, and
+`gnd_taps.py` has refused to place such a via since it was written.
+
+**Why it got through:** the rule lived in our *scripts*, not in the *board* and
+not in the *gate*.
+
+* the **router** was never told, so it placed them;
+* **`stitch_open.py`** was never told either — it welded `GND J4.5` with a via
+  **0.382 mm inside J4.5's own pad** (fixed today);
+* **`preflight.py` had no check for it at all**, so the order gate passed a
+  board with two holes through keyboard contacts.
+
+**Now: `preflight` check 22 — "no via pierces a pogo contact".** It fails both
+the current board and the ordered one.
+
+### The fix is not obvious, and three attempts failed
+
+| attempt | result |
+|---|---|
+| board-level no-via rule areas over all 10 pogo pads | routing collapses: open pads 8 → 12, untapped GND 7 → 17 |
+| delete the two vias, re-stitch | 8 → 10 opens: the vias were load-bearing |
+| rip BL_RETURN + HARV_1, re-route with the rule applied | router fails all 4 connections |
+
+The minimum legal keep-out radius is **1.45 mm** (pad 1.10 + via pad 0.25 +
+clearance 0.10). Ten Ø2.2 pads with 1.45 mm no-via rings remove enough of the
+board that the router cannot work.
+
+**So this is a real design problem, not a tooling gap:** `BL_RETURN` and
+`HARV_1` terminate on J11 pads, which are **B.Cu**. Reaching them from F.Cu
+needs a layer change, the layer change needs a via, and there is nowhere legal
+to put one in the congestion around J11.
+
+**The likely answer is to route those two nets on B.Cu for their whole length**
+so no transition is needed near the pogo block — which is a placement/topology
+change, not a router setting. Not attempted yet.
+
+### Current state
+
+| | |
+|---|---|
+| blockers | **3** — 8 open pads, GND connectivity, 2 pogo vias |
+| DRC | clean |
+| antenna keep-out | clear, and holds through a KiCad round-trip |
+| U5 + R8/R9/C14 | placed, netlist matches (134 pins), BOM sourced |
