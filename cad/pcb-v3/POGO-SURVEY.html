@@ -1,0 +1,375 @@
+<title>Pogo Pad Survey</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500;600&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&display=swap">
+
+<style>
+:root{
+  --ground:#EEF1F5;
+  --surface:#FFFFFF;
+  --surface-2:#F6F8FA;
+  --ink:#131820;
+  --ink-2:#3B4553;
+  --muted:#68727F;
+  --rule:#D6DDE5;
+  --rule-2:#E7ECF1;
+  --brass:#8A6224;
+  --brass-soft:#F0E4D0;
+  --ok:#1C6B52;
+  --ok-soft:#DCEDE6;
+  --assume:#8A5A08;
+  --assume-soft:#F6E7CE;
+  --gap:#97332F;
+  --gap-soft:#F7DFDD;
+  --pad:#B98A47;
+  --shadow:0 1px 2px rgba(19,24,32,.06),0 8px 24px -12px rgba(19,24,32,.18);
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --ground:#0D1015;
+    --surface:#151A21;
+    --surface-2:#1B212A;
+    --ink:#E7ECF3;
+    --ink-2:#B7C1CE;
+    --muted:#8492A2;
+    --rule:#2A323D;
+    --rule-2:#222932;
+    --brass:#D6A45E;
+    --brass-soft:#2E2517;
+    --ok:#63C6A0;
+    --ok-soft:#142A23;
+    --assume:#D9A44F;
+    --assume-soft:#2C2314;
+    --gap:#E3817B;
+    --gap-soft:#2E1918;
+    --pad:#C99A57;
+    --shadow:0 1px 2px rgba(0,0,0,.4),0 10px 28px -14px rgba(0,0,0,.7);
+  }
+}
+:root[data-theme="dark"]{
+  --ground:#0D1015;
+  --surface:#151A21;
+  --surface-2:#1B212A;
+  --ink:#E7ECF3;
+  --ink-2:#B7C1CE;
+  --muted:#8492A2;
+  --rule:#2A323D;
+  --rule-2:#222932;
+  --brass:#D6A45E;
+  --brass-soft:#2E2517;
+  --ok:#63C6A0;
+  --ok-soft:#142A23;
+  --assume:#D9A44F;
+  --assume-soft:#2C2314;
+  --gap:#E3817B;
+  --gap-soft:#2E1918;
+  --pad:#C99A57;
+  --shadow:0 1px 2px rgba(0,0,0,.4),0 10px 28px -14px rgba(0,0,0,.7);
+}
+
+*{box-sizing:border-box}
+body{
+  margin:0;
+  background:var(--ground);
+  color:var(--ink);
+  font-family:"Source Serif 4",Georgia,serif;
+  font-size:16.5px;
+  line-height:1.6;
+  -webkit-font-smoothing:antialiased;
+}
+.wrap{max-width:60rem;margin:0 auto;padding:2.5rem 1.5rem 5rem;display:flex;flex-direction:column;gap:2.25rem}
+
+h1,h2,h3,.lbl,th{font-family:Archivo,"Helvetica Neue",Arial,sans-serif}
+h1{font-size:2.35rem;line-height:1.1;margin:0;font-weight:700;letter-spacing:-.02em;text-wrap:balance}
+h2{font-size:1.28rem;margin:0;font-weight:600;letter-spacing:-.01em;text-wrap:balance}
+h3{font-size:.98rem;margin:0;font-weight:600}
+p{margin:0}
+.lbl{
+  font-size:.7rem;font-weight:600;letter-spacing:.13em;text-transform:uppercase;
+  color:var(--muted);
+}
+.mono,td.n,.k{font-family:"IBM Plex Mono",ui-monospace,Menlo,monospace;font-variant-numeric:tabular-nums}
+
+header{display:flex;flex-direction:column;gap:.9rem;padding-bottom:.25rem}
+header .sub{font-size:1.05rem;color:var(--ink-2);max-width:44rem}
+.meta{display:flex;flex-wrap:wrap;gap:.4rem .5rem;margin-top:.35rem}
+.chip{
+  font-family:"IBM Plex Mono",monospace;font-size:.73rem;font-variant-numeric:tabular-nums;
+  padding:.24rem .55rem;border-radius:2px;border:1px solid var(--rule);
+  background:var(--surface);color:var(--ink-2);
+}
+.chip b{font-weight:600;color:var(--ink)}
+
+section{display:flex;flex-direction:column;gap:1rem}
+.card{
+  background:var(--surface);border:1px solid var(--rule);border-radius:3px;
+  padding:1.35rem 1.4rem;box-shadow:var(--shadow);
+}
+
+.note{border-left:3px solid var(--brass);background:var(--brass-soft);padding:1rem 1.15rem;border-radius:0 3px 3px 0}
+.note.warn{border-left-color:var(--gap);background:var(--gap-soft)}
+.note p+p{margin-top:.6rem}
+
+/* ---- drawing ---- */
+.fig{background:var(--surface);border:1px solid var(--rule);border-radius:3px;padding:1.1rem;box-shadow:var(--shadow)}
+.fig-scroll{overflow-x:auto}
+svg{display:block;width:100%;min-width:30rem;height:auto}
+.legend{display:flex;flex-wrap:wrap;gap:.5rem 1.4rem;margin-top:.9rem;padding-top:.9rem;border-top:1px solid var(--rule-2)}
+.legend div{display:flex;align-items:center;gap:.45rem;font-size:.8rem;color:var(--ink-2)}
+.sw{width:.85rem;height:.85rem;border-radius:50%;flex:none}
+
+/* ---- tables ---- */
+.tbl-scroll{overflow-x:auto;border:1px solid var(--rule);border-radius:3px;background:var(--surface);box-shadow:var(--shadow)}
+table{border-collapse:collapse;width:100%;min-width:38rem}
+th{
+  text-align:left;font-size:.68rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;
+  color:var(--muted);padding:.7rem .8rem;border-bottom:1px solid var(--rule);
+  background:var(--surface-2);white-space:nowrap;
+}
+td{padding:.6rem .8rem;border-bottom:1px solid var(--rule-2);font-size:.92rem}
+tbody tr:last-child td{border-bottom:none}
+td.n{text-align:right;white-space:nowrap}
+td.k{font-weight:500;white-space:nowrap}
+.write{background:var(--surface-2);border-left:1px solid var(--rule);min-width:5.5rem}
+.grp td{background:var(--surface-2);font-family:Archivo,sans-serif;font-size:.72rem;font-weight:600;
+  letter-spacing:.1em;text-transform:uppercase;color:var(--muted);padding:.5rem .8rem}
+
+.tag{
+  display:inline-block;font-family:"IBM Plex Mono",monospace;font-size:.68rem;
+  padding:.12rem .4rem;border-radius:2px;white-space:nowrap;
+}
+.t-ok{background:var(--ok-soft);color:var(--ok)}
+.t-as{background:var(--assume-soft);color:var(--assume)}
+.t-no{background:var(--gap-soft);color:var(--gap)}
+
+ol.steps{margin:0;padding:0;list-style:none;counter-reset:s;display:flex;flex-direction:column;gap:1rem}
+ol.steps li{counter-increment:s;display:grid;grid-template-columns:1.9rem 1fr;gap:.9rem;align-items:start}
+ol.steps li::before{
+  content:counter(s,decimal-leading-zero);
+  font-family:"IBM Plex Mono",monospace;font-size:.78rem;font-weight:600;
+  color:var(--brass);padding-top:.15rem;
+}
+ol.steps h3{margin-bottom:.25rem}
+ol.steps p{color:var(--ink-2);font-size:.95rem}
+
+.q{display:flex;flex-direction:column;gap:.45rem;padding:1.1rem 0;border-bottom:1px solid var(--rule-2)}
+.q:last-child{border-bottom:none;padding-bottom:0}
+.q p{color:var(--ink-2);font-size:.95rem}
+
+footer{color:var(--muted);font-size:.85rem;border-top:1px solid var(--rule);padding-top:1.25rem}
+a{color:var(--brass)}
+:focus-visible{outline:2px solid var(--brass);outline-offset:2px}
+@media (max-width:640px){
+  h1{font-size:1.9rem}
+  .wrap{padding:1.75rem 1.1rem 3.5rem;gap:1.75rem}
+  .card{padding:1.1rem}
+}
+</style>
+
+<div class="wrap">
+
+<header>
+  <span class="lbl">TouchID · preflight WARN 14</span>
+  <h1>Pogo Pad Survey</h1>
+  <p class="sub">Ten contacts on the underside of the module press against sprung pins in the keyboard. Their positions came from a task brief, not from calipers — and unlike every other dimension on this board, they cannot be derived from a datasheet. The keyboard decides them.</p>
+  <div class="meta">
+    <span class="chip"><b>10</b> pads</span>
+    <span class="chip"><b>2</b> blocks · J4, J11</span>
+    <span class="chip">all <b>Ø2.20</b></span>
+    <span class="chip">pitch <b>2.500</b></span>
+    <span class="chip">layer <b>B.Cu</b></span>
+    <span class="chip">board <b>19.30 sq</b></span>
+  </div>
+</header>
+
+<div class="note warn">
+  <p><strong>Get the orientation right before touching a caliper.</strong> These pads are on the <em>underside</em>. The drawing below is a <strong>bottom view</strong> — the face you see when the module is turned over — so <strong>X is mirrored</strong> relative to the design file.</p>
+  <p>The table carries both: <span class="mono">design X</span> as stored in the board, and <span class="mono">seen-from-below X</span>, which is simply its negative. Mixing them up mirrors the whole block and it will still look plausible. This project has already lost time to a top-view/bottom-view mix-up once, on the MC3651 pinout.</p>
+</div>
+
+<section>
+  <h2>Bottom view, to scale</h2>
+  <div class="fig">
+    <div class="fig-scroll">
+      <!-- Bottom view: svgX = -designX, svgY = -designY (so +Y, the spacebar edge, is up) -->
+      <svg viewBox="-12.6 -12.2 25.2 25.6" role="img" aria-label="Scale drawing of the module underside showing ten pogo pads in two blocks">
+        <defs>
+          <marker id="a" markerWidth="6" markerHeight="6" refX="3" refY="3" orient="auto">
+            <path d="M0,1 L4,3 L0,5" fill="none" stroke="var(--muted)" stroke-width=".5"/>
+          </marker>
+        </defs>
+        <g stroke-linecap="round">
+          <!-- board outline, 19.30 sq, R2.0 -->
+          <rect x="-9.65" y="-9.65" width="19.3" height="19.3" rx="2" ry="2"
+                fill="var(--surface-2)" stroke="var(--rule)" stroke-width=".18"/>
+
+          <!-- spacebar edge marker (+Y in design coords = up here) -->
+          <line x1="-6" y1="-10.9" x2="6" y2="-10.9" stroke="var(--rule)" stroke-width=".16"/>
+          <text x="0" y="-11.35" text-anchor="middle" font-family="Archivo,sans-serif"
+                font-size=".85" font-weight="600" letter-spacing=".12" fill="var(--muted)">SPACEBAR EDGE  ( +Y )</text>
+
+          <!-- J4 block: 6 pads. design x -7.20/-4.70 -> svg +7.20/+4.70 -->
+          <g fill="var(--pad)" stroke="var(--surface)" stroke-width=".1">
+            <circle cx="7.20" cy="7.22" r="1.1"/><circle cx="4.70" cy="7.22" r="1.1"/>
+            <circle cx="7.20" cy="4.72" r="1.1"/><circle cx="4.70" cy="4.72" r="1.1"/>
+            <circle cx="7.20" cy="2.22" r="1.1"/><circle cx="4.70" cy="2.22" r="1.1"/>
+          </g>
+          <g font-family="IBM Plex Mono,monospace" font-size=".72" fill="var(--surface)" text-anchor="middle">
+            <text x="7.20" y="7.47">1</text><text x="4.70" y="7.47">2</text>
+            <text x="7.20" y="4.97">3</text><text x="4.70" y="4.97">4</text>
+            <text x="7.20" y="2.47">5</text><text x="4.70" y="2.47">6</text>
+          </g>
+
+          <!-- J11 block: 4 pads. design x 3.45/5.95 -> svg -3.45/-5.95 -->
+          <g fill="var(--pad)" stroke="var(--surface)" stroke-width=".1">
+            <circle cx="-3.45" cy="7.20" r="1.1"/><circle cx="-5.95" cy="7.20" r="1.1"/>
+            <circle cx="-3.45" cy="4.70" r="1.1"/><circle cx="-5.95" cy="4.70" r="1.1"/>
+          </g>
+          <g font-family="IBM Plex Mono,monospace" font-size=".72" fill="var(--surface)" text-anchor="middle">
+            <text x="-3.45" y="7.45">1</text><text x="-5.95" y="7.45">2</text>
+            <text x="-3.45" y="4.95">3</text><text x="-5.95" y="4.95">4</text>
+          </g>
+
+          <!-- block labels -->
+          <g font-family="Archivo,sans-serif" font-size="1" font-weight="700" fill="var(--ink)" text-anchor="middle">
+            <text x="5.95" y="9.6">J4</text>
+            <text x="-4.70" y="9.35">J11</text>
+          </g>
+          <g font-family="IBM Plex Mono,monospace" font-size=".62" fill="var(--muted)" text-anchor="middle">
+            <text x="5.95" y="10.45">6 contacts · 1 used</text>
+            <text x="-4.70" y="10.2">4 contacts · 4 used</text>
+          </g>
+
+          <!-- pitch dimension, J4 columns -->
+          <g stroke="var(--muted)" stroke-width=".08" fill="none">
+            <line x1="7.20" y1="1.0" x2="7.20" y2="-.2"/>
+            <line x1="4.70" y1="1.0" x2="4.70" y2="-.2"/>
+            <line x1="7.20" y1=".3" x2="4.70" y2=".3" marker-start="url(#a)" marker-end="url(#a)"/>
+          </g>
+          <text x="5.95" y="-.55" text-anchor="middle" font-family="IBM Plex Mono,monospace"
+                font-size=".7" fill="var(--ink-2)">2.500</text>
+
+          <!-- block gap, nearest centres -->
+          <g stroke="var(--muted)" stroke-width=".08" fill="none">
+            <line x1="4.70" y1="7.22" x2="4.70" y2="11.3"/>
+            <line x1="-3.45" y1="7.20" x2="-3.45" y2="11.3"/>
+            <line x1="4.70" y1="10.9" x2="-3.45" y2="10.9" marker-start="url(#a)" marker-end="url(#a)"/>
+          </g>
+          <text x=".62" y="11.85" text-anchor="middle" font-family="IBM Plex Mono,monospace"
+                font-size=".7" fill="var(--ink-2)">8.150  centre to centre</text>
+
+          <!-- edge distances -->
+          <g stroke="var(--muted)" stroke-width=".08" fill="none" stroke-dasharray=".25 .25">
+            <line x1="9.65" y1="7.22" x2="7.20" y2="7.22"/>
+            <line x1="-9.65" y1="7.20" x2="-5.95" y2="7.20"/>
+          </g>
+          <text x="8.42" y="6.75" text-anchor="middle" font-family="IBM Plex Mono,monospace"
+                font-size=".62" fill="var(--muted)">2.450</text>
+          <text x="-7.8" y="6.72" text-anchor="middle" font-family="IBM Plex Mono,monospace"
+                font-size=".62" fill="var(--muted)">3.700</text>
+        </g>
+      </svg>
+    </div>
+    <div class="legend">
+      <div><span class="sw" style="background:var(--pad)"></span> Ø2.20 contact pad, B.Cu</div>
+      <div><span class="sw" style="background:var(--surface-2);border:1px solid var(--rule)"></span> board outline 19.30 sq, R2.0</div>
+      <div>All values in millimetres · drawn to scale</div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <h2>Every contact</h2>
+  <p style="color:var(--ink-2);font-size:.95rem">Straight from <span class="mono">pcb-v4-routed-wip.kicad_pcb</span>. The right-hand column is blank on purpose — write what the caliper says.</p>
+  <div class="tbl-scroll">
+    <table>
+      <thead>
+        <tr>
+          <th>Pad</th><th>Design X</th><th>Seen from below X</th><th>Y</th>
+          <th>Ø</th><th>Net</th><th class="write">Measured</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr class="grp"><td colspan="7">J4 — six contacts, left side of the board</td></tr>
+        <tr><td class="k">J4.1</td><td class="n">−7.200</td><td class="n">+7.200</td><td class="n">−7.220</td><td class="n">2.20</td><td><span class="tag t-no">unused</span></td><td class="write"></td></tr>
+        <tr><td class="k">J4.2</td><td class="n">−4.700</td><td class="n">+4.700</td><td class="n">−7.220</td><td class="n">2.20</td><td><span class="tag t-no">unused</span></td><td class="write"></td></tr>
+        <tr><td class="k">J4.3</td><td class="n">−7.200</td><td class="n">+7.200</td><td class="n">−4.720</td><td class="n">2.20</td><td><span class="tag t-no">unused</span></td><td class="write"></td></tr>
+        <tr><td class="k">J4.4</td><td class="n">−4.700</td><td class="n">+4.700</td><td class="n">−4.720</td><td class="n">2.20</td><td><span class="tag t-no">unused</span></td><td class="write"></td></tr>
+        <tr><td class="k">J4.5</td><td class="n">−7.200</td><td class="n">+7.200</td><td class="n">−2.220</td><td class="n">2.20</td><td><span class="mono" style="font-size:.8rem">GND</span></td><td class="write"></td></tr>
+        <tr><td class="k">J4.6</td><td class="n">−4.700</td><td class="n">+4.700</td><td class="n">−2.220</td><td class="n">2.20</td><td><span class="tag t-no">unused</span></td><td class="write"></td></tr>
+        <tr class="grp"><td colspan="7">J11 — four contacts, right side</td></tr>
+        <tr><td class="k">J11.1</td><td class="n">+3.450</td><td class="n">−3.450</td><td class="n">−7.200</td><td class="n">2.20</td><td><span class="mono" style="font-size:.8rem">HARV_1</span></td><td class="write"></td></tr>
+        <tr><td class="k">J11.2</td><td class="n">+5.950</td><td class="n">−5.950</td><td class="n">−7.200</td><td class="n">2.20</td><td><span class="mono" style="font-size:.8rem">HARV_2</span></td><td class="write"></td></tr>
+        <tr><td class="k">J11.3</td><td class="n">+3.450</td><td class="n">−3.450</td><td class="n">−4.700</td><td class="n">2.20</td><td><span class="mono" style="font-size:.8rem">HARV_3</span></td><td class="write"></td></tr>
+        <tr><td class="k">J11.4</td><td class="n">+5.950</td><td class="n">−5.950</td><td class="n">−4.700</td><td class="n">2.20</td><td><span class="mono" style="font-size:.8rem">BL_RETURN</span></td><td class="write"></td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<section>
+  <h2>Quicker to check than ten coordinates</h2>
+  <p style="color:var(--ink-2);font-size:.95rem">Measuring absolute positions against a board datum is fiddly. These four derived numbers catch almost any error, and a caliper reads them directly off the keyboard.</p>
+  <div class="tbl-scroll">
+    <table>
+      <thead><tr><th>What to measure</th><th>Expect</th><th>Confidence</th><th class="write">Measured</th></tr></thead>
+      <tbody>
+        <tr><td>Pin-to-pin spacing inside one block, both axes</td><td class="n">2.500</td><td><span class="tag t-as">assumed</span></td><td class="write"></td></tr>
+        <tr><td>Nearest pin of J4 to nearest pin of J11</td><td class="n">8.150</td><td><span class="tag t-as">assumed</span></td><td class="write"></td></tr>
+        <tr><td>Contact pad diameter</td><td class="n">2.20</td><td><span class="tag t-as">assumed</span></td><td class="write"></td></tr>
+        <tr><td>Number of pins present: J4 / J11</td><td class="n">6 / 4</td><td><span class="tag t-as">assumed</span></td><td class="write"></td></tr>
+        <tr><td>Board outline</td><td class="n">19.30 sq</td><td><span class="tag t-ok">measured</span></td><td class="write">—</td></tr>
+        <tr><td>Housing lip / body, from the knob module</td><td class="n">19.66 / 18.52</td><td><span class="tag t-ok">measured</span></td><td class="write">—</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<section>
+  <h2>Three things worth resolving while you have it open</h2>
+  <div class="card">
+
+    <div class="q">
+      <h3>J4 and J11 do not sit on the same Y grid</h3>
+      <p>J4's rows are at <span class="mono">−7.220 / −4.720 / −2.220</span>. J11's are at <span class="mono">−7.200 / −4.700</span>. A consistent <span class="mono">0.020</span> offset between two blocks that meet the same rigid keyboard.</p>
+      <p>It is small enough to be a typo carried forward and small enough not to matter — but nobody knows which, and those are different situations. If the two blocks really are on one grid, one of these sets is wrong by 20 µm.</p>
+    </div>
+
+    <div class="q">
+      <h3>Five of J4's six contacts connect to nothing</h3>
+      <p>Only <span class="mono">J4.5</span> carries a net, and it is ground. The other five are copper pads wired to nowhere — presumably functions of the knob module this replaces.</p>
+      <p>Worth confirming the keyboard actually drives six pins there. If it does, and any of them carry a signal or a supply, five landing pads sitting unconnected is a wasted opportunity at best and a short waiting to happen at worst.</p>
+    </div>
+
+    <div class="q">
+      <h3>Pin tip diameter versus pad diameter</h3>
+      <p>Ø2.20 is what the board draws. What matters mechanically is the pogo pin's <em>tip</em> and how far it can wander before it walks off the edge under sideways load.</p>
+      <p>If the tip is much smaller than 2.20 there is margin; if it is comparable, position error eats it fast. This is the number that decides how much the other measurements are allowed to be wrong.</p>
+    </div>
+
+  </div>
+</section>
+
+<section>
+  <h2>If a number comes back different</h2>
+  <ol class="steps">
+    <li>
+      <h3>Tell me the measured values</h3>
+      <p>Even one that disagrees is worth acting on. Pitch and block spacing are the two that propagate furthest.</p>
+    </li>
+    <li>
+      <h3>The pads move, and the board is re-routed</h3>
+      <p>Pad positions are an input to placement, so the twenty-odd passives around them shift and every track is laid again. It is automated, but it is the whole routing step.</p>
+    </li>
+    <li>
+      <h3>Preflight WARN 14 clears</h3>
+      <p>It reads <em>"J4/J11 pogo pads — fixed by the keyboard; measurement, not a datasheet."</em> It is one of two things standing between this board and an order, and the only one I cannot resolve myself.</p>
+    </li>
+  </ol>
+</section>
+
+<footer>
+  Values read from <span class="mono">pcb-v4-routed-wip.kicad_pcb</span> and <span class="mono">build_pcb_v3.py</span> on 29 Aug 2026. Board frame: origin at board centre, <span class="mono">+Y</span> toward the spacebar. Every figure marked <span class="tag t-as">assumed</span> traces back to a task brief rather than an instrument — which is precisely why this page exists.
+</footer>
+
+</div>
