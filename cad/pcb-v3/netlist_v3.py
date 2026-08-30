@@ -185,9 +185,9 @@ def rc(ref, name, a, b, note=""):
 
 # harvest current limiting — also what isolates the three channels,
 # which is why no ORing diodes are needed
-rc("R1", "1k 0402", "HARV_1", "VIN_DC", "caps awake draw to ~1.1 mA/pin")
-rc("R2", "1k 0402", "HARV_2", "VIN_DC")
-rc("R3", "1k 0402", "HARV_3", "VIN_DC")
+rc("R1", "1k 0201", "HARV_1", "VIN_DC", "caps awake draw to ~1.1 mA/pin")
+rc("R2", "1k 0201", "HARV_2", "VIN_DC")
+rc("R3", "1k 0201", "HARV_3", "VIN_DC")
 
 # BQ25505 programming — all 0402 so they can be swapped by hand
 # WAS 5.6M / 7.5M = 4.246 V, which OVERCHARGES THE CELL.
@@ -270,7 +270,7 @@ rc("C10", "0.1uF 0402", "VSTOR", "GND", "VDDH decoupling, at the module")
 # on. Wiring it to nRESET holds the CPU in reset through the slow ramp and
 # releases it once the rail is up — the standard supervisor trick, using a
 # signal the BQ25505 already provides. See B2.
-rc("R7", "1k 0402", "VBAT_OK", "RESET",
+rc("R7", "1k 0201", "VBAT_OK", "RESET",
    "1k so an SWD programmer can still override RESET")
 
 # cell voltage sense. 4.7M/1M from a 4.25 V rail -> 0.745 V at the tap,

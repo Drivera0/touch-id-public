@@ -145,10 +145,19 @@ SRC = {
     "C12":  ("C15195",    "BASIC",    8405016, "Samsung CL05B103KB5NNNC 10nF 50V X7R 0402"),
     "C13":  ("C15195",    "BASIC",    8405016, "Samsung CL05B103KB5NNNC 10nF 50V X7R 0402"),
 
-    "R1":   ("C11702",    "BASIC",   13920787, "UNI-ROYAL 0402WGF1001TCE 1k 1% 0402"),
-    "R2":   ("C11702",    "BASIC",   13920787, "UNI-ROYAL 0402WGF1001TCE 1k 1% 0402"),
-    "R3":   ("C11702",    "BASIC",   13920787, "UNI-ROYAL 0402WGF1001TCE 1k 1% 0402"),
-    "R7":   ("C11702",    "BASIC",   13920787, "UNI-ROYAL 0402WGF1001TCE 1k 1% 0402"),
+    # ---- the 1k group, moved to 0201 2026-08-29 ----
+    # R1/R2/R3 are the harvest series resistors at ~1.1 mA/pin -> 1.21 mW in a
+    # 1k, 2.4% of a 0201's 50 mW. R7 is on RESET and carries nothing. Same value
+    # and tolerance as before, so nothing electrical changes at all -- unlike
+    # the OK divider, 1k is abundant in 0201 and did not need re-deriving.
+    #
+    # COSTS ONE THING: 0402 1k was a BASIC part (free feeder), 0201 1k is
+    # Extended, so this adds a single feeder setup fee. All four share one part
+    # number, so it is one fee, not four. Worth it for the corner it unblocks.
+    "R1":   ("C270365",   "extended",  1407015, "UNI-ROYAL 0201WMF1001TEE 1k 1% 0201"),
+    "R2":   ("C270365",   "extended",  1407015, "UNI-ROYAL 0201WMF1001TEE 1k 1% 0201"),
+    "R3":   ("C270365",   "extended",  1407015, "UNI-ROYAL 0201WMF1001TEE 1k 1% 0201"),
+    "R7":   ("C270365",   "extended",  1407015, "UNI-ROYAL 0201WMF1001TEE 1k 1% 0201"),
     "R4":   ("C3013173",  "extended",  263891, "FOJAN FRC0402F4704TS 4.7M 1% 0402"),
     "R5":   ("C26083",    "BASIC",    3470670, "UNI-ROYAL 0402WGF1004TCE 1M 1% 0402"),
     "R6":   ("C25741",    "BASIC",   14849306, "UNI-ROYAL 0402WGF1003TCE 100k 1% 0402"),
