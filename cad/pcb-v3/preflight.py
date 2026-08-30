@@ -947,6 +947,50 @@ except Exception as _e:                      # a check that cannot run must say 
     rec(False, "21 every placed part has an LCSC code",
         "COULD NOT RUN (%s) -- treat as unverified" % _e)
 
+# ---------------------------------------------------------------------------
+# COPPER vs THE PRESS-FIT PIN HOLES
+#
+# This check did not exist and its absence let two unbuildable boards through:
+# L1's pad 2 sat 0.288 mm INSIDE the right pin hole and U4's pad 2 0.120 mm
+# inside the left one, so the drill went through both lands. Every board
+# generated since the pins moved to the middle of the sides had it, including
+# the one that was being treated as the best result.
+#
+# build_pcb_v3.py now gates PADS at build time, where the real land sizes live.
+# This gates TRACKS and VIAS, which are the router's output and arrive later --
+# close_open put a GND track 0.064 mm inside the same left hole on one pass.
+#
+# NOTE ON PADS AND WHY THEY ARE NOT RE-CHECKED HERE. Parsing the board file
+# gives U4's pads as 0.148 x 0.148 -- that is the custom PRIMITIVE, not the
+# 0.46 x 0.31 land. Measuring it says U4.2 clears by +0.036 when it actually
+# overlaps by -0.120. A check that reads the wrong number is worse than no
+# check, so pads stay where the true geometry is known.
+_MH_XY = [(-8.75, 0.00), (8.75, 0.00)]
+_MH_R, _MH_KEEP = 0.60, 0.20
+# preflight's own `vias` is a Counter of (size, drill) strings and carries no
+# geometry, so parse for it -- through pour_truth, which is the only parser in
+# this project that reads both net dialects correctly.
+import pour_truth as _pt
+_pads_g, _segs_g, _vias_g, _polys_g = _pt.parse(BOARD)
+_hole_bad = []
+for _hx, _hy in _MH_XY:
+    for _s in _segs_g:
+        _g = _pt.seg_dist(_hx, _hy, _s["x1"], _s["y1"], _s["x2"], _s["y2"]) \
+            - _s["w"] / 2 - _MH_R
+        if _g < _MH_KEEP:
+            _hole_bad.append("track %s %+.3f mm at (%+.2f,%+.2f)"
+                             % (_s["net"], _g, _hx, _hy))
+    for _v in _vias_g:
+        _g = math.hypot(_v["x"] - _hx, _v["y"] - _hy) - _v["d"] / 2 - _MH_R
+        if _g < _MH_KEEP:
+            _hole_bad.append("via %s %+.3f mm at (%+.2f,%+.2f)"
+                             % (_v["net"], _g, _hx, _hy))
+rec(not _hole_bad, "17 copper clear of pin holes",
+    ("%d item(s) inside the %.2f mm keep-out: %s"
+     % (len(_hole_bad), _MH_KEEP, "; ".join(_hole_bad[:4]))) if _hole_bad
+    else "all tracks and vias >= %.2f mm from both %.2f mm holes"
+         % (_MH_KEEP, 2 * _MH_R))
+
 prov = []
 # BT1 no longer belongs here. The board never depended on VARTA's tab geometry:
 # it presents two Phi1.4 wire pads and the cell is wired down from above. The

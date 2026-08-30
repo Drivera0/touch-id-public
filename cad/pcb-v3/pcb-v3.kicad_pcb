@@ -244,8 +244,8 @@
 		(layer "F.SilkS")
 	)
 	(gr_circle
-		(center -8.59 -1.125)
-		(end -8.41 -1.125)
+		(center -8.23 -1.125)
+		(end -8.05 -1.125)
 		(stroke (width 0.12) (type solid))
 		(fill solid)
 		(layer "F.SilkS")
@@ -941,7 +941,7 @@
 	)
 	(footprint "touchid:U4"
 		(layer "F.Cu")
-		(at -7.61 -0.25)
+		(at -7.25 -0.25)
 		(property "Reference" "U4"
 			(at 0 0 0)
 			(layer "F.SilkS")
@@ -1035,7 +1035,7 @@
 	)
 	(footprint "touchid:L1"
 		(layer "F.Cu")
-		(at 6.8100000000000005 1.03 180)
+		(at 6.29 1.03 180)
 		(property "Reference" "L1"
 			(at 0 0 0)
 			(layer "F.SilkS")
@@ -1437,7 +1437,7 @@
 	)
 	(footprint "touchid:C2"
 		(layer "F.Cu")
-		(at 6.9 7.85 90)
+		(at 6.0 7.6 90)
 		(property "Reference" "C2"
 			(at 0 0 0)
 			(layer "F.SilkS")
@@ -1472,7 +1472,7 @@
 	)
 	(footprint "touchid:C3"
 		(layer "F.Cu")
-		(at 6.0 7.6 90)
+		(at 6.9 7.85 90)
 		(property "Reference" "C3"
 			(at 0 0 0)
 			(layer "F.SilkS")
@@ -1717,7 +1717,7 @@
 	)
 	(footprint "touchid:C12"
 		(layer "F.Cu")
-		(at -7.7 7.85 90)
+		(at -7.05 3.5 90)
 		(property "Reference" "C12"
 			(at 0 0 0)
 			(layer "F.SilkS")
@@ -1927,7 +1927,7 @@
 	)
 	(footprint "touchid:R5"
 		(layer "F.Cu")
-		(at -7.05 3.5 90)
+		(at -7.7 7.85 90)
 		(property "Reference" "R5"
 			(at 0 0 0)
 			(layer "F.SilkS")
@@ -2102,7 +2102,7 @@
 	)
 	(footprint "touchid:ROK1"
 		(layer "F.Cu")
-		(at 8.6 -6.15 90)
+		(at 8.55 1.55 90)
 		(property "Reference" "ROK1"
 			(at 0 0 0)
 			(layer "F.SilkS")
@@ -2137,7 +2137,7 @@
 	)
 	(footprint "touchid:ROK2"
 		(layer "F.Cu")
-		(at 7.7 -6.15 90)
+		(at 8.6 -6.15 90)
 		(property "Reference" "ROK2"
 			(at 0 0 0)
 			(layer "F.SilkS")
@@ -2172,7 +2172,7 @@
 	)
 	(footprint "touchid:ROK3"
 		(layer "F.Cu")
-		(at 7.05 -7.9 90)
+		(at 7.7 -6.15 90)
 		(property "Reference" "ROK3"
 			(at 0 0 0)
 			(layer "F.SilkS")
