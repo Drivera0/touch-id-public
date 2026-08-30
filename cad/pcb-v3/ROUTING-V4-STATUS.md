@@ -197,3 +197,40 @@ F.Cu track reaches without a via. `own_copper()` also still uses the
    went in: the VDDH 100 ms rise gate, harvest MPPT with the 1 kΩ series
    resistor, and `VBAT_OK` at 3.12 V against the PCM's 2.70 V backstop now
    that all return current flows through U5.
+
+---
+
+## check_drc IGNORES PAD ROTATION — do not trust check 6b alone
+
+`py_router/check_drc.py` builds pad rectangles from `(size w h)` without
+applying the pad's `(at x y ROT)`. On this board that is not academic: **twelve
+of the twenty-two 0402s sit at rot 90**, where w and h swap.
+
+It has now failed in **both directions on the same board**:
+
+* **False negative.** A GND tap ran **0.0915 mm** from C9.1 (0.500 × 0.540 at
+  rot 90) against a 0.10 rule. `check_drc`: *NO DRC VIOLATIONS FOUND*. It
+  modelled the pad 0.250 wide in X where the copper is 0.270 — exactly the
+  0.020 per side it dropped. `check_board.py` caught it.
+* **False positive.** One VSTOR segment reported as overlapping **six** pads by
+  0.014 mm each. Same cause, other axis: it used h/2 = 0.270 in Y where the
+  rotated pad is w/2 = 0.250. Hand arithmetic gives a **0.1065 mm** gap against
+  a 0.10 rule — a pass with margin.
+
+**`check_board.py` is authoritative for clearance.** It parses with shapely and
+applies `affinity.rotate`, so rotated and roundrect pads are modelled as drawn.
+`check_drc` remains useful for what `check_board` does not cover — via sizes,
+board-edge, hole-to-hole — but its pad-clearance verdicts are unreliable on any
+board with rotated passives.
+
+**preflight check 6b wraps check_drc, so 6b inherits this.** When 6b and
+check 2 disagree, check 2 wins. Verify by hand before acting on either.
+
+### The matching bug in our own scripts, now fixed
+
+`gnd_taps.py` and `stitch_open.py` classified pads with
+`abs(rot % 90) > 1e-6` — which catches 45° and **passes 90° straight through**
+to a fallback box built from the *unrotated* w and h. That is what let the tap
+sit 0.0915 mm from C9.1 in the first place. Both now swap w/h when
+`round(rot) % 180 == 90`. Re-running the taps with the fix: **0 clearance
+violations**, where the same step previously produced one.

@@ -252,8 +252,18 @@ def main():
                 if r is not None:
                     m[L] |= (XX - p["x"])**2 + (YY - p["y"])**2 <= (r + halo)**2
                 else:
-                    m[L] |= (np.abs(XX - p["x"]) <= p["w"]/2 + halo) & \
-                            (np.abs(YY - p["y"]) <= p["h"]/2 + halo)
+                    # SWAP W/H AT 90 AND 270. pad_radius() only catches
+                    # rotations that are NOT multiples of 90 (its test is
+                    # `rot % 90 > 0`), so a pad at exactly 90 lands here -- and
+                    # this box used to be built from the UNROTATED w and h.
+                    # C9.1 is 0.500 x 0.540 at rot 90: modelled 0.250 half-width
+                    # in x where the copper is really 0.270, so a GND tap ran
+                    # 0.0915 mm from it against a 0.10 rule. Exactly the 0.020
+                    # per side this dropped.
+                    pw, ph = ((p["w"], p["h"]) if round(p["rot"]) % 180 == 0
+                              else (p["h"], p["w"]))
+                    m[L] |= (np.abs(XX - p["x"]) <= pw/2 + halo) & \
+                            (np.abs(YY - p["y"]) <= ph/2 + halo)
         for t in tracks:
             if t["net"] == GND or t["layer"] not in m:
                 continue

@@ -125,6 +125,14 @@ def load(path):
                                     max(p["w"], p["h"]) / 2 + 0.35)
         elif abs(p["rot"] % 90.0) > 1e-6:
             p["r_eff"] = math.hypot(p["w"], p["h"]) / 2
+        elif round(p["rot"]) % 180 == 90:
+            # Exactly 90 or 270: axis aligned, but W AND H ARE SWAPPED.
+            # The test above only fires for rotations that are not multiples
+            # of 90, so these fell through to a box built from the unrotated
+            # dimensions. Same defect as gnd_taps; it put a GND tap 0.0915 mm
+            # from C9.1 (0.500 x 0.540 at rot 90) against a 0.10 rule.
+            p["w"], p["h"] = p["h"], p["w"]
+            p["r_eff"] = None
         elif p["shape"] == "circle":
             p["r_eff"] = p["w"] / 2
         else:
