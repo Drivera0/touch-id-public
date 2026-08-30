@@ -51,6 +51,18 @@ import pour_truth as pt
 HERE = os.path.dirname(os.path.abspath(__file__))
 VIA_D, VIA_DRILL, CLR = 0.45, 0.20, 0.10
 HALF, EDGE, CORNER_R, H2H = 9.65, 0.30, 2.00, 0.20
+# JLC: "Via hole to Track 0.2mm". This constrains the DRILL, not the copper,
+# so no copper-clearance checker can see it. At 0.45/0.20 the copper rule
+# dominates (0.225+0.10 > 0.10+0.20) and it never bites; below 0.45 the hole
+# rule takes over. Missing it made a via-shrink look far more powerful than it
+# is and nearly produced a fab change that would not have worked.
+HOLE_TO_TRACK = 0.20
+
+
+def via_halo():
+    """Clearance a via centre needs from FOREIGN copper: whichever of the
+    copper rule and the drill rule binds."""
+    return max(VIA_D / 2.0 + CLR, VIA_DRILL / 2.0 + HOLE_TO_TRACK)
 POGO_REFS = ("J4", "J11")
 STEP = 0.02
 
@@ -69,6 +81,8 @@ def fab_floor():
                 VIA_D = float(v)
             elif k == "via_drill":
                 VIA_DRILL = float(v)
+            elif k == "via_hole_to_track":
+                globals()["HOLE_TO_TRACK"] = float(v)
 
 
 def poly_area(pts):
@@ -108,6 +122,7 @@ def keepouts(path):
 def legal_elsewhere(vx, vy, pads, segs, vias, novia):
     """Everything the hole hits OUTSIDE the island it is being placed in."""
     r = VIA_D / 2.0
+    halo = via_halo()          # copper rule OR drill rule, whichever binds
     lim = HALF - EDGE - r
     if abs(vx) > lim or abs(vy) > lim:
         return False
@@ -123,21 +138,21 @@ def legal_elsewhere(vx, vy, pads, segs, vias, novia):
     for p in pads:
         if p["ref"] in POGO_REFS:           # incl. J4.5, itself GND
             if math.hypot(vx - p["x"], vy - p["y"]) \
-                    < max(p["w"], p["h"]) / 2 + r + CLR:
+                    < max(p["w"], p["h"]) / 2 + halo:
                 return False
             continue
         if p["net"] == "GND":
             continue
         pw, ph = ((p["w"], p["h"]) if round(p["rot"]) % 180 == 0
                   else (p["h"], p["w"]))    # ROTATION APPLIED
-        if abs(vx - p["x"]) < pw / 2 + r + CLR and \
-                abs(vy - p["y"]) < ph / 2 + r + CLR:
+        if abs(vx - p["x"]) < pw / 2 + halo and \
+                abs(vy - p["y"]) < ph / 2 + halo:
             return False
     for s in segs:                          # every layer: a via pierces all
         if s["net"] == "GND":
             continue
         if pt.seg_dist(vx, vy, s["x1"], s["y1"], s["x2"], s["y2"]) \
-                < s["w"] / 2 + r + CLR:
+                < s["w"] / 2 + halo:
             return False
     for v in vias:
         if math.hypot(vx - v["x"], vy - v["y"]) < (v["d"] + VIA_D) / 2 + H2H:

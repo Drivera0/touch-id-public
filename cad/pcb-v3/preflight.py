@@ -55,7 +55,32 @@ def _fab_floor():
 
 DESIGN_TRACK, DESIGN_CU = _fab_floor()
 FAB_MIN_CU = DESIGN_CU
-VIA_MIN_D, VIA_MIN_DRILL = 0.45, 0.20        # JLC standard 4-layer
+def _via_floor():
+    """Via floor comes from the fab floor file, never a constant here.
+
+    2026-08-29 this moved from 0.45 to 0.40 (drill unchanged at 0.20) to reach
+    three GND pads whose surroundings are smaller than a 0.45 via. JLC allows
+    it -- min multilayer via is 0.15/0.25, and diameter must exceed hole by
+    0.10 -- but their rule is explicit that "0.2mm or 0.25mm hole size with via
+    diameter less than 0.45mm will cost more. Please select corresponding via
+    size option when placing order."  Check 8b below refuses to pass silently
+    on that, because a board DRAWN at 0.40 and ORDERED on the default rung is
+    a board built to the wrong rules.
+    """
+    d, k = 0.45, 0.20
+    fp = os.path.join(HERE, "fab_floor_touchid.txt")
+    if os.path.exists(fp):
+        for line in open(fp):
+            if "=" in line and not line.strip().startswith("#"):
+                a, b = [z.strip() for z in line.split("=", 1)]
+                if a == "via_diameter":
+                    d = float(b)
+                elif a == "via_drill":
+                    k = float(b)
+    return d, k
+
+
+VIA_MIN_D, VIA_MIN_DRILL = _via_floor()
 POWER = {"VSTOR", "VBAT", "VIN_DC", "LX", "SENSOR_3V3", "SENSOR_MCU_3V3"}
 
 results = []
@@ -257,8 +282,26 @@ rec(bad == 0, "7  antenna keep-out clear of copper",
 # ------------------------------------------------------------ 8 via sizes ---
 vias = collections.Counter(re.findall(r'\(via\b.*?\(size ([\d.]+)\)\s*\(drill ([\d.]+)\)', t, re.S))
 smalld = [k for k in vias if float(k[0]) < VIA_MIN_D or float(k[1]) < VIA_MIN_DRILL]
-rec(not smalld, "8  vias >= %.2f/%.2f (JLC standard)" % (VIA_MIN_D, VIA_MIN_DRILL),
+rec(not smalld, "8  vias >= %.2f/%.2f (fab floor)" % (VIA_MIN_D, VIA_MIN_DRILL),
     "advanced-tier vias: %s" % smalld if smalld else "all %s" % dict(vias))
+
+# ------------------------------------- 8b the ORDER FORM must match the board --
+# JLC prices vias in rungs. Their capabilities page: "0.15mm hole size with any
+# size via diameter, and 0.2mm or 0.25mm hole size with via diameter less than
+# 0.45mm, will cost more. Please select corresponding via size option when
+# placing order."
+#
+# Nothing in the Gerbers carries that selection -- it is a dropdown on the order
+# page. So a board drawn at 0.40 and ordered on the default rung is built to
+# rules it does not satisfy, and NO file-based check can catch it. This is a
+# standing WARN, on purpose: it is a human step, and it stays visible every run
+# rather than being passed once and forgotten.
+_paid_rung = VIA_MIN_D < 0.45 or VIA_MIN_DRILL < 0.20
+rec(not _paid_rung, "8b order form via rung",
+    ("board is drawn at %.2f/%.2f -- JLC charges more below 0.45 diameter. "
+     "SELECT THE MATCHING VIA SIZE OPTION AT CHECKOUT; it is not in the Gerbers"
+     % (VIA_MIN_D, VIA_MIN_DRILL)) if _paid_rung
+    else "default rung, nothing to select", blocker=False)
 
 # --------------------------------------------------- 9 fab floor on tracks --
 widths = collections.Counter()

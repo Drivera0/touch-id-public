@@ -655,3 +655,60 @@ read off the order form rather than assumed.
 Note U2.18 is VBAT and U2.19 is VSTOR -- the charger's battery and storage
 rails. These are not optional nets. **The board is not manufacturable until
 they connect**, by one route or the other.
+
+---
+
+## CORRECTION: the finer via fixes three of five, not five
+
+I recommended buying the finer fab rung on a measurement that was WRONG, and
+JLC's own capabilities page corrected it.
+
+The missing rule is **"Via hole to Track 0.2mm"**. It constrains the DRILL, not
+the copper, so no copper-clearance checker on this project can see it. At
+0.45/0.20 the copper rule dominates -- 0.225 + 0.10 = 0.325 against
+0.10 + 0.20 = 0.30 -- so it never bit and its absence never showed. Below a
+0.45 via the hole rule takes over, and shrinking the via stops buying room.
+
+Re-measured with the drill rule applied:
+
+| via / hole | binding halo | R9.2 | U5.4 | U2.18 | U2.19 | C7.2 |
+|---|---|---|---|---|---|---|
+| 0.45 / 0.20 | 0.325 | no | no | 0 | 0 | 9 |
+| 0.40 / 0.20 | 0.300 | fits | fits | **0** | **0** | 20976 |
+| 0.35 / 0.20 | 0.300 | fits | fits | **0** | **0** | 20976 |
+| 0.30 / 0.15 | 0.275 | fits | fits | **0** | **0** | 24693 |
+| 0.25 / 0.15 | 0.275 | fits | fits | **0** | **0** | 24693 |
+
+**U2.18 and U2.19 gain nothing from any via JLC can make.** The earlier figures
+of 26277 and 32067 were the drill rule being ignored.
+
+### What was actually bought: via 0.40 / drill 0.20
+
+The drill deliberately STAYS at 0.20 -- JLC's "preferred minimum" hole, still
+mechanical drilling, still 6:1 aspect ratio on a 1.20 mm board. A 0.15 hole
+buys almost nothing here and moves toward laser-drilled HDI, a different
+product.
+
+Closed **U5.4** (via inside its island) and **C7.2** (2.20 mm route to a via
+over the plane). **5 open pads -> 3.**
+
+`preflight` check 8 now reads the via floor from the fab floor file instead of
+a constant, and new **check 8b** is a standing WARN: the via rung is a dropdown
+at checkout and appears nowhere in the Gerbers, so a board drawn at 0.40 and
+ordered on the default rung is built to rules it does not satisfy. No
+file-based check can ever catch that, so it stays visible on every run.
+
+### The last three
+
+**R9.2** -- its island is wide enough for a 0.40 via (0.215 vs 0.200 needed),
+but only 12 cells qualify and the best is blocked by **J4.1's pogo ring** plus
+a VBAT_SENSE In1.Cu track. R9 sits too close to a pogo pad.
+
+**U2.18 (VBAT) and U2.19 (VSTOR)** -- no via site in the pin row at any
+manufacturable via size. Detouring the one CELL_NEG track that crossed the
+corridor was tried and discarded: it widened the corridor from 0.90 to 1.50 mm
+and still produced zero via sites, because the wall is the pads themselves --
+U2's own neighbours and L1 immediately north.
+
+All three need parts moved. These are the charger's battery and storage rails;
+**the board is not manufacturable until they connect.**

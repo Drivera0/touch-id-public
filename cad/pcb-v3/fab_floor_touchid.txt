@@ -46,7 +46,38 @@ clearance    = 0.10
 # Kept in mind and rejected: this board flexes where the pogo pins push up, and
 # thin barrels crack under flex. But vias are already banned from the pogo zone
 # outright, so the small ones cannot sit where the flexing is.
-via_diameter = 0.45
+#
+# 2026-08-29: via_diameter 0.45 -> 0.40, DRILL UNCHANGED AT 0.20.
+#
+# Three GND pads could not be connected at 0.45 because the space left around
+# their parts is smaller than a 0.45 via: R9.2's ground island is 0.215 mm from
+# edge to centre and U5.4's is 0.207 mm, against the 0.225 a 0.45 via needs --
+# short by 10 and 18 microns -- and C7.2's nine reachable via sites were none
+# of them over connected ground copper. At 0.40 all three resolve: the islands
+# fit, and C7.2 gets 20412 sites over connected copper.
+#
+# The DRILL DELIBERATELY STAYS AT 0.20, which is JLC's "preferred minimum" hole
+# and keeps mechanical drilling and the 6:1 aspect ratio on a 1.20 mm board.
+# Going to a 0.15 hole buys almost nothing here (24693 sites vs 20412) and
+# moves toward the laser-drilled/HDI process, which is a different product.
+#
+# JLC rules this satisfies (jlcpcb.com/capabilities/pcb-capabilities):
+#   * min multilayer via: 0.15 mm hole / 0.25 mm diameter -- we are well above
+#   * via diameter must be >= hole + 0.10 mm: 0.40 >= 0.30, comfortable
+#   * "0.2mm or 0.25mm hole size with via diameter less than 0.45mm WILL COST
+#     MORE. Please select corresponding via size option when placing order."
+#
+# ==> THE ORDER FORM MUST SELECT THE SMALL-VIA OPTION. A board drawn at 0.40
+#     and ordered on the default rung is a board built to the wrong rules.
+#
+# via_hole_to_track is the rule that was MISSED and nearly caused a bad
+# decision. It constrains the DRILL, not the copper, so it is invisible to
+# every copper-clearance checker. At 0.45/0.20 the copper rule dominates
+# (0.225+0.10 = 0.325 > 0.10+0.20 = 0.30) and it never bit. Below 0.45 the hole
+# rule takes over, which is why shrinking the via buys far less room than it
+# appears to: U2.18/U2.19 gain ZERO via sites at ANY via JLC can make.
+via_diameter = 0.40
 via_drill    = 0.20
 hole_to_hole = 0.20
 board_edge   = 0.30
+via_hole_to_track = 0.20

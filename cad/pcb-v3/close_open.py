@@ -154,7 +154,11 @@ def main():
             continue
 
         tmask = H.blocked_masks(net, H.CLR + H.TRACK / 2)
-        vmask = H.blocked_masks(net, H.CLR + H.VIA_D / 2, ko="vias")
+        # JLC's "via hole to track 0.2mm" constrains the DRILL, not the copper.
+        # Below a 0.45 via it is the BINDING rule, and it is invisible to every
+        # copper-clearance checker. Take whichever of the two is larger.
+        _vhalo = max(H.CLR + H.VIA_D / 2, H.VIA_DRILL / 2 + H.HOLE_TO_TRACK)
+        vmask = H.blocked_masks(net, _vhalo, ko="vias")
         via_ok = ~(vmask["F.Cu"] | vmask["In1.Cu"] | vmask["B.Cu"]
                    | vmask["In2.Cu"])
 

@@ -48,6 +48,17 @@ def _rules():
 
 
 TRACK, CLR, VIA_D, VIA_DRILL = _rules()
+# JLC: "Via hole to Track 0.2mm" -- a DRILL rule, invisible to copper checkers,
+# and the binding one for any via smaller than 0.45 on this fab floor.
+HOLE_TO_TRACK = 0.20
+try:
+    for _l in open(os.path.join(HERE, "fab_floor_touchid.txt")):
+        if "=" in _l and not _l.strip().startswith("#"):
+            _k, _v = [x.strip() for x in _l.split("=", 1)]
+            if _k == "via_hole_to_track":
+                HOLE_TO_TRACK = float(_v)
+except OSError:
+    pass
 BOARD_SZ, EDGE = 19.30, 0.30
 LAYERS = ["F.Cu", "In1.Cu", "B.Cu"]        # ROUTABLE layers
 # In2.Cu is the GND plane and is not routed on -- but it is still COPPER.
@@ -275,7 +286,7 @@ def pad_cells(p, L):
 
 def route(net, verbose=True):
     tmask = blocked_masks(net, CLR + TRACK/2)
-    vmask = blocked_masks(net, CLR + VIA_D/2, ko="vias")
+    vmask = blocked_masks(net, max(CLR + VIA_D/2, VIA_DRILL/2 + HOLE_TO_TRACK), ko="vias")
     via_ok = ~(vmask["F.Cu"] | vmask["In1.Cu"] | vmask["B.Cu"] | vmask["In2.Cu"])
     for k in keepouts:                       # a via pierces every layer
         if k["no_vias"]:
