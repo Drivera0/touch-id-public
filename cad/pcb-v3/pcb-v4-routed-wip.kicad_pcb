@@ -4885,91 +4885,7 @@
 		(layer "B.SilkS")
 		(uuid "19f88f27-b62f-4421-b2e6-5682d7fd256f")
 	)
-	(gr_arc
-		(start -9.65 -7.65)
-		(mid -9.0642 -9.0642)
-		(end -7.65 -9.65)
-		(stroke
-			(width 0.05)
-			(type default)
-		)
-		(layer "Edge.Cuts")
-		(uuid "37608c5a-774a-43ba-a2c0-5d72102bbd09")
-	)
-	(gr_line
-		(start -9.65 7.65)
-		(end -9.65 -7.65)
-		(stroke
-			(width 0.05)
-			(type default)
-		)
-		(layer "Edge.Cuts")
-		(uuid "6b28e3e0-c6a1-4864-9188-6203139952cd")
-	)
-	(gr_line
-		(start -7.65 -9.65)
-		(end 7.65 -9.65)
-		(stroke
-			(width 0.05)
-			(type default)
-		)
-		(layer "Edge.Cuts")
-		(uuid "332486c7-a5ee-4b74-b539-f954b8582d2a")
-	)
-	(gr_arc
-		(start -7.65 9.65)
-		(mid -9.0642 9.0642)
-		(end -9.65 7.65)
-		(stroke
-			(width 0.05)
-			(type default)
-		)
-		(layer "Edge.Cuts")
-		(uuid "c9da4468-879c-45fe-9968-3e0aeb591b84")
-	)
-	(gr_arc
-		(start 7.65 -9.65)
-		(mid 9.064199 -9.064199)
-		(end 9.65 -7.65)
-		(stroke
-			(width 0.05)
-			(type default)
-		)
-		(layer "Edge.Cuts")
-		(uuid "eab1b42e-307b-4a9a-a5e0-e03d4a5b3eef")
-	)
-	(gr_line
-		(start 7.65 9.65)
-		(end -7.65 9.65)
-		(stroke
-			(width 0.05)
-			(type default)
-		)
-		(layer "Edge.Cuts")
-		(uuid "27602846-22c8-4944-94e8-af87c5cc86f6")
-	)
-	(gr_line
-		(start 9.65 -7.65)
-		(end 9.65 7.65)
-		(stroke
-			(width 0.05)
-			(type default)
-		)
-		(layer "Edge.Cuts")
-		(uuid "ba350e2e-592b-44e8-bad5-b24a2d093d3a")
-	)
-	(gr_arc
-		(start 9.65 7.65)
-		(mid 9.0642 9.0642)
-		(end 7.65 9.65)
-		(stroke
-			(width 0.05)
-			(type default)
-		)
-		(layer "Edge.Cuts")
-		(uuid "9ae6b9d0-297d-4a5f-ba5b-e0237671fed7")
-	)
-	(gr_text "-"
+(gr_text "-"
 		(at -6.572 -5.9 0)
 		(layer "F.SilkS")
 		(uuid "8ce611ab-d5d5-4b05-963c-3c7037016da8")
@@ -14803,7 +14719,7 @@
 		)
 		(polygon
 			(pts
-				(xy -9.15 -9.15) (xy 9.15 -9.15) (xy 9.15 9.15) (xy -9.15 9.15)
+				(xy -9.50 -9.00) (xy 9.50 -9.00) (xy 9.50 9.00) (xy -9.50 9.00)
 			)
 		)
 		(filled_polygon
@@ -15796,7 +15712,7 @@
 		)
 		(polygon
 			(pts
-				(xy -9.15 -9.15) (xy 9.15 -9.15) (xy 9.15 9.15) (xy -9.15 9.15)
+				(xy -9.50 -9.00) (xy 9.50 -9.00) (xy 9.50 9.00) (xy -9.50 9.00)
 			)
 		)
 		(filled_polygon
@@ -16789,7 +16705,7 @@
 		)
 		(polygon
 			(pts
-				(xy -9.15 -9.15) (xy 9.15 -9.15) (xy 9.15 9.15) (xy -9.15 9.15)
+				(xy -9.50 -9.00) (xy 9.50 -9.00) (xy 9.50 9.00) (xy -9.50 9.00)
 			)
 		)
 		(filled_polygon
@@ -18573,5 +18489,81 @@
 		(drill 0.2)
 		(layers "F.Cu" "B.Cu")
 		(net "PCM_VM")
+	)
+	(gr_line
+		(start -8.0000 -9.5000)
+		(end 8.0000 -9.5000)
+		(stroke
+			(width 0.05)
+			(type default)
+		)
+		(layer "Edge.Cuts")
+	)
+	(gr_arc
+		(start 8.0000 -9.5000)
+		(mid 9.4142 -8.9142)
+		(end 10.0000 -7.5000)
+		(stroke
+			(width 0.05)
+			(type default)
+		)
+		(layer "Edge.Cuts")
+	)
+	(gr_line
+		(start 10.0000 -7.5000)
+		(end 10.0000 7.5000)
+		(stroke
+			(width 0.05)
+			(type default)
+		)
+		(layer "Edge.Cuts")
+	)
+	(gr_arc
+		(start 10.0000 7.5000)
+		(mid 9.4142 8.9142)
+		(end 8.0000 9.5000)
+		(stroke
+			(width 0.05)
+			(type default)
+		)
+		(layer "Edge.Cuts")
+	)
+	(gr_line
+		(start 8.0000 9.5000)
+		(end -8.0000 9.5000)
+		(stroke
+			(width 0.05)
+			(type default)
+		)
+		(layer "Edge.Cuts")
+	)
+	(gr_arc
+		(start -8.0000 9.5000)
+		(mid -9.4142 8.9142)
+		(end -10.0000 7.5000)
+		(stroke
+			(width 0.05)
+			(type default)
+		)
+		(layer "Edge.Cuts")
+	)
+	(gr_line
+		(start -10.0000 7.5000)
+		(end -10.0000 -7.5000)
+		(stroke
+			(width 0.05)
+			(type default)
+		)
+		(layer "Edge.Cuts")
+	)
+	(gr_arc
+		(start -10.0000 -7.5000)
+		(mid -9.4142 -8.9142)
+		(end -8.0000 -9.5000)
+		(stroke
+			(width 0.05)
+			(type default)
+		)
+		(layer "Edge.Cuts")
 	)
 )
