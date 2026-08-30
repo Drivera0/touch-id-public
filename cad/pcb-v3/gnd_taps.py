@@ -464,6 +464,68 @@ def main():
     if _snapped:
         print(f"  snapped {_snapped} endpoint(s) onto a shared point")
 
+    # ---- PRUNE STUBS ------------------------------------------------------
+    # A tap segment is only worth emitting if BOTH ends land on something of
+    # this net: a GND pad, one of our vias, an existing GND track, or another
+    # tap. Snapping and partial paths can leave an end hanging in free copper,
+    # and two duly survived to the board -- preflight check 20 caught them as
+    # "free ends" at (-8.30,-3.30) and (-2.10,-8.55). One of those touched
+    # nothing at EITHER end; the other ran from a via to nowhere. Neither
+    # carried current, but a stub is an antenna and a fab yield question, and
+    # it is a lie in the file about what is connected.
+    #
+    # Iterative, because dropping a stub can orphan the segment that fed it.
+    def _anchored(px, py, drop):
+        for p in pads:                                   # a pad of this net
+            if p["net"] != GND:
+                continue
+            # pad_radius(), NOT max(w,h)/2 -- U3/U4 are custom pads whose
+            # (size) is a 0.1485 mm anchor, not the copper. Using the anchor
+            # here made every segment landing on one look unanchored and
+            # pruned 10 of 23 tap segments. Third time this exact trap has
+            # bitten on this board; the function to avoid it was already
+            # defined 200 lines up.
+            r = pad_radius(p)
+            if r is None:
+                if abs(p["x"] - px) <= p["w"] / 2 + STEP and \
+                   abs(p["y"] - py) <= p["h"] / 2 + STEP:
+                    return True
+            elif math.hypot(p["x"] - px, p["y"] - py) <= r + STEP:
+                return True
+        for v in new_v:                                  # one of our vias
+            if math.hypot(v["x"] - px, v["y"] - py) <= VIA_D / 2:
+                return True
+        for t_ in tracks:                                # pre-existing GND copper
+            if t_["net"] != GND:
+                continue
+            if min(math.hypot(t_["x1"] - px, t_["y1"] - py),
+                   math.hypot(t_["x2"] - px, t_["y2"] - py)) <= STEP:
+                return True
+        for i, (a1, b1, a2, b2, _L) in enumerate(new_t): # another tap segment
+            if i in drop:
+                continue
+            if (abs(a1 - px) <= STEP and abs(b1 - py) <= STEP) or \
+               (abs(a2 - px) <= STEP and abs(b2 - py) <= STEP):
+                if (a1, b1, a2, b2) != (px, py, px, py):
+                    return True
+        return False
+
+    drop = set()
+    while True:
+        grew = False
+        for i, (x1, y1, x2, y2, L) in enumerate(new_t):
+            if i in drop:
+                continue
+            d2 = drop | {i}
+            if not _anchored(x1, y1, d2) or not _anchored(x2, y2, d2):
+                drop.add(i)
+                grew = True
+        if not grew:
+            break
+    if drop:
+        print(f"  pruned {len(drop)} stub segment(s) with a free end")
+        new_t = [s for i, s in enumerate(new_t) if i not in drop]
+
     body = []
     for (x1, y1, x2, y2, L) in new_t:
         body.append(f'\t(segment (start {x1:.4f} {y1:.4f}) (end {x2:.4f} {y2:.4f}) '
