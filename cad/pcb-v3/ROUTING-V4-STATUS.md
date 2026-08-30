@@ -613,3 +613,45 @@ inside J11.2's pogo ring, and its one route out needs a via 0.025 mm inside the
 board-edge rule), and U2.18/U2.19 (no via site anywhere in the QFN pin row).
 Nothing about the U4 fix generalises to them -- U4's blocker was removable
 copper on another layer, theirs is the position of the parts themselves.
+
+---
+
+## The last five: one decision, not five problems
+
+`CELL_NEG` was tried and DISCARDED. The wall boxing U2's pin row was 190 cells
+of a single 0.300 mm `CELL_NEG` track crossing at y = -0.500, which looked like
+the U4 fix all over again. Detouring it (same length, 3 vias) did widen the
+corridor from 0.90 mm to 1.50 mm tall -- and still produced **zero** via sites.
+The wall is now the pads themselves: U2's own neighbours plus **L1**, the
+inductor sitting immediately north. Nothing was kept.
+
+C7.2 is worse than it first looked. It can reach 9 legal via sites, but **none
+of them sit over connected ground copper** -- and that holds on B.Cu too,
+because the J11 pogo pads void the bottom pour right there.
+
+### What actually decides all five: via size
+
+| pad | standard 0.45/0.20 | advanced 0.25/0.15 |
+|---|---|---|
+| R9.2 | island half-width 0.215 mm, needs 0.225 | needs 0.125 — **fits** |
+| U5.4 | island half-width 0.207 mm, needs 0.225 | needs 0.125 — **fits** |
+| U2.18 | **0** reachable via sites | 26277 |
+| U2.19 | **0** reachable via sites | 32067 |
+| C7.2 | 9, none over connected copper | 38865 |
+
+All five are the same problem wearing five costumes: **a 0.45 mm via is too big
+for the space left around these parts.** Two miss by 10 and 18 microns.
+
+So it is one decision:
+
+**A. Move parts.** L1 and U2 for the QFN escape, R9/U5/C7 for the ground pads.
+Correct, costs nothing, and means regenerating placement -- which regressed the
+board badly once already this week.
+
+**B. Buy the finer fab rung.** 0.25/0.15 vias makes every one of the five
+routable as the board stands. A paid step up at JLC; the exact price should be
+read off the order form rather than assumed.
+
+Note U2.18 is VBAT and U2.19 is VSTOR -- the charger's battery and storage
+rails. These are not optional nets. **The board is not manufacturable until
+they connect**, by one route or the other.
