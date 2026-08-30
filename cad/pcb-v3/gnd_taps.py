@@ -35,7 +35,31 @@ LAYERS = ["F.Cu", "In1.Cu", "B.Cu"]
 PLANE = "In2.Cu"
 BOARD_SZ, EDGE = 19.30, 0.30
 CORNER_R = 2.00              # R2.0 outline corners -- see the arc test in masks()
+KEEPOUT_MARGIN = 0.30        # slack for KiCad's format-migration track rewrite
+# Sized from the measured damage, not guessed: when KiCad migrated this board
+# from file format 20240108 to 20260206 it rewrote track geometry, turning a
+# tap path that skirted the antenna keep-out into a diagonal cutting the
+# corner. Deepest copper intrusion was 0.2635 mm. 0.30 covers it; 0.15 would
+# NOT have, which is worth stating because 0.15 was my first instinct.
+# It costs 4 taps (24 -> 20). Paid deliberately: copper in the antenna zone is
+# a fault you cannot see and cannot check against a drawing.
 STEP = 0.05
+
+
+def _grow(mask, r):
+    """Dilate a boolean mask by r mm (disc structuring element)."""
+    if not mask.any() or r <= 0:
+        return mask
+    out = mask.copy()
+    steps = int(math.ceil(r / STEP))
+    for dx in range(-steps, steps + 1):
+        for dy in range(-steps, steps + 1):
+            if math.hypot(dx, dy) * STEP > r:
+                continue
+            out |= np.roll(np.roll(mask, dy, axis=0), dx, axis=1)
+    return out
+
+
 VIA_D_DEFAULT, VIA_DRILL_DEFAULT = 0.45, 0.20   # fallback only; fab floor wins
 GND = "GND"
 
@@ -242,10 +266,19 @@ def main():
                 e |= _out
         for L in LAYERS:
             m[L] |= e
-            # "tracks not_allowed" rule areas -- the antenna keep-out. Grown by
-            # the halo like everything else, because a track centred just
-            # outside still puts copper inside.
-            m[L] |= notrack[L]
+            # "tracks not_allowed" rule areas -- the antenna keep-out.
+            #
+            # GROWN, and by more than the halo. Two separate reasons:
+            #  1. halo: a track whose CENTRE is just outside still puts copper
+            #     inside. (My first version of this said it grew the mask and
+            #     then didn't -- the comment was right and the code was not.)
+            #  2. KEEPOUT_MARGIN: KiCad rewrites track geometry when it
+            #     migrates a board to a newer file format. It did exactly that
+            #     here -- same 554 segments in and out, but a tap path that
+            #     skirted the keep-out came back as a diagonal cutting the
+            #     corner, three segments deep into the antenna zone. We cannot
+            #     stop it simplifying, so leave it slack to simplify INTO.
+            m[L] |= _grow(notrack[L], halo + KEEPOUT_MARGIN)
         return m
 
     # A grid samples cell CENTRES, so the segment BETWEEN two legal cells can
