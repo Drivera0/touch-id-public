@@ -146,7 +146,14 @@ for lay, key in (("F.Cu", 'F'), ("B.Cu", 'B')):
             if na is not None and nb is not None and na == nb:
                 continue
             d = ga.distance(gb)
-            if d < MIN_CU:
+            # EPSILON, because copper that lands EXACTLY on the rule is legal.
+            # A router asked for 0.10 clearance will happily produce geometry
+            # at 0.10, and shapely then returns 0.09999999998 for it. A strict
+            # `d < MIN_CU` calls that a violation and prints it as "0.1000",
+            # which reads as a real fault and is not one -- the router's own
+            # check_drc passes the same board clean. 1e-6 mm is a nanometre:
+            # far below anything a fab can resolve, and far above float noise.
+            if d < MIN_CU - 1e-6:
                 viol.append((d, lay, na, la, nb, lb))
 
 print(f"\n  different-net pairs closer than {MIN_CU} mm: {len(viol)}")
