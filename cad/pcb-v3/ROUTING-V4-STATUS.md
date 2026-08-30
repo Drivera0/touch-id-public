@@ -294,3 +294,50 @@ through congestion — it already has the correct obstacle model, the pogo rule
 and the A*. That is a change to one script with a clear success test
 (`taps placed` goes up, check 2 and check 22 stay clean), not more copper
 placed by hand.
+
+---
+
+## ROOT CAUSE of the stranded GND pads — found by looking, not theorising
+
+Dumping every pad, track and via within 2 mm of C5.2 answered in one pass what
+three hypotheses had failed to:
+
+```
+C5.2   at (-6.910,-1.920)   nearest pogo J4.5 at 0.417 mm   ring 1.425  -> INSIDE
+C12.2  at (-7.780,-3.050)   nearest pogo J4.5 at 1.013 mm   ring 1.425  -> INSIDE
+C3.2   at (-1.400,-8.320)   nearest pogo J4.2 at 3.479 mm               -> outside
+C9.2   at ( 1.300,-8.320)   nearest pogo J11.1 at 2.424 mm              -> outside
+U4.2   at (-8.040, 0.075)   nearest pogo J4.5 at 2.444 mm               -> outside
+```
+
+**C5 and C12 are placed on top of the J4 pogo block.** Their GND pads sit
+inside J4.5's no-via ring (pogo pad 1.10 + via 0.225 + clearance 0.10 =
+**1.425 mm**), so **no via can ever be placed near them** — not by `gnd_taps`,
+not by stitching, not by hand. There were no vias at all within 2 mm of C5.2.
+
+And a GND pad on **F.Cu** with no via cannot reach a plane on **In2.Cu**. The
+pour cannot rescue it either: a pour island there would need its own via.
+
+This is why the last three fixes did nothing:
+
+| attempt | why it could not have worked |
+|---|---|
+| relax `gnd_taps`' via search | the sites it rejected were inside J4.5 — it was right |
+| pour clearance 0.25 → 0.10 | a pour still needs a via to reach the plane |
+| 50 stitching vias | none could be placed in the forbidden ring either |
+
+### The fix is PLACEMENT, and it belongs in build_pcb_v3.py
+
+The 0402 packer treats the pogo zone as *legal but expensive* — parts land
+there once every other slot is taken. That was reasoned about **routing**
+(`_POGO_ZONE`'s comment is about via access for the part's own escape) but the
+consequence for a part with a **GND pad** was never drawn: it cannot be tapped,
+so its ground pin is stranded no matter how the board is routed afterwards.
+
+**Proposed rule: a pad on GND may not be placed inside a pogo no-via ring.**
+Cheap to state, and it is a placement-time constraint rather than another
+routing patch. C5 (0603, cell bulk cap) and C12 would move; both have
+alternatives elsewhere on the left strip.
+
+C3.2, C9.2 and U4.2 are a separate, ordinary crowding problem and are not
+affected by this rule.
