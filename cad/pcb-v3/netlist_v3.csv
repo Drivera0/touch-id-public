@@ -9,8 +9,8 @@ C3,1,VSTOR,0.1uF 0402,CSTOR HF
 C3,2,GND,0.1uF 0402,CSTOR HF
 C4,1,VREF_SAMP,10nF 0402 low-leak,"CREF, 9-11 nF window"
 C4,2,GND,10nF 0402 low-leak,"CREF, 9-11 nF window"
-C5,1,VBAT,10uF 16V X5R 0603,CBAT bulk beside the cell
-C5,2,GND,10uF 16V X5R 0603,CBAT bulk beside the cell
+C5,1,VBAT,10uF 10V X5R 0402,CBAT bulk beside the cell
+C5,2,GND,10uF 10V X5R 0402,CBAT bulk beside the cell
 C6,1,SENSOR_3V3,1uF 0402,LDO input side of U3 is VSTOR; this is OUT
 C6,2,GND,1uF 0402,LDO input side of U3 is VSTOR; this is OUT
 C7,1,SENSOR_3V3,22uF 10V X5R 0603,"ZW0905 200 mA / 4 us scan transient. REQUIREMENT: ripple < 200 mV (Hi-Link), so C_eff at 3.3 V bias must be >= 4 uF, target >= 8 uF. Do NOT substitute a 6.3 V part -- it derates onto the floor."
@@ -25,8 +25,8 @@ C12,1,VBAT_SENSE,10nF 0402,SAADC sampling reservoir
 C12,2,GND,10nF 0402,SAADC sampling reservoir
 C13,1,BL_FLAG,10nF 0402,
 C13,2,GND,10nF 0402,
-C14,1,PCM_VDD,0.1uF 0402,"Datasheet C1. Across VDD and S1, for supply-voltage fluctuation."
-C14,2,CELL_NEG,0.1uF 0402,"Datasheet C1. Across VDD and S1, for supply-voltage fluctuation."
+C14,1,PCM_VDD,0.1uF 0201,"Datasheet C1. Across VDD and S1, for supply-voltage fluctuation."
+C14,2,CELL_NEG,0.1uF 0201,"Datasheet C1. Across VDD and S1, for supply-voltage fluctuation."
 J2,1,SENSOR_3V3,"Sensor pads, HLK-ZW0922 (was ZW0905 — discontinued)","DESIGN-SPEC §5 as corrected 2026-08-27. The old table was the ZW0901's, reversed end-for-end. **2026-08-28: the ZW0905 is DISCONTINUED; the replacement HLK-ZW0922 has this SAME pin order** (spec V1.0 §4.3), so no board change. See cad/pcb-v3/SENSOR-ZW0922.md."
 J2,2,SENSOR_WAKEUP,"Sensor pads, HLK-ZW0922 (was ZW0905 — discontinued)","DESIGN-SPEC §5 as corrected 2026-08-27. The old table was the ZW0901's, reversed end-for-end. **2026-08-28: the ZW0905 is DISCONTINUED; the replacement HLK-ZW0922 has this SAME pin order** (spec V1.0 §4.3), so no board change. See cad/pcb-v3/SENSOR-ZW0922.md."
 J2,3,SENSOR_MCU_3V3,"Sensor pads, HLK-ZW0922 (was ZW0905 — discontinued)","DESIGN-SPEC §5 as corrected 2026-08-27. The old table was the ZW0901's, reversed end-for-end. **2026-08-28: the ZW0905 is DISCONTINUED; the replacement HLK-ZW0922 has this SAME pin order** (spec V1.0 §4.3), so no board change. See cad/pcb-v3/SENSOR-ZW0922.md."
@@ -64,10 +64,10 @@ R6,1,BL_RETURN,100k 0402,series protection only
 R6,2,BL_FLAG,100k 0402,series protection only
 R7,1,VBAT_OK,1k 0402,1k so an SWD programmer can still override RESET
 R7,2,RESET,1k 0402,1k so an SWD programmer can still override RESET
-R8,1,VBAT,330R 0402,"Datasheet R1. VDD series protection; 330R typ, 470R max."
-R8,2,PCM_VDD,330R 0402,"Datasheet R1. VDD series protection; 330R typ, 470R max."
-R9,1,PCM_VM,2.7k 0402,"Datasheet R2. FUNCTIONAL, not optional -- every over-current figure in the datasheet is measured with R2 = 2.7k. Omit it and 0.315 A is not 0.315 A."
-R9,2,GND,2.7k 0402,"Datasheet R2. FUNCTIONAL, not optional -- every over-current figure in the datasheet is measured with R2 = 2.7k. Omit it and 0.315 A is not 0.315 A."
+R8,1,VBAT,330R 0201,"Datasheet R1. VDD series protection; 330R typ, 470R max."
+R8,2,PCM_VDD,330R 0201,"Datasheet R1. VDD series protection; 330R typ, 470R max."
+R9,1,PCM_VM,2.7k 0201,"Datasheet R2. FUNCTIONAL, not optional -- every over-current figure in the datasheet is measured with R2 = 2.7k. Omit it and 0.315 A is not 0.315 A."
+R9,2,GND,2.7k 0201,"Datasheet R2. FUNCTIONAL, not optional -- every over-current figure in the datasheet is measured with R2 = 2.7k. Omit it and 0.315 A is not 0.315 A."
 ROK1,1,OK_PROG,4.53M 0402,VBAT_OK falling = 3.12 V
 ROK1,2,GND,4.53M 0402,VBAT_OK falling = 3.12 V
 ROK2,1,OK_HYST,7.15M 0402,

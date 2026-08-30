@@ -105,7 +105,7 @@ Edit the Python and re-run, or the two will disagree.
 | 1 | `VREF_SAMP` |
 | 2 | `GND` |
 
-### C5 — 10uF 16V X5R 0603
+### C5 — 10uF 10V X5R 0402
 
 > CBAT bulk beside the cell
 
@@ -173,7 +173,7 @@ Edit the Python and re-run, or the two will disagree.
 | 1 | `BL_FLAG` |
 | 2 | `GND` |
 
-### C14 — 0.1uF 0402
+### C14 — 0.1uF 0201
 
 > Datasheet C1. Across VDD and S1, for supply-voltage fluctuation.
 
@@ -295,7 +295,7 @@ Edit the Python and re-run, or the two will disagree.
 | 1 | `VBAT_OK` |
 | 2 | `RESET` |
 
-### R8 — 330R 0402
+### R8 — 330R 0201
 
 > Datasheet R1. VDD series protection; 330R typ, 470R max.
 
@@ -304,7 +304,7 @@ Edit the Python and re-run, or the two will disagree.
 | 1 | `VBAT` |
 | 2 | `PCM_VDD` |
 
-### R9 — 2.7k 0402
+### R9 — 2.7k 0201
 
 > Datasheet R2. FUNCTIONAL, not optional -- every over-current figure in the datasheet is measured with R2 = 2.7k. Omit it and 0.315 A is not 0.315 A.
 

@@ -315,12 +315,12 @@ part("U5", "Mitsumi MC3651DF1AAM cell protection, PLP-4E", 5, {
    "the AP6683's 0.9 A. Iq 3.0 uA typ / 4.5 max = 6.7 % of the 4.0 mWh/day "
    "budget. Digi-Key 2508-MC3651DF1AAMCT-ND, US$1.33 at qty 1.")
 
-rc("R8", "330R 0402", "VBAT", "PCM_VDD",
+rc("R8", "330R 0201", "VBAT", "PCM_VDD",
    "Datasheet R1. VDD series protection; 330R typ, 470R max.")
-rc("R9", "2.7k 0402", "PCM_VM", "GND",
+rc("R9", "2.7k 0201", "PCM_VM", "GND",
    "Datasheet R2. FUNCTIONAL, not optional -- every over-current figure in the "
    "datasheet is measured with R2 = 2.7k. Omit it and 0.315 A is not 0.315 A.")
-rc("C14", "0.1uF 0402", "PCM_VDD", "CELL_NEG",
+rc("C14", "0.1uF 0201", "PCM_VDD", "CELL_NEG",
    "Datasheet C1. Across VDD and S1, for supply-voltage fluctuation.")
 
 # The datasheet's C2 (S1 to V-) and C3 (across the pack) are drawn DASHED, and
