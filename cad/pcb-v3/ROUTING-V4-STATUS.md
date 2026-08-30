@@ -816,3 +816,50 @@ but by free space between rotations, which was fixed here in August.
 **Fix: give C14 (and preferably R8) a hard distance limit from U5 and let the
 placer carve space rather than take a distant slot.** That should close C14.2
 as a side effect and leaves R9 as the only routing-level open.
+
+---
+
+## Where v5 finished: 2 open pads, everything else clean
+
+    open pads              2   (C7.2 on GND, ROK3.1 on VRDIV)
+    copper clearance       0 violations
+    router DRC             CLEAN -- no violations, not even phantoms
+    pogo vias              83 checked, all clear
+    dangling track ends    none, 1300 ends all land on their own net
+    PCM bypass C14 -> U5   2.18 mm   (was 19.77)
+    board                  20.00 x 19.00, pins at (1.25, 9.50) / (18.75, 9.50)
+    pogo datum             matches calipers exactly
+
+From 16 open pads at the start of this work to 2.
+
+### The last two, and why they are not a routing problem
+
+**C7.2 (GND)** and **ROK3.1 (VRDIV)** share one pocket in the +X/-Y corner.
+ROK3.1 has **eight pads inside 1.5 mm** -- J11.2, ROK3.2, ROV1.1, ROV1.2,
+ROV2.2, ROK2.2, C7.2, R2.2 -- and **zero via sites** anywhere it can reach.
+C7.2 is the same pocket from the other side.
+
+Tried and failed:
+* `close_open` from both pads -- no path
+* `island_via` -- the F.Cu island holding C7.2 has no legal via site
+* promoting VRDIV to stage 1b -- it fails there on its own (9/10)
+* ripping OK_HYST and VBAT_OV_SET, the two tracks forming the wall, and
+  re-routing all three together -- still 2
+
+**This is placement density, not routing.** The OK and OV dividers (ROK1/2/3,
+ROV1/2) plus C7 pack that corner harder than anywhere else on the board, and
+they are hard against J11's pogo pads, which are immovable.
+
+### An escape-ring attempt that did NOT work, and why
+
+Added ESCAPE_RING for the divider cluster, mirroring FINE_PITCH/FINE_ESCAPE
+which solved exactly this for U3/U4. It changed nothing, and the reason is
+worth recording: `_legal_mask` applies the ring only to parts ALREADY IN
+`PLACE`, and these parts are placed BY the packer, later. The constraint is
+order-dependent and silently does nothing for anything the packer has not
+reached yet. Reverted rather than left in place doing nothing.
+
+**Fixing the last two means re-planning that corner** -- either spreading the
+divider cluster, or moving C7 away from ROK3 -- with the packer taught to
+reserve escape room for parts it has not placed yet. That is a packer change,
+not another route.
