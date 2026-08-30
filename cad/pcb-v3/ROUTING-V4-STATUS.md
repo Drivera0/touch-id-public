@@ -772,3 +772,47 @@ pads, changes the land pattern and needs a deliberate decision.
 
 Not something to pick unilaterally: A costs money on every board, B changes a
 footprint. Both need the user.
+
+---
+
+## v5 (20 x 19 board): 2 open pads, and a DECOUPLING DEFECT that matters more
+
+Fresh placement + route on the new geometry. **8 open pads -> 2**, and the F.Cu
+ground pour went from **15 islands to 3** -- the fragmentation behind the whole
+stranding saga is gone, because the wider board let the pour stay contiguous.
+
+Everything except connectivity passes: clearance 0, router DRC phantom-only,
+pogo contacts clear, no dangling ends, IR drop inside budget, boxed-in pads
+4 -> 1.
+
+### The two opens
+
+**R9.2 (GND)** -- sealed in a 0.75 x 0.50 mm pocket with **zero** legal via
+sites, walled by the PCM_VDD and PCM_VM tracks and R9's own other pad. No
+router closes this; R9 has to move.
+
+**C14.2 (CELL_NEG)** -- reaches 12495 cells and 2292 via sites, so it is not
+boxed in at all. Its net is simply in two pieces that never meet.
+
+### The thing to fix first is not either of those
+
+    U5  (MC3651 PCM)   (-3.70, -7.83)
+    R9                  2.18 mm from U5     PCM_VM -> GND          fine
+    R8                 14.31 mm from U5     VBAT -> PCM_VDD        far
+    C14                19.77 mm from U5     PCM SUPPLY DECOUPLING  wrong
+
+**C14 is the PCM's supply bypass and it is 19.77 mm from U5 on a 20 mm board**
+-- diagonally opposite. A decoupling capacitor that far away is not decoupling
+anything; the loop it exists to shorten is the entire board. This is an
+electrical defect, and it is almost certainly why C14.2 reads open too: the
+router had to cross the whole board to reach it and gave up.
+
+Cause: `_place_smalls` takes "the three 0402 SLOTS nearest U5", and when the
+shelf beside U5 is full, "nearest" can be 20 mm away. Distance is used to RANK
+candidates but never to REJECT one. A bypass cap needs a hard maximum, not a
+preference -- the same shape of bug as ranking by distance within a rotation
+but by free space between rotations, which was fixed here in August.
+
+**Fix: give C14 (and preferably R8) a hard distance limit from U5 and let the
+placer carve space rather than take a distant slot.** That should close C14.2
+as a side effect and leaves R9 as the only routing-level open.
