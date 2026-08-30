@@ -223,6 +223,23 @@ def main():
             return math.hypot(p["w"], p["h"]) / 2
         return None
 
+    # Escape room for GND pads that sit outside the true keep-out but inside
+    # the grown margin: a disc at each such pad, so a tap can start there and
+    # route AWAY. Never lets copper into the real zone -- notrack[L] itself is
+    # applied ungrown and unconditionally.
+    _pad_escape = {L: np.zeros((N, N), bool) for L in LAYERS}
+    for p_ in pads:
+        if p_["net"] != GND:
+            continue
+        gi, gj = mm2g(p_["x"]), mm2g(p_["y"])
+        if not (0 <= gi < N and 0 <= gj < N):
+            continue
+        for L in LAYERS:
+            if L not in p_["layers"] or notrack[L][gj, gi]:
+                continue          # genuinely inside the keep-out: leave it be
+            r_ = (pad_radius(p_) or max(p_["w"], p_["h"]) / 2) + TRACK / 2 + CLR
+            _pad_escape[L] |= (XX - p_["x"])**2 + (YY - p_["y"])**2 <= r_**2
+
     def masks(halo):
         m = {L: np.zeros((N, N), bool) for L in LAYERS}
         for p in pads:
@@ -278,7 +295,16 @@ def main():
             #     skirted the keep-out came back as a diagonal cutting the
             #     corner, three segments deep into the antenna zone. We cannot
             #     stop it simplifying, so leave it slack to simplify INTO.
-            m[L] |= _grow(notrack[L], halo + KEEPOUT_MARGIN)
+            # ...but the grown margin must not blockade pads that are
+            # legitimately OUTSIDE the real keep-out. U1's GND pads sit at
+            # y = 4.75 against a keep-out starting at 4.95: outside it, yet
+            # buried under the grown mask, so a tap could not even start at the
+            # pad. Two GND pads went open that way -- the margin was supposed
+            # to keep tracks out of the zone, not fence off copper next to it.
+            # So carve the pads' own footprints back out of the GROWN part
+            # only; the true keep-out (notrack[L], ungrown) still applies.
+            grown = _grow(notrack[L], halo + KEEPOUT_MARGIN) & ~notrack[L]
+            m[L] |= (grown & ~_pad_escape[L]) | notrack[L]
         return m
 
     # A grid samples cell CENTRES, so the segment BETWEEN two legal cells can
