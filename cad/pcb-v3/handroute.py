@@ -182,8 +182,22 @@ for z in re.finditer(r'\(zone(.*?)\n\t\)', t, re.S):
 XX, YY = np.meshgrid(np.array([g2mm(i) for i in range(N)]),
                      np.array([g2mm(i) for i in range(N)]), indexing="xy")
 
-def poly_mask(pts):
-    """even-odd fill for a convex/simple polygon on the grid"""
+def poly_mask(pts, grow=0.0):
+    """even-odd fill for a convex/simple polygon on the grid.
+
+    `grow` DILATES the polygon by that many mm, and it is not optional for
+    keep-outs. blocked_masks answers "may the CENTRE of a feature sit here?",
+    and every other obstacle in it is inflated by the feature radius -- pads,
+    tracks, vias all get `+ halo`. Keep-outs were rasterised raw, so a track
+    centre was allowed to sit hard against a keep-out boundary and its copper
+    edge crossed it.
+
+    That is not hypothetical: close_open laid 20 VSTOR segments at x = -7.100
+    against the antenna keep-out edge at x = -7.050. Centre 0.050 outside,
+    half-width 0.0635, so 0.0135 mm of copper INSIDE the antenna keep-out, 20
+    times over, on the one region of the board whose emptiness is the point.
+    preflight check 7 caught it; nothing in the router did.
+    """
     inside = np.zeros((N, N), bool)
     j = len(pts) - 1
     for i in range(len(pts)):
@@ -193,6 +207,24 @@ def poly_mask(pts):
             xint = (xj - xi) * (YY - yi) / (yj - yi + 1e-30) + xi
         inside ^= cond & (XX < xint)
         j = i
+    if grow > 0.0:
+        # Dilate by testing distance to every polygon EDGE. Cheap enough at
+        # this grid size and exact, where a binary dilation would quantise the
+        # margin to whole cells.
+        near = np.zeros((N, N), bool)
+        j = len(pts) - 1
+        for i in range(len(pts)):
+            xi, yi = pts[i]; xj, yj = pts[j]
+            dx, dy = xj - xi, yj - yi
+            L2 = dx * dx + dy * dy
+            if L2 < 1e-18:
+                d = np.hypot(XX - xi, YY - yi)
+            else:
+                tt = np.clip(((XX - xi) * dx + (YY - yi) * dy) / L2, 0.0, 1.0)
+                d = np.hypot(XX - (xi + tt * dx), YY - (yi + tt * dy))
+            near |= (d <= grow)
+            j = i
+        inside |= near
     return inside
 
 def blocked_masks(net, halo, ko="tracks"):
@@ -249,7 +281,10 @@ def blocked_masks(net, halo, ko="tracks"):
     for k in keepouts:
         if not (k["no_tracks"] if ko == "tracks" else k["no_vias"]):
             continue
-        pm = poly_mask(k["pts"])
+        # Grow by the FEATURE RADIUS (halo - CLR), the same quantity the board
+        # edge band below uses. A keep-out is not copper, so it is owed no
+        # clearance -- but the feature's own body must stay out of it.
+        pm = poly_mask(k["pts"], grow=max(0.0, halo - CLR))
         for L in ALL_CU:
             if L in k["layers"]:
                 m[L] |= pm
