@@ -434,3 +434,49 @@ this is the second distinct way that script has misreported today.
    0.5 mm pitch inside a 4.32 mm strip leaves ~0.21 mm of escape ring per side.
 3. The left-strip GND pads last — they are the least critical of the three and
    the most entangled with everything else.
+
+---
+
+## STOP POINT — the last round of "correct" rules made the board worse
+
+Two rules were added that are defensible in isolation and bad in combination:
+
+* the **0201 placer** now honours the pogo ring for GND pads (R9 carries one)
+* **U5's V-** must clear every ring by 0.30 mm
+
+Each fixes a real thing. Together they pushed U5 to 3.39 mm from the cell pad,
+R9 13.3 mm from U5, and the rebuild came out at **15 open pads, 5 dangling
+ends and a DRC violation** — against **8 open pads and everything else clean**
+on the board already in the vault.
+
+**Both changes are reverted.** `build_pcb_v3.py` is back to the revision that
+produced the good board. The rules are recorded here rather than in the script,
+because re-adding them needs the U5 objective reworked at the same time, not
+bolted on:
+
+> R9 is 2.7k from `PCM_VM` to **GND**. Banning it from pogo rings is correct,
+> but U5 must then be placed somewhere its V- pin has a ring-free neighbourhood
+> AND its S1 stays near BT1-2 AND the packer still fits 23 passives. That is a
+> four-way constraint and the current search optimises one term with two
+> rejections bolted on. It wants a proper cost function, not another `continue`.
+
+### What actually shipped today
+
+The board in the vault is the best artifact produced:
+
+| | |
+|---|---|
+| open pads | **8**, from 16 |
+| clearance, netlist, DRC, antenna, dangling ends, sourcing, pogo vias | **all PASS** |
+| J4.5 | **connected**, by the anchor-via technique |
+
+`gnd_via_anchor.py` is committed and is the one tool from today worth reusing:
+it places a via and no track, so it has no path to get wrong, and its legality
+predicate carries every trap this board produced — pogo rings including J4.5,
+the keep-out grown by the via radius, rotated pads, all-layer tracks,
+hole-to-hole, and the R2.0 corners.
+
+Its verdict on the current board: **all 41 GND pads already have a via within
+2.5 mm.** So the remaining opens are not a via-proximity problem. They are pour
+CONNECTIVITY, and the authority on that is KiCad's own DRC, which has never
+been consulted. **Run it before any more surgery.**
