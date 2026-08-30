@@ -5545,7 +5545,7 @@
 		(uuid "ff7507e4-0118-48f6-8c18-66deff80797c")
 	)
 	(via
-		(at 5.6 -9.15)
+		(at 5.6 -8.9)
 		(size 0.4)
 		(drill 0.2)
 		(layers "F.Cu" "B.Cu")
@@ -5975,8 +5975,8 @@
 		(uuid "2f69a0ae-27b2-4789-834c-7592ca20abdd")
 	)
 	(segment
-		(start 5.65 -9.1)
-		(end 5.6 -9.15)
+		(start 5.65 -8.9)
+		(end 5.6 -8.9)
 		(width 0.127)
 		(layer "B.Cu")
 		(net "GND")
@@ -6088,7 +6088,7 @@
 	)
 	(segment
 		(start 5.75 -9)
-		(end 5.65 -9.1)
+		(end 5.65 -8.9)
 		(width 0.127)
 		(layer "B.Cu")
 		(net "GND")
@@ -7217,7 +7217,7 @@
 		(uuid "621f8203-3fdb-46a0-96bc-b4a926324bc7")
 	)
 	(segment
-		(start 1.45 -9.05)
+		(start 1.45 -8.9)
 		(end 1.55 -8.95)
 		(width 0.4)
 		(layer "F.Cu")
@@ -7225,8 +7225,8 @@
 		(uuid "69f3c498-5ab2-4265-b9ea-442fec64ba1b")
 	)
 	(segment
-		(start -2.8 -9.05)
-		(end 1.45 -9.05)
+		(start -2.8 -8.9)
+		(end 1.45 -8.9)
 		(width 0.4)
 		(layer "F.Cu")
 		(net "VIN_DC")
@@ -7258,7 +7258,7 @@
 	)
 	(segment
 		(start -7 -8.55)
-		(end -6.5 -9.05)
+		(end -6.5 -8.9)
 		(width 0.4)
 		(layer "F.Cu")
 		(net "VIN_DC")
@@ -7313,7 +7313,7 @@
 		(uuid "fd29c94c-a80d-4a9f-9dcd-c330282eedd1")
 	)
 	(via
-		(at -2.8 -9.05)
+		(at -2.8 -8.9)
 		(size 0.5)
 		(drill 0.3)
 		(layers "F.Cu" "B.Cu")
@@ -7403,7 +7403,7 @@
 		(uuid "a1e1cffa-9afe-4243-8af6-c5a1c344caa0")
 	)
 	(via
-		(at -6.5 -9.05)
+		(at -6.5 -8.9)
 		(size 0.5)
 		(drill 0.3)
 		(layers "F.Cu" "B.Cu")
@@ -7619,8 +7619,8 @@
 		(uuid "96648572-c95a-43ff-a852-e14b6b068ed8")
 	)
 	(segment
-		(start -6.5 -9.05)
-		(end -2.8 -9.05)
+		(start -6.5 -8.9)
+		(end -2.8 -8.9)
 		(width 0.4)
 		(layer "In1.Cu")
 		(net "VIN_DC")
@@ -17497,21 +17497,21 @@
 	)
 	(embedded_fonts no)
 	(via
-		(at 2.75 -9.15)
+		(at 2.75 -8.9)
 		(size 0.4)
 		(drill 0.2)
 		(layers "F.Cu" "B.Cu")
 		(net "GND")
 	)
 	(segment
-		(start 2.15 -9.15)
-		(end 2.05 -9.05)
+		(start 2.15 -8.9)
+		(end 2.05 -8.9)
 		(width 0.127)
 		(layer "In1.Cu")
 		(net "PCM_VM")
 	)
 	(segment
-		(start 2.05 -9.05)
+		(start 2.05 -8.9)
 		(end 1.95 -8.95)
 		(width 0.127)
 		(layer "In1.Cu")
@@ -18477,7 +18477,7 @@
 		(net "PCM_VM")
 	)
 	(via
-		(at 2.15 -9.15)
+		(at 2.15 -8.9)
 		(size 0.4)
 		(drill 0.2)
 		(layers "F.Cu" "B.Cu")
