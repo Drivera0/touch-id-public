@@ -109,6 +109,11 @@ def main():
                 return False
         return True
 
+    def seg_via_gap(s, v):
+        """closest approach of a segment's copper to a VIA's copper"""
+        return (pt.seg_dist(v["x"], v["y"], s["x1"], s["y1"], s["x2"], s["y2"])
+                - v["d"] / 2.0 - s["w"] / 2.0)
+
     moves = {}          # (x,y) -> (nx,ny)
     fixed = failed = 0
     for s in segs:
@@ -119,6 +124,19 @@ def main():
             g = seg_pad_gap(s, p)
             if g < CLR and (worst is None or g < worst[0]):
                 worst = (g, p)
+        # VIAS TOO. This checked pads only, and a via is not a pad -- so a
+        # track grazing a foreign via was invisible here and survived every
+        # run. gnd_taps left exactly that twice: a GND track 0.0853 mm from a
+        # RESET via and 0.0920 mm from a SENSOR_WAKEUP via, against 0.100.
+        # A via pierces every layer, so there is no layer test to do.
+        for v in vias:
+            if v["net"] == s["net"]:
+                continue
+            g = seg_via_gap(s, v)
+            if g < CLR and (worst is None or g < worst[0]):
+                worst = (g, dict(x=v["x"], y=v["y"], w=v["d"], h=v["d"],
+                                 rot=0.0, shape="circle", net=v["net"],
+                                 ref="via", pad=""))
         if worst is None:
             continue
         g, p = worst
