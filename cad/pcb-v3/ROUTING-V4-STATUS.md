@@ -480,3 +480,96 @@ Its verdict on the current board: **all 41 GND pads already have a via within
 2.5 mm.** So the remaining opens are not a via-proximity problem. They are pour
 CONNECTIVITY, and the authority on that is KiCad's own DRC, which has never
 been consulted. **Run it before any more surgery.**
+
+---
+
+## The eight open pads, diagnosed against the pour KiCad actually computed
+
+The connectivity numbers we had been working from came from `check_connected`,
+which does not read the fill geometry in the file -- it builds a MODEL of where
+fill could go. `pour_truth.py` now reads the real `(filled_polygon ...)` blocks
+KiCad writes when you fill zones, and does union-find over pads, vias, tracks
+and each polygon.
+
+**Both methods name the same eight pads.** They are real, not an artifact.
+
+### What the pour actually looks like
+
+The F.Cu GND fill is **15 separate islands**, and four of them contain no via:
+
+| island | area | holds |
+|---|---|---|
+| 4 | 0.931 mm2 | U4.2, U4.5 |
+| 10 | 3.157 mm2 | C7.2 |
+| 13 | 0.402 mm2 | R9.2 |
+| 14 | 0.387 mm2 | U5.4 |
+
+This kills the theory `gnd_via_anchor` was built on. It asked "is there a via
+within 2.5 mm of this GND pad?" and got yes for all 41. Wrong question. Copper
+does not care about distance, it cares about which PIECE of copper it is. A via
+1 mm away in a neighbouring island does nothing.
+
+### Why each remaining pad is open -- measured, not guessed
+
+**R9.2 and U5.4 -- the island is physically too narrow.** Widest point in
+island 13 is **0.215 mm** from an edge and in island 14 **0.207 mm**. A 0.45 mm
+via needs 0.225 mm. Short by 10 and 18 microns.
+
+**C7.2 -- trapped inside a pogo ring.** Island 10 lies wholly within 1.425 mm
+of **J11.2**, which is `HARV_2`, a live net. Every one of the 2740 candidate
+via sites is inside that ring. A route out exists but its only via site is
+0.025 mm inside the board-edge rule.
+
+**U4.2 and U4.5 -- sealed in a 1.15 x 1.50 mm pocket** with **zero** legal via
+sites reachable. Not boxed in at the pad (129 of 169 cells free) -- boxed in
+by the pocket.
+
+**U2.18 (VBAT) and U2.19 (VSTOR) -- the QFN escape.** Reachable region is the
+pin row itself, **3.10 x 0.90 mm, no via site anywhere in it**. Pins sit on a
+0.5 mm pitch with 0.24 mm pads, so the gap between neighbours is 0.26 mm and a
+0.127 track needs 0.327 mm. There is no way between the pins and no way down.
+
+### The conclusion that matters
+
+**These six are placement problems, not routing problems.** No router will
+close them, because the copper they need to reach is not reachable from where
+the parts sit. Closing them means moving U2, U4, R9, U5 and C7 -- or accepting
+a finer fab rung.
+
+### What was closed
+
+`close_open.py` closed **SENSOR_SW_EN (U4.3)**, which was never routed at all
+(one 0.106 mm stub off U1.19). 8 open pads -> **7**. Clearance 0, router DRC
+clean, pogo vias clear, no dangling ends.
+
+### Tools written, and what each got wrong first
+
+* `pour_truth.py` -- reads the real pour. First run reported 34 opens because
+  KiCad 10 writes the zone net inline as `(net "GND")` and it looked for
+  `net_name`. Now hard-fails on an unreadable zone net rather than failing soft.
+* `close_open.py` -- routes ONE open pad to its net's existing copper. Four
+  false starts, each caught by making it check its own work: it aimed only at
+  pads (so GND ignored 212 mm2 of plane sitting under it); it placed two vias
+  0.427 mm apart; it "closed" U4.2 with zero segments by landing on stranded
+  copper; and it put a via 0.025 mm inside the board edge. It now self-verifies
+  by re-reading the file it wrote.
+* `island_via.py` -- proves no via fits in islands 4/10/13/14 and says why.
+
+### handroute.py was broken in three ways on this board
+
+Found while porting it, all silent failures:
+
+1. **KiCad 10 net dialect** -- every net regex assumed the KiCad 8 table, so
+   every pad and track read as net `""` and `emit()` would have written the
+   literal `(net None)` into the board.
+2. **Rotated pads were skipped entirely** -- the pad regex demanded `(at X Y)`
+   with exactly two numbers, so `(at 0 0 45)` failed and hit `continue`. That
+   hid **U3.5 and U4.5**, the X2SON thermal pads, from the obstacle map. The
+   router was free to route straight through them.
+3. **Mounting holes were skipped** -- written `(pad "" np_thru_hole circle)`
+   with an empty pad number, and the regex required one character. Two 1.3 mm
+   holes it could route through.
+
+Plus a board-edge band computed with `TRACK/2` for every mask, giving vias a
+track-sized margin. Obstacle map now sees 145/145 pads, matching `pour_truth`
+independently.

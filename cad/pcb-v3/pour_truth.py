@@ -354,7 +354,17 @@ def analyse(pads, segs, vias, polys, nets=None):
             groups.setdefault(uf.find(("P", i)), []).append(i)
         big = max(groups.values(), key=len) if groups else []
         stray = [np_[i] for g in groups.values() if g is not big for i in g]
-        report[net] = dict(pads=np_, polys=nz, groups=len(groups), stray=stray)
+        # Which SEGMENTS and VIAS belong to the main group. Anything routing at
+        # stranded copper is aiming at a piece that is itself disconnected --
+        # it will report success and leave the pad open. Callers need to be
+        # able to tell the two apart.
+        root = uf.find(("P", big[0])) if big else None
+        main_segs = [ns[i] for i in range(len(ns))
+                     if root is not None and uf.find(("S", i)) == root]
+        main_vias = [nv[i] for i in range(len(nv))
+                     if root is not None and uf.find(("V", i)) == root]
+        report[net] = dict(pads=np_, polys=nz, groups=len(groups), stray=stray,
+                           main_segs=main_segs, main_vias=main_vias)
     return report
 
 

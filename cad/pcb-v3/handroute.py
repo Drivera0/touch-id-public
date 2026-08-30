@@ -49,7 +49,13 @@ def _rules():
 
 TRACK, CLR, VIA_D, VIA_DRILL = _rules()
 BOARD_SZ, EDGE = 19.30, 0.30
-LAYERS = ["F.Cu", "In1.Cu", "B.Cu"]
+LAYERS = ["F.Cu", "In1.Cu", "B.Cu"]        # ROUTABLE layers
+# In2.Cu is the GND plane and is not routed on -- but it is still COPPER.
+# The v4 board has segments on it, and a through via pierces it, so it
+# must appear in the obstacle map or a via can be dropped straight onto
+# an In2.Cu track. Building masks only over LAYERS also crashed outright
+# the moment an In2.Cu segment appeared (KeyError).
+ALL_CU = LAYERS + ["In2.Cu"]
 VIA_COST = 40          # in grid steps
 N = int(round(BOARD_SZ / STEP)) + 1
 ORG = -BOARD_SZ / 2.0
@@ -178,13 +184,23 @@ def poly_mask(pts):
         j = i
     return inside
 
-def blocked_masks(net, halo):
-    """per-layer boolean: may the CENTRE of a feature sit here?"""
-    m = {L: np.zeros((N, N), bool) for L in LAYERS}
+def blocked_masks(net, halo, ko="tracks"):
+    """per-layer boolean: may the CENTRE of a feature sit here?
+
+    ko selects WHICH keep-outs to fold in -- "tracks" for a track mask,
+    "vias" for a via mask. They are not the same set and conflating them is
+    catastrophic here: In2.Cu carries a board-wide keep-out that bans tracks
+    and expressly ALLOWS vias (it is the plane guard). Folding that into the
+    via mask marks all 19.3x19.3 mm of In2.Cu as blocked, and since a through
+    via must be legal on every layer, via_ok becomes zero everywhere -- on a
+    board that already contains 105 vias. Copper obstacles (pads, tracks,
+    vias) still apply on every layer for both kinds.
+    """
+    m = {L: np.zeros((N, N), bool) for L in ALL_CU}
     for p in pads:
         if p["net"] == net:
             continue
-        for L in LAYERS:
+        for L in ALL_CU:
             if L not in p["layers"]:
                 continue
             r = round(p.get("rot", 0)) % 180
@@ -211,22 +227,30 @@ def blocked_masks(net, halo):
         tt = np.zeros((N, N)) if L2 == 0 else np.clip(
             ((XX - s["x1"]) * dx + (YY - s["y1"]) * dy) / L2, 0, 1)
         d2 = (XX - (s["x1"] + tt*dx))**2 + (YY - (s["y1"] + tt*dy))**2
-        m[s["layer"]] |= d2 <= (s["w"]/2 + halo)**2
+        if s["layer"] in m:
+            m[s["layer"]] |= d2 <= (s["w"]/2 + halo)**2
     for v in vias:
         if v["net"] == net:
             continue
         hit = ((XX - v["x"])**2 + (YY - v["y"])**2) <= (v["d"]/2 + halo)**2
-        for L in LAYERS:
+        for L in ALL_CU:
             m[L] |= hit
     for k in keepouts:
-        if not k["no_tracks"]:
+        if not (k["no_tracks"] if ko == "tracks" else k["no_vias"]):
             continue
         pm = poly_mask(k["pts"])
-        for L in LAYERS:
+        for L in ALL_CU:
             if L in k["layers"]:
                 m[L] |= pm
-    edge = (np.abs(XX) > BOARD_SZ/2 - EDGE - TRACK/2) | \
-           (np.abs(YY) > BOARD_SZ/2 - EDGE - TRACK/2)
+    # The edge band depends on the FEATURE, not always on the track. `halo` is
+    # CLR + feature_radius, so feature_radius = halo - CLR: TRACK/2 for a track
+    # mask, VIA_D/2 for a via mask. Hard-coding TRACK/2 gave vias a track-sized
+    # margin and put a GND via 0.025 mm inside the board-edge rule -- caught by
+    # check_drc as VIA-BOARD-EDGE, and invisible to every clearance checker
+    # because the board edge is not copper.
+    _fr = max(0.0, halo - CLR)
+    edge = (np.abs(XX) > BOARD_SZ/2 - EDGE - _fr) | \
+           (np.abs(YY) > BOARD_SZ/2 - EDGE - _fr)
     for L in LAYERS:
         m[L] |= edge
     return m
@@ -251,8 +275,8 @@ def pad_cells(p, L):
 
 def route(net, verbose=True):
     tmask = blocked_masks(net, CLR + TRACK/2)
-    vmask = blocked_masks(net, CLR + VIA_D/2)
-    via_ok = ~(vmask["F.Cu"] | vmask["In1.Cu"] | vmask["B.Cu"])
+    vmask = blocked_masks(net, CLR + VIA_D/2, ko="vias")
+    via_ok = ~(vmask["F.Cu"] | vmask["In1.Cu"] | vmask["B.Cu"] | vmask["In2.Cu"])
     for k in keepouts:                       # a via pierces every layer
         if k["no_vias"]:
             via_ok &= ~poly_mask(k["pts"])
