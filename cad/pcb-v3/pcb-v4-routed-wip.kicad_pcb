@@ -15333,4 +15333,5 @@
 		)
 	)
 	(embedded_fonts no)
+	(via (at -9.1000 -3.9500) (size 0.45) (drill 0.2) (layers "F.Cu" "B.Cu") (net "GND"))
 )
