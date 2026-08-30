@@ -671,7 +671,7 @@
 	)
 	(footprint "touchid:TP3"
 		(layer "F.Cu")
-		(at -2.72 -2.72)
+		(at 2.53 -0.97)
 		(property "Reference" "TP3"
 			(at 0 0 0)
 			(layer "F.SilkS")
@@ -1033,41 +1033,6 @@
 			(rotate (xyz 0 0 0))
 		)
 	)
-	(footprint "touchid:C5"
-		(layer "F.Cu")
-		(at -7.61 -1.92)
-		(property "Reference" "C5"
-			(at 0 0 0)
-			(layer "F.SilkS")
-			(hide yes)
-			(effects (font (size 0.6 0.6) (thickness 0.1)))
-		)
-		(attr smd)
-		(fp_text user "C5"
-			(at 0 0 0)
-			(layer "F.Fab")
-			(effects (font (size 0.4 0.4) (thickness 0.06)))
-		)
-		(pad "1" smd roundrect
-			(at -0.7 0)
-			(size 0.8 0.9)
-			(layers "F.Cu" "F.Mask" "F.Paste")
-			(roundrect_rratio 0.25)
-			(net 23 "VBAT")
-		)
-		(pad "2" smd roundrect
-			(at 0.7 0)
-			(size 0.8 0.9)
-			(layers "F.Cu" "F.Mask" "F.Paste")
-			(roundrect_rratio 0.25)
-			(net 4 "GND")
-		)
-		(model "${KIPRJMOD}/3dmodels/chip_0603.step"
-			(offset (xyz 0 0 0))
-			(scale (xyz 1 1 1))
-			(rotate (xyz 0 0 0))
-		)
-	)
 	(footprint "touchid:L1"
 		(layer "F.Cu")
 		(at 6.8100000000000005 1.03 180)
@@ -1282,7 +1247,7 @@
 	)
 	(footprint "touchid:U5"
 		(layer "F.Cu")
-		(at -6.35 -7.9)
+		(at -6.55 -7.9)
 		(property "Reference" "U5"
 			(at 0 0 0)
 			(layer "F.SilkS")
@@ -1330,44 +1295,9 @@
 			(rotate (xyz 0 0 0))
 		)
 	)
-	(footprint "touchid:R8"
-		(layer "F.Cu")
-		(at -6.75 -3.15)
-		(property "Reference" "R8"
-			(at 0 0 0)
-			(layer "F.SilkS")
-			(hide yes)
-			(effects (font (size 0.6 0.6) (thickness 0.1)))
-		)
-		(attr smd)
-		(fp_text user "R8"
-			(at 0 0 0)
-			(layer "F.Fab")
-			(effects (font (size 0.4 0.4) (thickness 0.06)))
-		)
-		(pad "1" smd roundrect
-			(at -0.24155 0)
-			(size 0.3031 0.324)
-			(layers "F.Cu" "F.Mask" "F.Paste")
-			(roundrect_rratio 0.25)
-			(net 23 "VBAT")
-		)
-		(pad "2" smd roundrect
-			(at 0.24155 0)
-			(size 0.3031 0.324)
-			(layers "F.Cu" "F.Mask" "F.Paste")
-			(roundrect_rratio 0.25)
-			(net 12 "PCM_VDD")
-		)
-		(model "${KIPRJMOD}/3dmodels/chip_0402.step"
-			(offset (xyz 0 0 0))
-			(scale (xyz 1 1 1))
-			(rotate (xyz 0 0 0))
-		)
-	)
 	(footprint "touchid:R9"
 		(layer "F.Cu")
-		(at 6.05 2.65)
+		(at -8.7 -7.45 90)
 		(property "Reference" "R9"
 			(at 0 0 0)
 			(layer "F.SilkS")
@@ -1393,6 +1323,41 @@
 			(layers "F.Cu" "F.Mask" "F.Paste")
 			(roundrect_rratio 0.25)
 			(net 4 "GND")
+		)
+		(model "${KIPRJMOD}/3dmodels/chip_0402.step"
+			(offset (xyz 0 0 0))
+			(scale (xyz 1 1 1))
+			(rotate (xyz 0 0 0))
+		)
+	)
+	(footprint "touchid:R8"
+		(layer "F.Cu")
+		(at 6.05 2.65)
+		(property "Reference" "R8"
+			(at 0 0 0)
+			(layer "F.SilkS")
+			(hide yes)
+			(effects (font (size 0.6 0.6) (thickness 0.1)))
+		)
+		(attr smd)
+		(fp_text user "R8"
+			(at 0 0 0)
+			(layer "F.Fab")
+			(effects (font (size 0.4 0.4) (thickness 0.06)))
+		)
+		(pad "1" smd roundrect
+			(at -0.24155 0)
+			(size 0.3031 0.324)
+			(layers "F.Cu" "F.Mask" "F.Paste")
+			(roundrect_rratio 0.25)
+			(net 23 "VBAT")
+		)
+		(pad "2" smd roundrect
+			(at 0.24155 0)
+			(size 0.3031 0.324)
+			(layers "F.Cu" "F.Mask" "F.Paste")
+			(roundrect_rratio 0.25)
+			(net 12 "PCM_VDD")
 		)
 		(model "${KIPRJMOD}/3dmodels/chip_0402.step"
 			(offset (xyz 0 0 0))
@@ -1472,7 +1437,7 @@
 	)
 	(footprint "touchid:C2"
 		(layer "F.Cu")
-		(at 6.0 7.6 90)
+		(at 6.9 7.85 90)
 		(property "Reference" "C2"
 			(at 0 0 0)
 			(layer "F.SilkS")
@@ -1507,7 +1472,7 @@
 	)
 	(footprint "touchid:C3"
 		(layer "F.Cu")
-		(at 6.0 5.836 90)
+		(at 6.0 7.6 90)
 		(property "Reference" "C3"
 			(at 0 0 0)
 			(layer "F.SilkS")
@@ -1542,7 +1507,7 @@
 	)
 	(footprint "touchid:C4"
 		(layer "F.Cu")
-		(at 1.3 -7.9 90)
+		(at 2.0 -7.9 90)
 		(property "Reference" "C4"
 			(at 0 0 0)
 			(layer "F.SilkS")
@@ -1575,9 +1540,44 @@
 			(rotate (xyz 0 0 0))
 		)
 	)
+	(footprint "touchid:C5"
+		(layer "F.Cu")
+		(at 5.0 3.15 90)
+		(property "Reference" "C5"
+			(at 0 0 0)
+			(layer "F.SilkS")
+			(hide yes)
+			(effects (font (size 0.6 0.6) (thickness 0.1)))
+		)
+		(attr smd)
+		(fp_text user "C5"
+			(at 0 0 0)
+			(layer "F.Fab")
+			(effects (font (size 0.4 0.4) (thickness 0.06)))
+		)
+		(pad "1" smd roundrect
+			(at -0.42 0)
+			(size 0.5 0.54)
+			(layers "F.Cu" "F.Mask" "F.Paste")
+			(roundrect_rratio 0.25)
+			(net 23 "VBAT")
+		)
+		(pad "2" smd roundrect
+			(at 0.42 0)
+			(size 0.5 0.54)
+			(layers "F.Cu" "F.Mask" "F.Paste")
+			(roundrect_rratio 0.25)
+			(net 4 "GND")
+		)
+		(model "${KIPRJMOD}/3dmodels/chip_0603.step"
+			(offset (xyz 0 0 0))
+			(scale (xyz 1 1 1))
+			(rotate (xyz 0 0 0))
+		)
+	)
 	(footprint "touchid:C6"
 		(layer "F.Cu")
-		(at -0.5 -7.9 90)
+		(at 0.2 -7.9 90)
 		(property "Reference" "C6"
 			(at 0 0 0)
 			(layer "F.SilkS")
@@ -1647,7 +1647,7 @@
 	)
 	(footprint "touchid:C9"
 		(layer "F.Cu")
-		(at 0.4 -7.9 90)
+		(at 1.1 -7.9 90)
 		(property "Reference" "C9"
 			(at 0 0 0)
 			(layer "F.SilkS")
@@ -1682,7 +1682,7 @@
 	)
 	(footprint "touchid:C10"
 		(layer "F.Cu")
-		(at 6.9 7.85 90)
+		(at 6.0 5.836 90)
 		(property "Reference" "C10"
 			(at 0 0 0)
 			(layer "F.SilkS")
@@ -1717,7 +1717,7 @@
 	)
 	(footprint "touchid:C12"
 		(layer "F.Cu")
-		(at -2.3 -7.9 90)
+		(at -1.6 -7.9 90)
 		(property "Reference" "C12"
 			(at 0 0 0)
 			(layer "F.SilkS")
@@ -1752,7 +1752,7 @@
 	)
 	(footprint "touchid:C13"
 		(layer "F.Cu")
-		(at -3.2 -7.9 90)
+		(at -2.5 -7.9 90)
 		(property "Reference" "C13"
 			(at 0 0 0)
 			(layer "F.SilkS")
@@ -1787,7 +1787,7 @@
 	)
 	(footprint "touchid:R1"
 		(layer "F.Cu")
-		(at 2.2 -7.9 90)
+		(at -3.4 -7.9 90)
 		(property "Reference" "R1"
 			(at 0 0 0)
 			(layer "F.SilkS")
@@ -1822,7 +1822,7 @@
 	)
 	(footprint "touchid:R2"
 		(layer "F.Cu")
-		(at 3.1 -7.9 90)
+		(at 2.9 -7.9 90)
 		(property "Reference" "R2"
 			(at 0 0 0)
 			(layer "F.SilkS")
@@ -1857,7 +1857,7 @@
 	)
 	(footprint "touchid:R3"
 		(layer "F.Cu")
-		(at 5.0 3.15 90)
+		(at -4.3 -7.9 90)
 		(property "Reference" "R3"
 			(at 0 0 0)
 			(layer "F.SilkS")
@@ -1892,7 +1892,7 @@
 	)
 	(footprint "touchid:R4"
 		(layer "F.Cu")
-		(at -8.2 -3.05)
+		(at -8.6 -2.65 90)
 		(property "Reference" "R4"
 			(at 0 0 0)
 			(layer "F.SilkS")
@@ -1927,7 +1927,7 @@
 	)
 	(footprint "touchid:R5"
 		(layer "F.Cu")
-		(at -1.4 -7.9 90)
+		(at -0.7 -7.9 90)
 		(property "Reference" "R5"
 			(at 0 0 0)
 			(layer "F.SilkS")
@@ -1962,7 +1962,7 @@
 	)
 	(footprint "touchid:R6"
 		(layer "F.Cu")
-		(at -4.1 -7.9 90)
+		(at -6.8 -2.65 90)
 		(property "Reference" "R6"
 			(at 0 0 0)
 			(layer "F.SilkS")
@@ -1997,7 +1997,7 @@
 	)
 	(footprint "touchid:R7"
 		(layer "F.Cu")
-		(at -8.6 -7.9 90)
+		(at -7.7 -2.65 90)
 		(property "Reference" "R7"
 			(at 0 0 0)
 			(layer "F.SilkS")

@@ -131,7 +131,13 @@ SRC = {
     # difference against parts that always match is `idleFlag`: null on the
     # CCTC part, true on this one and on C7's. Swapped rather than accept a
     # manual click on every future upload; same 10uF 16V X5R +-10% 0603.
-    "C5":   ("C70225",    "extended",  479335, "FH 0603X106K160NT 10uF 16V X5R 0603"),
+    # C5 was an 0603 (C70225, 16 V). Moved to the SAME 0402 part as C1/C2 because
+    # as an 0603 there was nowhere on the board its GND pad could sit outside a
+    # pogo no-via ring -- one legal position existed and it was inside the
+    # antenna keep-out. 10 V is ample against a 4.30 V cell, and with BT1 itself
+    # on VBAT the cell dominates the bulk impedance; C5 is there for switching
+    # transients, not for storage. Bonus: one fewer distinct LCSC code.
+    "C5":   ("C77000",    "extended",  543698, "Murata GRM155R61A106ME44D 10uF 10V X5R 0402"),
     "C6":   ("C52923",    "BASIC",   11865003, "Samsung CL05A105KA5NQNC 1uF 25V X5R 0402"),
     "C8":   ("C52923",    "BASIC",   11865003, "Samsung CL05A105KA5NQNC 1uF 25V X5R 0402"),
     "C9":   ("C52923",    "BASIC",   11865003, "Samsung CL05A105KA5NQNC 1uF 25V X5R 0402"),

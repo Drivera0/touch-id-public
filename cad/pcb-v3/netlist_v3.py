@@ -228,7 +228,7 @@ rc("C2", "10uF 10V X5R 0402", "VSTOR", "GND",
    "and more nominal capacitance in the same land was the only lever.")
 rc("C3", "0.1uF 0402", "VSTOR", "GND", "CSTOR HF")
 rc("C4", "10nF 0402 low-leak", "VREF_SAMP", "GND", "CREF, 9-11 nF window")
-rc("C5", "10uF 16V X5R 0603", "VBAT", "GND", "CBAT bulk beside the cell")
+rc("C5", "10uF 10V X5R 0402", "VBAT", "GND", "CBAT bulk beside the cell")
 
 rc("C6", "1uF 0402", "SENSOR_3V3", "GND", "LDO input side of U3 is VSTOR; this is OUT")
 # The REQUIREMENT is Hi-Link's "sensor-rail ripple < 200 mV" (DESIGN-SPEC 3).

@@ -341,3 +341,51 @@ alternatives elsewhere on the left strip.
 
 C3.2, C9.2 and U4.2 are a separate, ordinary crowding problem and are not
 affected by this rule.
+
+---
+
+## The C5 fix is right, and it exposed a deeper one: U5 sits in the pogo block
+
+**C5 is fixed and that part is settled.** As an 0603 there was exactly ONE
+position on the whole board with both pads clear of every pogo ring, and it was
+inside the antenna keep-out, which forbids pads. So C5 became the **same 0402
+part as C1/C2** (`C77000`, 10 uF 10 V) and now goes through the packer, which
+bans GND pads from pogo rings. 10 V is ample against a 4.30 V cell, and with
+BT1 itself on VBAT the cell dominates the bulk impedance — C5 is there for
+switching transients, not storage. One fewer distinct LCSC code, too.
+
+**But it cascaded, and the cascade is informative.** Freeing C5 into the 0402
+pool changed the packing, R9 lost the near-U5 spot it had been getting by luck,
+and `PCM_VM` came back with no copper.
+
+Chasing that turned up the real problem:
+
+```
+U5 centre (-6.35,-7.90)      U5.3 (V-) at (-5.10,-7.45)
+J4.2      (-4.70,-7.22)      0.461 mm from U5.3   <-- INSIDE its no-via ring
+U5.4 (S2, GND)                1.128 mm from a pogo pad
+```
+
+**U5 is placed inside the J4 pogo block.** Its own ground pin is in a ring, and
+so is the area beside its V- pin. R9 is 2.7k from `PCM_VM` to **GND** — it
+carries a GND pad, so the new rule correctly bans it from every ring, which
+means it cannot be placed beside the pin it connects to. Reordering and
+re-targeting the objective (to the PIN rather than the part centre, which was
+itself a real fix) only move R9 around the outside of the ban.
+
+This is not a routing problem and not a packer problem. **U5's own position is
+the constraint**, and it was chosen by a single objective: minimise
+`S1 -> BT1-2`, which drove it to the bottom-left corner — straight into J4.
+
+### What that means for the next session
+
+`U5`'s placement search needs a second term. Minimising the cell path is right,
+but it must also keep **U5.4 (S2, GND) out of every pogo ring** and leave a
+legal 0201 site beside **U5.3** for R9. Both are cheap to test inside the
+existing trial loop, which already rejects candidates that starve the packer.
+
+**The board currently in the vault predates all of today's build-script
+changes** (C5 as 0402, the GND/pogo ban, the pin-targeted 0201 objective). It
+is the 7-open-pad revision with every other check passing. Regenerating from
+the current script is not worth doing until U5's placement question above is
+settled, because the result would be worse: `PCM_VM` unrouted.
