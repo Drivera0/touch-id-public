@@ -75,6 +75,52 @@ def load(path):
         if "*.Cu" in p["layers"]:
             p["layers"] = LAYERS + ["In2.Cu"]
 
+    # ---- HOW BIG IS A PAD, REALLY -----------------------------------------
+    # PORTED FROM gnd_taps.py, which learned this the hard way. An axis-aligned
+    # w x h box is WRONG for both shapes on U3/U4 (TPS7A2033, X2SON-4):
+    #
+    #   * "custom" pads keep their real outline in (primitives). The (size)
+    #     field is only the ANCHOR -- on this board it reads 0.1485 mm for a
+    #     pad several times that. Modelling the anchor let stitched track run
+    #     straight through the real copper: three DRC violations against U4.2,
+    #     0.083-0.091 mm deep, all of them from segments this script laid.
+    #   * roundrect pads at rot 45 are not axis aligned at all.
+    #
+    # Both fall back to the CIRCUMSCRIBED CIRCLE: conservative, and it cannot
+    # under-cover. A stitch has the whole board to detour through, so the extra
+    # margin costs nothing -- being wrong here costs a re-spin.
+    prim_r = {}
+    for fp in k(root, "footprint"):
+        ref = "?"
+        for pp in k(fp, "property"):
+            if s(pp[1]) == "Reference":
+                ref = s(pp[2])
+        for pd in k(fp, "pad"):
+            pr = kd(pd, "primitives")
+            if pr is None:
+                continue
+            rr = 0.0
+            for gp in pr:
+                if not isinstance(gp, list):
+                    continue
+                ptsn, wln = kd(gp, "pts"), kd(gp, "width")
+                hw = f(wln[1]) / 2 if wln else 0.0
+                if ptsn:
+                    for xy in k(ptsn, "xy"):
+                        rr = max(rr, math.hypot(f(xy[1]), f(xy[2])) + hw)
+            if rr:
+                prim_r[(ref, s(pd[1]))] = rr
+    for p in pads:
+        if p["shape"] == "custom":
+            p["r_eff"] = prim_r.get((p["ref"], p["pad"]),
+                                    max(p["w"], p["h"]) / 2 + 0.35)
+        elif abs(p["rot"] % 90.0) > 1e-6:
+            p["r_eff"] = math.hypot(p["w"], p["h"]) / 2
+        elif p["shape"] == "circle":
+            p["r_eff"] = p["w"] / 2
+        else:
+            p["r_eff"] = None
+
     tracks = []
     for sg in k(root, "segment"):
         st, en = kd(sg, "start"), kd(sg, "end")
@@ -139,8 +185,9 @@ def build_masks(net, pads, tracks, vias, zones, halo):
         for L in LAYERS:
             if L not in p["layers"]:
                 continue
-            if p["shape"] == "circle":
-                m[L] |= (XX - p["x"]) ** 2 + (YY - p["y"]) ** 2 <= (p["w"] / 2 + halo) ** 2
+            r = p.get("r_eff")
+            if r is not None:
+                m[L] |= (XX - p["x"]) ** 2 + (YY - p["y"]) ** 2 <= (r + halo) ** 2
             else:
                 m[L] |= (np.abs(XX - p["x"]) <= p["w"] / 2 + halo) & \
                         (np.abs(YY - p["y"]) <= p["h"] / 2 + halo)

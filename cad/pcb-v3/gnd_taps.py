@@ -34,6 +34,7 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 LAYERS = ["F.Cu", "In1.Cu", "B.Cu"]
 PLANE = "In2.Cu"
 BOARD_SZ, EDGE = 19.30, 0.30
+CORNER_R = 2.00              # R2.0 outline corners -- see the arc test in masks()
 STEP = 0.05
 VIA_D, VIA_DRILL = 0.60, 0.30
 GND = "GND"
@@ -192,6 +193,22 @@ def main():
             for L in LAYERS:
                 m[L] |= hit
         e = (np.abs(XX) > BOARD_SZ/2 - EDGE - halo) | (np.abs(YY) > BOARD_SZ/2 - EDGE - halo)
+        # THE BOARD HAS R2.0 CORNERS AND THIS TEST DID NOT KNOW IT.
+        # The square test above passes anything inside the bounding box, but
+        # the real outline curves away inside each corner, so a via can clear
+        # both straight edges and still hang over the arc. That is exactly what
+        # happened at (-8.85, -8.60): |x| = 9.07 and |y| = 8.82 against a limit
+        # of 9.35 -- comfortably legal by the square rule -- while its copper
+        # reached 1.7555 from the arc centre against the 2.0 radius, leaving
+        # 0.2445 where 0.30 is required. check_drc caught it as a 0.057 mm
+        # board-edge violation.
+        _ac = BOARD_SZ / 2.0 - CORNER_R                    # arc centre offset
+        for _sx in (-1.0, 1.0):
+            for _sy in (-1.0, 1.0):
+                _cx, _cy = _sx * _ac, _sy * _ac
+                _out = ((np.hypot(XX - _cx, YY - _cy) > CORNER_R - EDGE - halo)
+                        & (XX * _sx > _ac) & (YY * _sy > _ac))
+                e |= _out
         for L in LAYERS:
             m[L] |= e
         return m
