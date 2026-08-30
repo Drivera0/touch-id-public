@@ -193,11 +193,52 @@ o = run(os.path.join(KRT, "py_router", "check_drc.py"), BOARD,
         # pin the fab rung; check_drc otherwise size-checks against the
         # ADVANCED tier (via 0.25/0.15), which we are not buying.
         "--fab-tier", "standard",
+        # AND pin hole-to-hole, or check_drc uses its own 0.5 mm constant for
+        # the DRILL checks -- it does not take that from --fab-overrides, so
+        # fab_floor_touchid.txt's hole_to_hole = 0.20 was being ignored here.
+        #
+        # 0.5 is not JLCPCB's number. Their capability table lists
+        #     Via Hole-to-Hole  0.2mm
+        #     Pad Hole-to-Hole  0.45mm
+        # and this board's tightest via pair is 0.3500 mm drill-edge to
+        # drill-edge, with ZERO pairs below 0.200. At the 0.5 default that is
+        # reported as 12 violations and the verdict comes back DO NOT ORDER on
+        # a board that meets the fab's rule with 75% margin.
+        #
+        # The pad rule is the tighter constraint and is NOT covered here --
+        # check 23 enforces 0.45 against the pin holes separately, which is
+        # where it actually bit (two vias short by 26 and 9 microns).
+        "--hole-to-hole-clearance", "0.20",
         "--fab-overrides", os.path.join(HERE, "fab_floor_touchid.txt"),
         cwd=KRT, env=env)
 _m = re.search(r"FOUND (\d+) DRC", o)
-rec("NO DRC VIOLATIONS" in o, "6b router DRC @ %.2f" % DESIGN_CU,
-    (_m.group(1) + " violations") if _m else ("clean" if "NO DRC" in o else "checker gave no verdict"))
+_sections = dict((k, int(v)) for k, v in
+                 re.findall(r"^([A-Z][A-Z-]+) violations \((\d+)\)", o, re.M))
+
+# VIA-DRILL-HOLE IS EXCLUDED HERE, AND ONLY THAT CLASS. check_drc grades via
+# drill spacing at a hardcoded 0.5 mm: --hole-to-hole-clearance does not reach
+# this sub-check (every reported overlap reproduces at 0.50 and at no other
+# value, whatever is passed), and neither does --fab-overrides. The same tool's
+# fab_tiers.py table says hole_to_hole 0.20, so it contradicts itself.
+#
+# 0.5 is not the fab's number either. JLCPCB publishes:
+#     Via Hole-to-Hole  0.2mm      Pad Hole-to-Hole  0.45mm
+# This board's tightest via pair is 0.3500 mm drill-edge to drill-edge and NO
+# pair is below 0.200 -- it clears the real rule by 75%. Graded at 0.5 it comes
+# back "12 violations" and the verdict reads DO NOT ORDER on a good board.
+#
+# The class is not simply dropped: check 23b re-checks the same geometry at
+# JLC's 0.20, and check 23 covers the 0.45 pad rule against the pin holes,
+# which is the one that genuinely bit. Everything else check_drc grades --
+# copper, board edge, track width, via size -- still blocks.
+_h2h_false = _sections.pop("VIA-DRILL-HOLE", 0)
+_real = sum(_sections.values())
+rec(_real == 0, "6b router DRC @ %.2f" % DESIGN_CU,
+    ("%d violation(s): %s" % (_real, ", ".join("%s=%d" % kv for kv in sorted(_sections.items()))))
+    if _real else
+    ("clean" + (" (%d VIA-DRILL-HOLE excluded: checker grades those at a hardcoded "
+                "0.5 mm, JLC's via rule is 0.2 -- see check 23b)" % _h2h_false
+                if _h2h_false else "")))
 
 # --------------------------------------------- 7 antenna keep-out is empty --
 from shapely.geometry import box as _box, LineString as _LS, Polygon as _P
@@ -997,6 +1038,34 @@ for _hx, _hy in _MH_XY:
         if _gd < _MH_PAD_H2H:
             _hole_bad.append("via %s DRILL %+.3f mm (need %.2f) at (%+.2f,%+.2f)"
                              % (_v["net"], _gd, _MH_PAD_H2H, _hx, _hy))
+# ---- 23b via drill spacing, graded at JLCPCB's ACTUAL via rule -------------
+# This exists because check 6b cannot: check_drc grades via drill spacing at a
+# hardcoded 0.5 mm and ignores every flag meant to change it. Dropping that
+# class without replacing it would leave real hole-to-hole spacing unchecked,
+# so it is re-checked here at the number JLCPCB publishes.
+#
+#   Via Hole-to-Hole  0.20 mm   <- this check
+#   Pad Hole-to-Hole  0.45 mm   <- check 23, against the pin holes
+_VIA_H2H = 0.20
+_vv = []
+for _i in range(len(_vias_g)):
+    for _j in range(_i + 1, len(_vias_g)):
+        _a, _b = _vias_g[_i], _vias_g[_j]
+        _da = _a.get("drill", 0.20)
+        _db = _b.get("drill", 0.20)
+        _g = math.hypot(_a["x"] - _b["x"], _a["y"] - _b["y"]) - _da / 2 - _db / 2
+        if _g < _VIA_H2H:
+            _vv.append("%s/%s %.3f mm at (%+.2f,%+.2f)"
+                       % (_a["net"], _b["net"], _g, _a["x"], _a["y"]))
+_vmin = min((math.hypot(_a["x"] - _b["x"], _a["y"] - _b["y"])
+             - _a.get("drill", 0.20) / 2 - _b.get("drill", 0.20) / 2)
+            for _i, _a in enumerate(_vias_g)
+            for _b in _vias_g[_i + 1:]) if len(_vias_g) > 1 else 9.99
+rec(not _vv, "23b via drill spacing >= %.2f" % _VIA_H2H,
+    ("%d pair(s) too close: %s" % (len(_vv), "; ".join(_vv[:3]))) if _vv
+    else "tightest of %d pairs is %.4f mm, JLC minimum %.2f"
+         % (len(_vias_g) * (len(_vias_g) - 1) // 2, _vmin, _VIA_H2H))
+
 rec(not _hole_bad, "23 copper+drill clear of pin holes",
     ("%d item(s) inside the %.2f mm keep-out: %s"
      % (len(_hole_bad), _MH_KEEP, "; ".join(_hole_bad[:4]))) if _hole_bad
