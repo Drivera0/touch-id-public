@@ -111,23 +111,48 @@ for fp in blocks('footprint "'):
             F='F.Cu' in tail, B='B.Cu' in tail, x=x, y=y))
 
 # ------------------------------------------------------------------- copper
+# PARSE BY BLOCK, NOT BY A POSITIONAL REGEX.
+#
+# These used to demand (start) (end) (width) (layer) (net) in that exact order
+# with that exact whitespace. Any tool writing the same keys in another order
+# was silently skipped -- and skipped copper is a PASS, not an error.
+#
+# It bit: on a tool-written board this file saw 54 of the 77 vias and reported
+# "0 different-net pairs closer than 0.100". The 23 it could not parse included
+# a RESET via sitting 0.0853 mm from a GND track against a 0.100 rule. Run the
+# same board back through KiCad, which normalises the key order, and the
+# violation appeared. The board never changed; only the formatting did.
+#
+# blocks() already walks parens properly and was right there.
+def _f1(b, pat, d=None):
+    m = re.search(pat, b)
+    return m.group(1) if m else d
+
 trk = []
-for m in re.finditer(
-        r'\(segment\s*\n\s*\(start ([-\d.]+) ([-\d.]+)\)\s*\n\s*\(end ([-\d.]+) ([-\d.]+)\)'
-        r'\s*\n\s*\(width ([\d.]+)\)\s*\n\s*\(layer "([^"]+)"\)\s*\n\s*\(net (?:\d+ )?"([^"]*)"\)', t):
-    sx, sy, ex, ey, w, lay, net = m.groups()
-    trk.append(dict(g=LineString([(float(sx), float(sy)), (float(ex), float(ey))])
-                    .buffer(float(w) / 2, cap_style=2, resolution=16),
-                    lay=lay, net=net, s=(float(sx), float(sy)), e=(float(ex), float(ey))))
+for b in blocks("segment"):
+    s_ = re.search(r'\(start ([-\d.]+) ([-\d.]+)\)', b)
+    e_ = re.search(r'\(end ([-\d.]+) ([-\d.]+)\)', b)
+    w_ = _f1(b, r'\(width ([\d.]+)\)')
+    lay = _f1(b, r'\(layer "([^"]+)"\)')
+    net = _f1(b, r'\(net (?:\d+ )?"([^"]*)"\)')
+    if not (s_ and e_ and w_ and lay):
+        continue
+    sx, sy = float(s_.group(1)), float(s_.group(2))
+    ex, ey = float(e_.group(1)), float(e_.group(2))
+    trk.append(dict(g=LineString([(sx, sy), (ex, ey)])
+                    .buffer(float(w_) / 2, cap_style=2, resolution=16),
+                    lay=lay, net=net, s=(sx, sy), e=(ex, ey)))
 
 vias = []
-for m in re.finditer(r'\(via\s*\n\s*\(at ([-\d.]+) ([-\d.]+)\)\s*\n\s*\(size ([\d.]+)\)'
-                     r'\s*\n\s*\(drill ([\d.]+)\)\s*\n\s*\(layers "([^"]+)" "([^"]+)"\)'
-                     r'(.*?)\n\t\)', t, re.S):
-    x, y, s, d, l1, l2, tail = m.groups()
-    net = re.search(r'\(net (?:\d+ )?"([^"]*)"\)', tail)
-    vias.append(dict(g=Point(float(x), float(y)).buffer(float(s) / 2, 64),
-                     net=net.group(1) if net else None, F=True, B=True))
+for b in blocks("via"):
+    a_ = re.search(r'\(at ([-\d.]+) ([-\d.]+)\)', b)
+    s_ = _f1(b, r'\(size ([\d.]+)\)')
+    if not (a_ and s_):
+        continue
+    net = _f1(b, r'\(net (?:\d+ )?"([^"]*)"\)')
+    vias.append(dict(g=Point(float(a_.group(1)), float(a_.group(2)))
+                     .buffer(float(s_) / 2, 64),
+                     net=net, F=True, B=True))
 
 print(f"{PCB}")
 print(f"  pads {len(pads)}   tracks {len(trk)}   vias {len(vias)}")
