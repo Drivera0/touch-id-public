@@ -31,16 +31,16 @@ Anything in `_archive/` is superseded. Do not take a number from there.
 
 | | |
 |---|---|
-| file | `cad/pcb-v3/pcb-v6-routed-ZERO-OPENS.kicad_pcb` |
+| file | `cad/pcb-v3/pcb-v6-handoff.kicad_pcb` |
 | size / layers | **20.00 × 19.00 mm** (20 horizontal), 4 layer, **1.20 mm laminate** |
 | finish | ENIG |
-| status | **preflight 0 blockers, 3 warnings** · **0 open pads** · clearance 0 · DRC clean |
+| status | **1 open pad** (C14.2) · clearance 0 · schema clean · see the 2026-08-30 pass below |
 | fixings | two **Ø1.20 press-fit pin holes** at (±8.75, 0) — corner coords (1.25, 9.50) and (18.75, 9.50) |
-| gerbers | **STALE — none exist for this board.** `cad/v3-handoff/` is the old 19.30 mm square board |
-| BOM / CPL | **regenerate.** `cad/v3-handoff/assembly/` predates the 0201 swap |
+| gerbers | **none exist for this board.** The old package is archived under `cad/_archive/2026-08-30-superseded-by-v6/v3-handoff-pkg/` |
+| BOM / CPL | **regenerate** into `cad/v6-handoff/assembly/`. `make_bom_cpl.py` is repointed and its origin bug is fixed |
 
 > [!warning] The handoff package is for a board that no longer exists
-> `cad/v3-handoff/` was plotted from the 19.30 mm SQUARE board with corner
+> The archived package was plotted from the 19.30 mm SQUARE board with corner
 > screws. The board is now 20.00 × 19.00 with press-fit pins on the side
 > centres, seven parts in 0201, and different divider values. **Do not order
 > from those Gerbers.** They have to be re-plotted and re-verified from the
@@ -139,7 +139,7 @@ finger-detect mode standard, and the Ø18.00 ±0.05 tolerance in production.
 
 ## The housing — built, but resting on an unmeasured number
 
-`cad/scripts/touchid_module_v5.py` → `cad/v3-handoff/housing/`
+`cad/scripts/touchid_module_v6.py` (v5 is archived) → regenerate the STL
 
 | | current |
 |---|---|
