@@ -115,18 +115,38 @@ def main():
         at = kd(v, "at")
         vias.append(dict(x=f(at[1]), y=f(at[2]), d=f(kd(v, "size")[1]),
                          net=netname.get(s(kd(v, "net")[1]), "")))
+    # Rule areas, read for BOTH flags.
+    #
+    # This used to read only "vias not_allowed" and apply it to via placement.
+    # The antenna keep-out declares "tracks not_allowed", which nothing here
+    # honoured -- so taps were free to run TRACK straight through the zone that
+    # exists to keep copper away from the BLE antenna, and two GND segments
+    # duly ended up inside it at (5.05,5.15)-(4.50,4.60). A keep-out that stops
+    # vias but not tracks is not a keep-out.
+    #
+    # Per layer, because a rule area applies only to the layers it names --
+    # unioning them and testing every layer against the result reports phantom
+    # violations, which preflight check 7 already had to learn.
     novia = np.zeros((N, N), bool)
+    notrack = {L: np.zeros((N, N), bool) for L in LAYERS}
     for z in k(root, "zone"):
         ko = kd(z, "keepout")
         if not ko:
             continue
         opt = {s(c[0]): s(c[1]) for c in ko if isinstance(c, list) and len(c) > 1}
-        if opt.get("vias") != "not_allowed":
-            continue
         poly = kd(z, "polygon")
         pts = [(f(p[1]), f(p[2])) for p in k(kd(poly, "pts"), "xy")] if poly else []
-        if pts:
-            novia |= poly_mask(np.array(pts))
+        if not pts:
+            continue
+        pm = poly_mask(np.array(pts))
+        if opt.get("vias") == "not_allowed":
+            novia |= pm
+        if opt.get("tracks") == "not_allowed":
+            zl = kd(z, "layers") or kd(z, "layer")
+            names = [s(c) for c in (zl[1:] if zl else [])] or LAYERS
+            for L in names:
+                if L in notrack:
+                    notrack[L] |= pm
 
     # ---- how big is a pad, really -------------------------------------------
     # An axis-aligned w x h box is WRONG for two shapes on this board, and both
@@ -222,6 +242,10 @@ def main():
                 e |= _out
         for L in LAYERS:
             m[L] |= e
+            # "tracks not_allowed" rule areas -- the antenna keep-out. Grown by
+            # the halo like everything else, because a track centred just
+            # outside still puts copper inside.
+            m[L] |= notrack[L]
         return m
 
     # A grid samples cell CENTRES, so the segment BETWEEN two legal cells can
