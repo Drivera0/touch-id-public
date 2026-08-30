@@ -107,6 +107,36 @@ def main():
         print(f"\n  FAIL: {loose} pad(s) sitting at the top level, outside any"
               " footprint")
         return 1
+
+    # ---- TOP-LEVEL SCHEMA -------------------------------------------------
+    # Balanced parens are NOT a schema, and this checker used to stop at
+    # balanced. A board went out with (aux_axis_origin ...) emitted at the top
+    # level instead of inside (setup ...). It parsed perfectly, this script
+    # printed "PARSE OK", and KiCad refused to open the file -- the only thing
+    # that caught it was the user trying to open it.
+    #
+    # So the child names are checked against what the format actually allows at
+    # the top level. Anything outside this set is either misplaced (the
+    # aux_axis_origin case) or invented, and both make the file unopenable.
+    KNOWN = {
+        "version", "generator", "generator_version", "general", "paper",
+        "title_block", "layers", "setup", "net", "net_class", "footprint",
+        "gr_line", "gr_arc", "gr_circle", "gr_rect", "gr_poly", "gr_curve",
+        "gr_text", "gr_text_box", "gr_bbox", "dimension", "image",
+        "segment", "arc", "via", "zone", "group", "target",
+        "embedded_fonts", "embedded_files", "property",
+    }
+    unknown = sorted({x[0] for x in root
+                      if isinstance(x, list) and x[0] not in KNOWN})
+    if unknown:
+        print("\n  FAIL: %d unexpected top-level key(s): %s"
+              % (len(unknown), ", ".join(unknown)))
+        print("        These parse fine but KiCad will refuse the file.")
+        print("        (aux_axis_origin, pcbplotparams, stackup and friends"
+              " belong INSIDE (setup ...).)")
+        return 1
+    print("  top-level schema: all %d child kinds known to KiCad"
+          % len({x[0] for x in root if isinstance(x, list)}))
     return 0
 
 
