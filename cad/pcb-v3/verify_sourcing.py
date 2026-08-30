@@ -19,7 +19,7 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)) or ".")
 import sexp
 from make_bom_cpl import SRC
 
-BOARD = "pcb-v3-handoff.kicad_pcb"
+BOARD = "pcb-v6-handoff.kicad_pcb"
 text = open(BOARD, encoding="utf-8", errors="replace").read()
 root = sexp.parse(text)
 k, kd, s, f = sexp.kids, sexp.kid, sexp.s, sexp.f

@@ -17,7 +17,7 @@ import heapq, math, os, re, sys
 import numpy as np
 
 HERE = os.path.dirname(os.path.abspath(__file__))
-BOARD = os.environ.get("BOARD") or os.path.join(HERE, "pcb-v3-handoff.kicad_pcb")
+BOARD = os.environ.get("BOARD") or os.path.join(HERE, "pcb-v6-handoff.kicad_pcb")
 STEP = 0.05
 def _rules():
     """Read the design rules from fab_floor_touchid.txt -- do NOT hard-code.

@@ -21,7 +21,7 @@ from shapely.geometry import box, Point, LineString, Polygon, MultiPolygon
 from shapely.ops import unary_union
 from shapely import affinity
 
-PCB   = sys.argv[1] if len(sys.argv) > 1 else "pcb-v3.kicad_pcb"
+PCB   = sys.argv[1] if len(sys.argv) > 1 else "pcb-v6.kicad_pcb"
 TRACK = 0.20     # signal track width
 CLR   = 0.20     # our design clearance
 VIA   = 0.60     # via pad diameter

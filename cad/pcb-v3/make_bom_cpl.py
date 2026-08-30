@@ -54,7 +54,7 @@ import collections, csv, os, re, sys
 import sexp
 
 HERE = os.path.dirname(os.path.abspath(__file__))
-BOARD = os.path.join(HERE, "pcb-v3-handoff.kicad_pcb")
+BOARD = os.path.join(HERE, "pcb-v6-handoff.kicad_pcb")
 OUT = os.path.join(HERE, "..", "exports")
 HALF = 9.65                      # board is 19.30 square, centred on the origin
 

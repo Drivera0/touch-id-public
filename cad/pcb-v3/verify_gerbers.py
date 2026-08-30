@@ -15,8 +15,8 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)) or ".")
 import sexp
 
 HERE = os.path.dirname(os.path.abspath(__file__)) or "."
-BOARD = os.path.join(HERE, "pcb-v3-handoff.kicad_pcb")
-GD = os.path.join(HERE, "..", "v3-handoff", "gerbers")
+BOARD = os.path.join(HERE, "pcb-v6-handoff.kicad_pcb")
+GD = os.path.join(HERE, "..", "v6-handoff", "gerbers")
 
 fails, rows = [], []
 def check(ok, what, detail=""):

@@ -15,7 +15,7 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)) or ".")
 import sexp
 
 HERE = os.path.dirname(os.path.abspath(__file__)) or "."
-BOARD = os.path.join(HERE, "pcb-v3-handoff.kicad_pcb")
+BOARD = os.path.join(HERE, "pcb-v6-handoff.kicad_pcb")
 EXP = os.path.join(HERE, "..", "exports")
 CPL = os.path.join(EXP, "touchid-v3-CPL.csv")
 BOM = os.path.join(EXP, "touchid-v3-BOM.csv")
@@ -40,7 +40,7 @@ def check(ok, what, detail=""):
 # inside it. This deliberately does NOT re-derive the generator's formula --
 # comparing a formula to itself proves nothing.
 import glob
-GERB = os.path.join(HERE, "..", "v3-handoff", "gerbers")
+GERB = os.path.join(HERE, "..", "v6-handoff", "gerbers")
 _edge = glob.glob(os.path.join(GERB, "*Edge_Cuts.gbr"))
 _gx = _gy = None
 if _edge:

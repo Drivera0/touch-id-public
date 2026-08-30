@@ -22,7 +22,7 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 # silently became "not found" there -- which surfaced as check 6b reporting
 # "checker gave no verdict" on a board whose DRC was in fact clean.
 BOARD = os.path.abspath(sys.argv[1] if len(sys.argv) > 1
-                        else os.path.join(HERE, "pcb-v3-handoff.kicad_pcb"))
+                        else os.path.join(HERE, "pcb-v6-handoff.kicad_pcb"))
 # Default to the checkout that lives IN THIS REPO, not /tmp. preflight once
 # reported "checker gave no verdict" on a board whose DRC was clean, purely
 # because /tmp/krt had been wiped -- an order gate that silently stops checking
@@ -938,10 +938,13 @@ try:
     _thin = sorted({(_SRC[r][0], _SRC[r][2], _need[r])
                     for r in _placed if r in _SRC and _SRC[r][2] < _need[r]})
     # ---------------------------------------- 22 no via through a pogo pad --
-    # THIS CHECK EXISTS BECAUSE THE BOARD IN THE CART FAILS IT.
+    # THIS CHECK EXISTS BECAUSE A BOARD THAT WAS IN THE CART FAILED IT.
     # pcb-v3-handoff.kicad_pcb -- the revision priced at $115.38 and waiting on
-    # U1 -- carries two vias drilled through J11's contacts, at (2.95,-4.05)
-    # into J11.3 and (2.40,-7.00) into J11.1.
+    # U1 -- carried two vias drilled through J11's contacts, at (2.95,-4.05)
+    # into J11.3 and (2.40,-7.00) into J11.1. That board is now archived under
+    # cad/_archive/2026-08-30-superseded-by-v6/ and must never be ordered; it
+    # also has both press-fit pins drilled through copper. The check stays
+    # because the failure mode is permanent, not because the board is live.
     #
     # The rule is old and well understood here: J4/J11 are the pads the
     # keyboard's sprung pogo pins press against, and a through-hole via comes
