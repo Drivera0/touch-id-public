@@ -81,6 +81,27 @@ def _f(s):
 def parse(path):
     t = open(path, encoding="utf-8", errors="replace").read()
 
+    # NET DIALECT. KiCad 8 writes a top-level table -- (net 5 "GND") -- and
+    # items refer to it by NUMBER: (net 5). KiCad 10 drops the table and puts
+    # the name inline on every item: (net "GND").
+    #
+    # This file was written for the KiCad 10 form. Handed a KiCad 8 board it
+    # read `(net 5)` as a net literally NAMED "5", so a via on GND became its
+    # own one-item net and every connectivity answer on that board was wrong.
+    # The freshly generated board is KiCad 8 style, so this is not theoretical.
+    _TBL = dict(re.findall(r'\(net (\d+) "([^"]*)"\)', t))
+
+    def _net(block):
+        m = re.search(r'\(net (?:(\d+)(?: "([^"]*)")?|"([^"]*)")\)', block)
+        if not m:
+            return ""
+        num, inline, only = m.group(1), m.group(2), m.group(3)
+        if only is not None:
+            return only
+        if inline is not None:
+            return inline
+        return _TBL.get(num, "")
+
     # ---- pads (need the footprint transform: pads are in local coords)
     pads = []
     for fb in blocks(t, "footprint"):
@@ -108,8 +129,7 @@ def parse(path):
             gx = fx + px * math.cos(a) + py * math.sin(a)
             gy = fy - px * math.sin(a) + py * math.cos(a)
             grot = frot + prot
-            nm = re.search(r'\(net (?:\d+ )?"([^"]*)"\)', pb)
-            net = nm.group(1) if nm else ""
+            net = _net(pb)
             lm = re.search(r"\(layers ([^)]*)\)", pb)
             lays = re.findall(r'"?([\w.*]+)"?', lm.group(1)) if lm else []
             through = ptype in ("thru_hole", "np_thru_hole")
@@ -124,22 +144,20 @@ def parse(path):
         e = re.search(r"\(end ([-\d.]+) ([-\d.]+)\)", b)
         w = re.search(r"\(width ([\d.]+)\)", b)
         l = re.search(r'\(layer "([^"]+)"\)', b)
-        n = re.search(r'\(net (?:\d+ )?"?([^")]*)"?\)', b)
         if s and e and w and l:
             segs.append(dict(x1=_f(s.group(1)), y1=_f(s.group(2)),
                              x2=_f(e.group(1)), y2=_f(e.group(2)),
                              w=_f(w.group(1)), layer=l.group(1),
-                             net=(n.group(1) if n else "")))
+                             net=_net(b)))
 
     # ---- vias
     vias = []
     for b in blocks(t, "via"):
         a = re.search(r"\(at ([-\d.]+) ([-\d.]+)\)", b)
         s = re.search(r"\(size ([\d.]+)\)", b)
-        n = re.search(r'\(net (?:\d+ )?"?([^")]*)"?\)', b)
         if a and s:
             vias.append(dict(x=_f(a.group(1)), y=_f(a.group(2)),
-                             d=_f(s.group(1)), net=(n.group(1) if n else "")))
+                             d=_f(s.group(1)), net=_net(b)))
 
     # ---- the pour KiCad actually computed
     polys = []
@@ -151,9 +169,8 @@ def parse(path):
         # net_name silently gave every polygon a blank net, no pad matched any
         # pour, and this reported 34 opens against a board with 8. A parser
         # that fails soft is worse than one that crashes.
-        n = (re.search(r'\(net_name "([^"]*)"\)', zb)
-             or re.search(r'\(net (?:\d+ )?"([^"]*)"\)', zb))
-        znet = n.group(1) if n else ""
+        n = re.search(r'\(net_name "([^"]*)"\)', zb)
+        znet = n.group(1) if n else _net(zb)
         if not znet:
             raise SystemExit(
                 "zone with no readable net -- refusing to report connectivity "
