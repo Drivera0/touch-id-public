@@ -863,3 +863,33 @@ reached yet. Reverted rather than left in place doing nothing.
 divider cluster, or moving C7 away from ROK3 -- with the packer taught to
 reserve escape room for parts it has not placed yet. That is a packer change,
 not another route.
+
+### Why no placement tweak can fix it either -- the board is slot-starved
+
+Before writing an order-independent version of the escape ring, I checked
+whether there was anywhere for it to push things TO:
+
+    0402 slots            26
+    0402 parts            23      <- three spare
+    slots over pogo pads  10 of 26, and 7 of them are USED
+                          (R1, R2, R4, ROV1, ROV2, ROK2, ROK3)
+
+Three spare slots, and the packer is already spending seven parts on slots it
+actively penalises for sitting over pogo contacts. Slot assignment is a
+Hungarian solve over that matrix -- there is no slack in it to spread the
+divider cluster with, and a pairwise separation constraint is not expressible
+in a linear assignment anyway.
+
+So the honest statement is: **23 0402s plus U1/U2/U5/L1 and the pogo blocks do
+not fit in 20 x 19 mm with escape room for every pin.** Two pins pay for it.
+That is a bill of materials / board-area problem, not a router problem and not
+a packer problem.
+
+The three ways out, in order of how much they cost:
+1. Drop the two dividers to 0201 (as R8/R9/C14 already are) -- frees real area
+   in exactly the corner that is starved.
+2. Combine OK_HYST / VBAT_OV_SET into a resistor array, 2 parts instead of 5.
+3. Accept 2 opens and jumper C7.2 and ROK3.1 by hand on the assembled board --
+   both are short hops, and the board is otherwise DRC-clean.
+
+Option 1 is the one I would take, and it is a schematic edit, not a script fix.
