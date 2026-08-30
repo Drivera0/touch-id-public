@@ -1,7 +1,7 @@
 ---
 title: CURRENT STATE — read this first
 type: project
-updated: 2026-08-29
+updated: 2026-08-30
 ---
 
 # TouchID — current state
@@ -27,20 +27,54 @@ Anything in `_archive/` is superseded. Do not take a number from there.
 
 ---
 
-## The board — settled
+## The board — clean, NOT yet re-packaged for the fab
 
 | | |
 |---|---|
-| file | `cad/pcb-v3/pcb-v3-handoff.kicad_pcb` |
-| size / layers | 19.30 mm square, 4 layer, **1.20 mm laminate** (1.22 finished) |
+| file | `cad/pcb-v3/pcb-v6-routed-ZERO-OPENS.kicad_pcb` |
+| size / layers | **20.00 × 19.00 mm** (20 horizontal), 4 layer, **1.20 mm laminate** |
 | finish | ENIG |
-| status | **preflight 0 blockers, 2 warnings** · verify_handoff 0 failures |
-| gerbers | `cad/v3-handoff/gerbers/`, plotted **corner origin 0…19.30** |
-| BOM / CPL | `cad/v3-handoff/assembly/` — 20 lines, all sourced |
+| status | **preflight 0 blockers, 3 warnings** · **0 open pads** · clearance 0 · DRC clean |
+| fixings | two **Ø1.20 press-fit pin holes** at (±8.75, 0) — corner coords (1.25, 9.50) and (18.75, 9.50) |
+| gerbers | **STALE — none exist for this board.** `cad/v3-handoff/` is the old 19.30 mm square board |
+| BOM / CPL | **regenerate.** `cad/v3-handoff/assembly/` predates the 0201 swap |
 
-**Panelises to 71.3 × 71.3 mm** with edge rails for Standard PCBA. The housing
-lip is 19.54 against a 19.50 worst-case board, so **a 0.1 mm break-off nub stops
-it fitting** — take the depaneling service or file the edges.
+> [!warning] The handoff package is for a board that no longer exists
+> `cad/v3-handoff/` was plotted from the 19.30 mm SQUARE board with corner
+> screws. The board is now 20.00 × 19.00 with press-fit pins on the side
+> centres, seven parts in 0201, and different divider values. **Do not order
+> from those Gerbers.** They have to be re-plotted and re-verified from the
+> file above.
+
+### What "0 blockers" does and does not mean
+
+It means every rule this project can check is satisfied: 0 open pads against
+the pour KiCad actually computed, 0 copper-clearance violations, router DRC
+clean, no dangling ends, all 75 vias clear of the pogo contacts, both pin holes
+clear in copper *and* drill.
+
+It does **not** mean the design is proven. Nothing has been fabricated or
+powered. The harvest test that DESIGN-SPEC calls "gates everything above" has
+not been run, cold-start on harvest alone is untested, and the cell is still
+unchosen — VBAT_OV is tuned against an assumed one.
+
+### Fixed on 2026-08-30 — both were order-blocking
+
+* **Both press-fit pins were drilled through copper.** L1 pad 2 sat 0.288 mm
+  inside the right hole, U4 pad 2 0.120 mm inside the left. Every board since
+  the pins moved to the side centres had this, including the one being treated
+  as the best result. The keep-out rule existed only in `_legal_mask`, which
+  **only the 0402 packer consults** — L1/U2/U3/U4/C7 are placed explicitly and
+  skipped it. `check()` now tests every pad; preflight 23 tests tracks and vias.
+* **JLC has two hole rules and only one was known.** Via hole-to-hole 0.20 mm,
+  **pad** hole-to-hole **0.45 mm**. The pin is a 1.20 mm np_thru_hole *pad*, so
+  vias beside it owe 0.45 — two were short by 26 and 9 µm. `PIN_HOLE_NO_VIA`
+  rings now prevent it; preflight 23b re-grades via spacing at JLC's real 0.20,
+  because `check_drc` grades it at a hardcoded 0.5 that no flag overrides.
+
+**Panelises with edge rails for Standard PCBA** — 0201 parts require the
+Standard tier, which this order already is. The housing lip figure below was
+computed for the 19.30 mm square board and **must be re-derived** for 20 × 19.
 
 **Keep "Confirm Parts Placement = Yes."** Only U1–U4 can be rotated wrong; the
 other 25 placements are two-pad symmetric.
@@ -146,22 +180,31 @@ Ranking and the enquiry text: `cad/pcb-v3/CELL-DECIDED.md`,
 
 **Blocking an order:**
 
+0. **Gerbers, BOM and CPL do not exist for the current board.** `cad/v3-handoff/`
+   is the 19.30 mm square board with corner screws. Re-plot and re-verify from
+   `pcb-v6-routed-ZERO-OPENS.kicad_pcb` before anything else.
 1. ~~Slot depth~~ — **resolved, was never a constraint.** See above.
 2. **J4/J11 pogo geometry** — preflight WARN 14. Measurement, not a datasheet.
 3. **JLCPCB customs "Product Description"** — a legal declaration, yours to make.
+4. **Two order-form settings are not in the Gerbers** and default wrong:
+   select the **small-via rung** (board is drawn 0.40/0.20; JLC charges more
+   below 0.45 and builds to the wrong rules if it is not selected) and
+   **1.20 mm thickness** (JLC defaults 4-layer to 1.6).
 
 **Waiting on others:**
 
-4. LiPol quote (cell).
-5. Sensor seller (wires vs bare pads).
+5. LiPol quote (cell). VBAT_OV is currently tuned against an ASSUMED cell.
+6. Sensor seller (wires vs bare pads).
+7. **U1 (C5118826) and U5 (C6989585) are both 0 stock at JLC** and consigned —
+   re-check at order time.
 
 **Not blocking:**
 
-6. The **330 Ω loaded-while-asleep** harvest test — DESIGN-SPEC calls it
+8. The **330 Ω loaded-while-asleep** harvest test — DESIGN-SPEC calls it
    "gates everything above".
-7. Cold-start robustness with the new C1/C2: run the cell flat and check it
+9. Cold-start robustness with the new C1/C2: run the cell flat and check it
    restarts on harvest alone. The 10 µF is the best part that fits either way.
-8. **The JLCONE project holds a stale housing STL** — pre-fillet and
+10. **The JLCONE project holds a stale housing STL** — pre-fillet and
    pre-riser-change. Replace before ordering 3D prints.
 
 ---
