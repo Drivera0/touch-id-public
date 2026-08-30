@@ -36,12 +36,19 @@ PLANE = "In2.Cu"
 BOARD_SZ, EDGE = 19.30, 0.30
 CORNER_R = 2.00              # R2.0 outline corners -- see the arc test in masks()
 STEP = 0.05
-VIA_D, VIA_DRILL = 0.60, 0.30
+VIA_D_DEFAULT, VIA_DRILL_DEFAULT = 0.45, 0.20   # fallback only; fab floor wins
 GND = "GND"
 
 
 def rules():
-    tw, cl = 0.127, 0.10
+    """Track, clearance AND via geometry, all from fab_floor_touchid.txt.
+
+    The via numbers used to be hard-coded here while the floor file carried its
+    own pair, and the two drifted: taps were emitted at one size and graded at
+    another, which is how 23 phantom 'via diameter too small for fab'
+    violations appeared. One source of truth, read at import.
+    """
+    tw, cl, vd, vk = 0.127, 0.10, VIA_D_DEFAULT, VIA_DRILL_DEFAULT
     p = os.path.join(HERE, "fab_floor_touchid.txt")
     if os.path.exists(p):
         for line in open(p):
@@ -51,10 +58,14 @@ def rules():
                     tw = float(v)
                 elif k == "clearance":
                     cl = float(v)
-    return tw, cl
+                elif k == "via_diameter":
+                    vd = float(v)
+                elif k == "via_drill":
+                    vk = float(v)
+    return tw, cl, vd, vk
 
 
-TRACK, CLR = rules()
+TRACK, CLR, VIA_D, VIA_DRILL = rules()
 N = int(round(BOARD_SZ / STEP)) + 1
 ORG = -BOARD_SZ / 2.0
 g2mm = lambda i: ORG + i * STEP

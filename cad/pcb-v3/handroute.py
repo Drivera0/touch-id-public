@@ -19,7 +19,35 @@ import numpy as np
 HERE = os.path.dirname(os.path.abspath(__file__))
 BOARD = os.path.join(HERE, "pcb-v3-handoff.kicad_pcb")
 STEP = 0.05
-TRACK, CLR, VIA_D, VIA_DRILL = 0.20, 0.20, 0.60, 0.30
+def _rules():
+    """Read the design rules from fab_floor_touchid.txt -- do NOT hard-code.
+
+    These were frozen at 0.20/0.20 and stayed there after the board moved to
+    0.127/0.10, so every "no path" this script reported was measured with a
+    track 57% wider than the real one. stitch_open.py's docstring had already
+    flagged it; the fix was applied to a scratch copy and never committed, so
+    it kept lying on the next run. Same failure as the via sizes in
+    gnd_taps.py: a constant that shadows the file everything else reads.
+    """
+    tw, cl, vd, vk = 0.127, 0.10, 0.45, 0.20
+    p = os.path.join(os.path.dirname(os.path.abspath(__file__)),
+                     "fab_floor_touchid.txt")
+    if os.path.exists(p):
+        for line in open(p):
+            if "=" in line and not line.strip().startswith("#"):
+                k, v = [s.strip() for s in line.split("=", 1)]
+                if k == "track_width":
+                    tw = float(v)
+                elif k == "clearance":
+                    cl = float(v)
+                elif k == "via_diameter":
+                    vd = float(v)
+                elif k == "via_drill":
+                    vk = float(v)
+    return tw, cl, vd, vk
+
+
+TRACK, CLR, VIA_D, VIA_DRILL = _rules()
 BOARD_SZ, EDGE = 19.30, 0.30
 LAYERS = ["F.Cu", "In1.Cu", "B.Cu"]
 VIA_COST = 40          # in grid steps

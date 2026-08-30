@@ -22,7 +22,31 @@
 
 track_width  = 0.127
 clearance    = 0.10
-via_diameter = 0.60
-via_drill    = 0.30
+# 0.45/0.20, not the 0.60/0.30 that used to sit here. That pair was the only
+# number in this file with no comment explaining it, which is usually the tell:
+# it was a carried-over KiCad default, not a decision.
+#
+# 0.45/0.20 IS JLCPCB's standard, no-extra-cost tier (py_router/fab_tiers.py,
+# citing JLC 2026-06: "standard via 0.20 drill / 0.45 dia"; the tighter
+# 0.25/0.15 is the "more costly" rung). preflight check 8 independently uses
+# 0.45/0.20 as its JLC-standard threshold. So this is the fab's own floor, not
+# us pushing them.
+#
+# The objection to a smaller hole is plating an aspect-ratio-deep barrel. This
+# board is 1.20 mm thick: 1.20 / 0.20 = 6:1, against the 8:1+ fabs run
+# routinely. Not close to anything.
+#
+# What it buys: GND taps 15 -> 22. Seven more pads with their own via down to
+# the In2.Cu plane instead of hoping the pour reaches them -- and since the PCM
+# went on, EVERY milliamp of board return current flows through U5, so solid
+# ground paths are worth more here than unused margin. The board is also at
+# capacity (26 0402 slots for 25 parts); space is the scarce thing, not
+# robustness.
+#
+# Kept in mind and rejected: this board flexes where the pogo pins push up, and
+# thin barrels crack under flex. But vias are already banned from the pogo zone
+# outright, so the small ones cannot sit where the flexing is.
+via_diameter = 0.45
+via_drill    = 0.20
 hole_to_hole = 0.20
 board_edge   = 0.30
