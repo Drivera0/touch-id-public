@@ -133,3 +133,67 @@ change, not a router setting. Not attempted yet.
 | DRC | clean |
 | antenna keep-out | clear, and holds through a KiCad round-trip |
 | U5 + R8/R9/C14 | placed, netlist matches (134 pins), BOM sourced |
+
+---
+
+## 2026-08-29 (end of session) — where v4 actually stands
+
+### Passing, and holding through a KiCad round-trip
+
+| check | |
+|---|---|
+| 2 copper clearance | PASS |
+| 4 netlist ↔ board | **PASS — 134 pins**, U5 + R8/R9/C14 + `CELL_NEG` all correct |
+| 5 dangling nets | PASS |
+| 6b router DRC @ 0.10 | PASS |
+| 7 antenna keep-out | PASS |
+| 18 zones filled | PASS |
+| 20 dangling track ends | PASS |
+| 21 every part sourced | PASS |
+| **22 no via pierces a pogo contact** | **PASS** (new check; the pre-PCM board fails it) |
+
+### The 2 remaining blockers
+
+**6 — 10 open pads. Half of them are in one place:**
+
+| region | opens |
+|---|---|
+| **left strip** | **5** — U3 ×2, C5, R9, U4 |
+| right strip | 2 — U2, ROV1 |
+| module / SWD / sensor pads | 3 — U1, J3, J2 |
+
+**17 — GND not fully connected** (5 of the above are GND pads).
+
+### The diagnosis: the left strip is over-subscribed
+
+It is **2.72 mm wide** and carries **U3, U4, C5, C12, R9 and C14** — including
+two TPS7A2033 in X2SON-4, whose pads are **0.34–0.40 mm apart** when a 0.127
+track needs 0.327 to pass between them. Every routing attempt today, under six
+router configurations and three placement strategies, has failed in that strip.
+
+This is a **placement** problem, not a routing one. No router setting fixes a
+2.72 mm channel with two fine-pitch QFNs in it.
+
+### `stitch_open` reports connections it did not make
+
+It reported `ROUTED` for GND ROV1.2, U3.5 and J3.5; `check_connected` — which
+models the zone fill and is preflight's gate — still reports all three open,
+and the pad list is byte-identical before and after. ROV1 got "4 seg, **0
+via**": F.Cu track ending in free space, and GND's plane is on In2.Cu, which no
+F.Cu track reaches without a via. `own_copper()` also still uses the
+`max(w,h)/2` box for custom pads — the fourth instance of that trap.
+**Do not trust stitch's ROUTED count; re-check with preflight.**
+
+### What to do next, in order
+
+1. **MEASURE THE SLOT DEPTH.** Still unmeasured, still the highest-value
+   unknown on the project. The module is 12.86 mm against the 8.36 mm knob it
+   replaces. Everything below is wasted if that does not fit.
+2. **Relieve the left strip.** The candidates are moving C12/C14 out of it, or
+   revisiting whether U3 and U4 both need to be there. This is the change that
+   would actually close the routing.
+3. Fix `stitch_open`'s `own_copper` (custom pads + no via-less plane reach).
+4. Re-derive the electrical claims that were never re-checked after the PCM
+   went in: the VDDH 100 ms rise gate, harvest MPPT with the 1 kΩ series
+   resistor, and `VBAT_OK` at 3.12 V against the PCM's 2.70 V backstop now
+   that all return current flows through U5.
