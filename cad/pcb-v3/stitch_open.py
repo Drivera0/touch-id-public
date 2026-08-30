@@ -414,10 +414,29 @@ def main():
         if path is None:
             print(f"  {net} {orph['ref']}.{orph['pad']}: NO PATH"); continue
 
-        nid = None
-        for k, v in netname.items():
-            if v == net:
-                nid = k; break
+        # WRITE BACK IN THE DIALECT THIS FILE USES.
+        #
+        # netname maps NUMBER -> NAME and is built from the top-level net
+        # TABLE. A KiCad 10 board has no table, so netname is empty, nid stayed
+        # None, and this emitted the literal '(net None)'. That is netless
+        # copper: it parses, it draws, and it belongs to no net -- so it shorted
+        # R8.1's VBAT pad to nothing at 0.0000 mm while the tool printed
+        # "ROUTED 15 seg, 2 via".
+        #
+        # handroute.emit() has handled both dialects (and hard-failed rather
+        # than guess) since the KiCad 10 migration. This copy never got it.
+        _k10 = not netname
+        if _k10:
+            nid = '"%s"' % net
+        else:
+            nid = None
+            for k, v in netname.items():
+                if v == net:
+                    nid = k
+                    break
+            if nid is None:
+                sys.exit("net %r is not in this board's net table -- refusing "
+                         "to emit copper with no net" % net)
         runs, cur = [], [path[0]]
         for a, b in zip(path, path[1:]):
             if a[2] != b[2]:
@@ -455,12 +474,28 @@ def main():
                     f'(end {s["x2"]:.4f} {s["y2"]:.4f}) (width {s["w"]}) '
                     f'(layer "{s["layer"]}") (net {s["nid"]}))')
     for v in new_via:
-        nid = None
-        for k, val in netname.items():
-            if val == v["net"]:
-                nid = k; break
+        # SECOND COPY OF THE SAME LOOKUP, and it had the same bug. Segments
+        # carry the resolved nid on the dict; vias recomputed it here straight
+        # off the net TABLE, so on a KiCad 10 board (no table) it came back
+        # None and every via was written '(net None)' -- netless copper that
+        # parses, draws, and shorts whatever it touches. Two of them shorted
+        # R8.1's VBAT pad at 0.0000 mm while the tool reported ROUTED.
+        #
+        # Resolve it once, the same way, and fail loudly rather than write
+        # copper with no net.
+        if not netname:
+            _vnid = '"%s"' % v["net"]
+        else:
+            _vnid = None
+            for k, val in netname.items():
+                if val == v["net"]:
+                    _vnid = k
+                    break
+            if _vnid is None:
+                sys.exit("net %r is not in this board's net table -- refusing "
+                         "to emit a via with no net" % v["net"])
         body.append(f'\t(via (at {v["x"]:.4f} {v["y"]:.4f}) (size {VIA_D}) '
-                    f'(drill {VIA_DRILL}) (layers "F.Cu" "B.Cu") (net {nid}))')
+                    f'(drill {VIA_DRILL}) (layers "F.Cu" "B.Cu") (net {_vnid}))')
     if body:
         cut = text.rstrip().rfind(")")
         text = text[:cut] + "\n".join(body) + "\n" + text[cut:]
