@@ -124,6 +124,28 @@ def parse(path):
                 continue
             px, py, prot = _f(am.group(1)), _f(am.group(2)), _f(am.group(3) or 0)
             w, h = _f(sm.group(1)), _f(sm.group(2))
+            # CUSTOM PADS: (size ...) IS ONLY THE ANCHOR, NOT THE COPPER.
+            #
+            # U3/U4 (TPS7A2033, X2SON-4) are written as custom pads whose
+            # (size) is 0.1485 -- the anchor circle -- while the real land is a
+            # gr_poly spanning 0.46 x 0.31. Reading (size) therefore
+            # UNDER-REPORTS these pads by a factor of three, and every consumer
+            # of this parser inherited that: it is why check_board reported
+            # "0 pairs closer than 0.100" on a board where check_drc found
+            # PAD-VIA violations, and why a hole check once said U4.2 cleared
+            # the pin hole by +0.036 when it actually overlapped by -0.120.
+            #
+            # Take the union extent of the primitives when they are there. The
+            # anchor stays the fallback for ordinary pads, which have none.
+            prims = re.findall(r"\(xy ([-\d.]+) ([-\d.]+)\)",
+                               pb[pb.find("(primitives"):] if "(primitives" in pb else "")
+            if prims:
+                _xs = [_f(a_) for a_, _b in prims]
+                _ys = [_f(b_) for _a, b_ in prims]
+                # centre the reported box on the pad anchor, and take the
+                # larger of each side so an off-centre primitive is not clipped
+                w = 2 * max(abs(min(_xs)), abs(max(_xs)))
+                h = 2 * max(abs(min(_ys)), abs(max(_ys)))
             a = math.radians(frot)
             # KiCad footprint rotation is CLOCKWISE in this Y-down space.
             gx = fx + px * math.cos(a) + py * math.sin(a)

@@ -138,9 +138,25 @@ for fm in re.finditer(r'\(footprint "touchid:([^"]+)"(.*?)\n\t\)', t, re.S):
         if "*.Cu" in lays:
             lays |= set(LAYERS) | {"In2.Cu"}
         prot = fa + float(a_.group(3) or 0)
+        # CUSTOM PADS: (size ...) IS THE ANCHOR, NOT THE COPPER.
+        # U3/U4 are custom pads with a 0.1485 anchor and a 0.46 x 0.31 gr_poly
+        # land. Reading (size) under-reports them threefold, and THIS parser is
+        # the one that decides where close_open, gnd_taps and stitch_open are
+        # allowed to put a via -- so it put a GND via 0.032 mm inside U4.3 and
+        # U4.1 and reported the pad closed. check_drc caught it as PAD-VIA;
+        # check_board did not, because it inherited the same wrong number.
+        _pw, _ph = float(s_.group(1)), float(s_.group(2))
+        if "(primitives" in pb:
+            _pr = re.findall(r'\(xy ([-\d.]+) ([-\d.]+)\)',
+                             pb[pb.find("(primitives"):])
+            if _pr:
+                _pxs = [float(q) for q, _r in _pr]
+                _pys = [float(r) for _q, r in _pr]
+                _pw = 2 * max(abs(min(_pxs)), abs(max(_pxs)))
+                _ph = 2 * max(abs(min(_pys)), abs(max(_pys)))
         pads.append(dict(net=pad_net, layers=lays,
                          x=fx + dx, y=fy + dy,
-                         w=float(s_.group(1)), h=float(s_.group(2)),
+                         w=_pw, h=_ph,
                          rot=prot,
                          shape=pm.group(2), ref=fm.group(1), num=pm.group(1)))
 
