@@ -46,6 +46,34 @@ Anything in `_archive/` is superseded. Do not take a number from there.
 > from those Gerbers.** They have to be re-plotted and re-verified from the
 > file above.
 
+### 2026-08-30 pass — 1 open pad, and SIX checker bugs found
+
+    open pads     1   C14.2 on CELL_NEG (see below)
+    clearance     0 different-net pairs inside 0.100
+    schema        top-level child kinds all known to KiCad
+    housing       all 8 boolean clearance checks pass
+
+**C14.2 has ZERO legal via sites within 1.8 mm** and its nearest own-net pad
+(U5.1) is 2.163 mm away through the PCM cluster, the densest on the board. It is
+a hand-jumper or a PCM re-plan, not another routing attempt.
+
+**The checkers were wronger than the board.** Six real defects, all of which had
+been passing boards as clean:
+
+| what | effect |
+|---|---|
+| `check_board` parsed copper with a POSITIONAL regex | saw 54 of 77 vias; missed a real 0.0853 mm violation |
+| `blocked_masks` never inflated keep-outs | close_open laid 20 VSTOR segments inside the antenna keep-out |
+| `blocked_masks` tested cell CENTRES, router draws SEGMENTS | two GND tracks 0.0853/0.0920 mm from vias |
+| `(size)` on a CUSTOM pad is the anchor, not the copper | U3/U4 pads read 3x too small by TWO parsers |
+| `stitch_open` resolved nets from the net TABLE | wrote `(net None)` on KiCad 10 boards -- netless copper that SHORTED a pad |
+| `push_off_pads` only pushed off PADS | a track grazing a foreign via was invisible to it |
+
+`close_open` also **writes a degraded board when it fails** -- it rips the net
+before retrying and does not restore, so a no-path run saved a file missing 33
+segments, 23 vias and every filled polygon. NOT YET FIXED; discard its output on
+failure.
+
 ### What "0 blockers" does and does not mean
 
 It means every rule this project can check is satisfied: 0 open pads against
