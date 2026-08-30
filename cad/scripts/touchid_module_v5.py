@@ -56,6 +56,33 @@ lip_l = 19.66 - 0.12
 pcb_t_ref = 1.2
 lip_h = 4.10 - pcb_t_ref    # 2.90 — plastic lip only
 body_h = 8.36 - pcb_t_ref   # 7.16 — housing back face -> flush top plane
+
+# ---- WHAT EACH TIER REGISTERS AGAINST (confirmed by the user 2026-08-29) ----
+# The two squares are not styling and they are not free dimensions. Each one
+# lands on a different feature of the keyboard, which is the whole reason the
+# part is stepped:
+#
+#   LIP TIER   (lip_w 19.66, lip_h 2.90)
+#       sits flush with the CUTOUT IN THE KEYBOARD'S OWN PCB that the module
+#       drops through. This is the tier that carries the load: it props on the
+#       enclosure and the rear shelf hooks under the metal top case.
+#
+#   BODY TIER  (body_w 18.52, body_h 7.16)
+#       its TOP FACE finishes flush with the METAL RIM SURROUNDING THE
+#       KEYBOARD. That is what "flush top plane" above means -- flush with the
+#       rim, not with some abstract datum.
+#
+#   RISER      (riser_h, 4.50 or 6.50)
+#       everything above the rim. THIS IS THE ONLY FREE HEIGHT IN THE PART.
+#
+# So lip_h and body_h are MEASUREMENTS OF THE KEYBOARD, not choices. Changing
+# either one stops the module seating. If height ever has to come out, it comes
+# out of riser_h and nowhere else.
+#
+# Corollary, and it retires a warning that stood in DESIGN-SPEC for nine days:
+# there is no "slot depth" limit, because the riser lives ABOVE the rim in open
+# air. The 8.36 mm knob module this replaces sat flush precisely because it had
+# nothing on top of it; this one carries a sensor that has to be touchable.
 # NOTE the lip is SQUARE (19.66) but the PCB is 19.60 x 17.60 — the board does
 # not fill the lip footprint in Y. The back rim it seats on must therefore be
 # cut to the PCB's real rectangle, not to a square.

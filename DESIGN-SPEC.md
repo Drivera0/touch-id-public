@@ -99,8 +99,20 @@ column and the numbers moved:
 > The dimensions that actually locate the module were caliper-measured from the
 > start and are unchanged: top tier **18.52**, lip **19.66**, rear shelf
 > **11.00 × 1.18 × 2.62**, arm width **5.12**, arm-tip-to-opposite-lip-corner
-> diagonal **30.14**. `riser_h` is free to be chosen on cell fit and ergonomics
-> alone.
+> diagonal **30.14**.
+>
+> **Why the part is stepped — each tier registers on a different keyboard
+> feature** (confirmed 2026-08-29):
+>
+> | tier | dims | lands on |
+> |---|---|---|
+> | **lip** | 19.66 sq × 2.90 | flush with the **cutout in the keyboard's own PCB**; carries the load, rear shelf hooks under the metal top case |
+> | **body** | 18.52 sq × 7.16 | top face flush with the **metal rim surrounding the keyboard** |
+> | **riser** | `riser_h` 4.50 / 6.50 | everything **above the rim, in open air** |
+>
+> So **`lip_h` and `body_h` are measurements of the keyboard, not choices** —
+> change either and the module stops seating. **`riser_h` is the only free
+> height in the part.** If height ever has to come out, it comes out there.
 
 **Altium ↔ KiCad Gerber transform** (verified, do not re-derive):
 ```
