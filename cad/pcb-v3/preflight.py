@@ -967,6 +967,7 @@ except Exception as _e:                      # a check that cannot run must say 
 # check, so pads stay where the true geometry is known.
 _MH_XY = [(-8.75, 0.00), (8.75, 0.00)]
 _MH_R, _MH_KEEP = 0.60, 0.20
+_MH_DRILL, _MH_PAD_H2H = 1.20, 0.45   # JLC: pad hole-to-hole, not the 0.2 via rule
 # preflight's own `vias` is a Counter of (size, drill) strings and carries no
 # geometry, so parse for it -- through pour_truth, which is the only parser in
 # this project that reads both net dialects correctly.
@@ -983,9 +984,20 @@ for _hx, _hy in _MH_XY:
     for _v in _vias_g:
         _g = math.hypot(_v["x"] - _hx, _v["y"] - _hy) - _v["d"] / 2 - _MH_R
         if _g < _MH_KEEP:
-            _hole_bad.append("via %s %+.3f mm at (%+.2f,%+.2f)"
+            _hole_bad.append("via %s copper %+.3f mm at (%+.2f,%+.2f)"
                              % (_v["net"], _g, _hx, _hy))
-rec(not _hole_bad, "17 copper clear of pin holes",
+        # DRILL-to-DRILL is a separate, larger rule and is invisible to every
+        # copper checker. JLCPCB publishes "Via Hole-to-Hole 0.2mm" but
+        # "Pad Hole-to-Hole 0.45mm", and the pin hole is a 1.20 mm np_thru_hole
+        # PAD -- so a via beside it owes 0.45, not 0.20. Two SENSOR_3V3 vias
+        # were at 0.4236 and 0.4413: short by 26 and 9 microns, and nothing in
+        # the project would have said so.
+        _gd = math.hypot(_v["x"] - _hx, _v["y"] - _hy) - _MH_DRILL / 2 \
+            - _v.get("drill", 0.20) / 2
+        if _gd < _MH_PAD_H2H:
+            _hole_bad.append("via %s DRILL %+.3f mm (need %.2f) at (%+.2f,%+.2f)"
+                             % (_v["net"], _gd, _MH_PAD_H2H, _hx, _hy))
+rec(not _hole_bad, "23 copper+drill clear of pin holes",
     ("%d item(s) inside the %.2f mm keep-out: %s"
      % (len(_hole_bad), _MH_KEEP, "; ".join(_hole_bad[:4]))) if _hole_bad
     else "all tracks and vias >= %.2f mm from both %.2f mm holes"
