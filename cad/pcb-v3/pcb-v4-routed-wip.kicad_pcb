@@ -6076,7 +6076,7 @@
 		(net "GND")
 		(uuid "8b54ea6b-13d2-4646-866a-6c8eff8e0f9c")
 	)
-		(segment
+	(segment
 		(start 5.7 -4.35)
 		(end 5.7 -3.75)
 		(width 0.127)
@@ -6108,7 +6108,7 @@
 		(net "GND")
 		(uuid "b2234c0f-7ffa-497c-9c25-47b94a7503fe")
 	)
-		(segment
+	(segment
 		(start 5.45 -3.1)
 		(end 5.75 -3.1)
 		(width 0.127)
@@ -6172,7 +6172,7 @@
 		(net "GND")
 		(uuid "d4e36c1d-061c-49c4-b069-222d40020960")
 	)
-		(segment
+	(segment
 		(start 5.45 -2.1)
 		(end 5.65 -2.1)
 		(width 0.127)
@@ -6306,7 +6306,7 @@
 		(net "GND")
 		(uuid "5f3e0874-f026-4dde-8410-f26386aa30c3")
 	)
-		(via
+	(via
 		(at 6.2 -2.65)
 		(size 0.45)
 		(drill 0.2)
@@ -6342,7 +6342,7 @@
 		(net "GND")
 		(uuid "b258be04-384a-4951-9405-b2992873c946")
 	)
-		(via
+	(via
 		(at -8.75 1.4)
 		(size 0.45)
 		(drill 0.2)
@@ -6432,7 +6432,7 @@
 		(net "GND")
 		(uuid "e5ac5ed8-1109-4dc3-bd0b-c30af6e7b4ce")
 	)
-		(via
+	(via
 		(at 0.1 2.45)
 		(size 0.45)
 		(drill 0.2)

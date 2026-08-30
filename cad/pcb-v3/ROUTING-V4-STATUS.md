@@ -234,3 +234,63 @@ to a fallback box built from the *unrotated* w and h. That is what let the tap
 sit 0.0915 mm from C9.1 in the first place. Both now swap w/h when
 `round(rot) % 180 == 90`. Re-running the taps with the fix: **0 clearance
 violations**, where the same step previously produced one.
+
+
+---
+
+## 2026-08-29 (end of day) — where v4 stands
+
+### Passing, and stable across several KiCad round-trips
+
+| check | |
+|---|---|
+| 2 copper clearance | **PASS** — 0 violating pairs |
+| 4 netlist ↔ board | **PASS** — 134 pins, U5 + R8/R9/C14 + `CELL_NEG` all correct |
+| 5 dangling nets | PASS |
+| 7 antenna keep-out | **PASS** — held through five fills |
+| 18 zones filled | PASS — In2.Cu, and new F.Cu / B.Cu pours |
+| 20 dangling track ends | PASS |
+| 21 every part sourced | PASS — 24 LCSC codes |
+| **22 no via pierces a pogo contact** | **PASS** — 80 vias vs 10 pads |
+
+### 2 real blockers
+
+**6 — 7 open pads.** Down from 16 at the start of the day.
+
+| pad | net | why |
+|---|---|---|
+| C3.2, C9.2 | GND | **no legal via site within 3.5 mm.** Mid-shelf on the bottom row, 0402 neighbours 0.74 mm each side; a 0.45 via + 0.10 clearance does not fit between them. Geometry, not search. |
+| C12.2, C5.2 | GND | sites exist at **1.65 / 2.15 mm**, but `gnd_taps`' A* cannot route a track that far through the congestion |
+| U4.2 | GND | site exists 0.90 mm away, same problem |
+| U2.18, U2.19 | VBAT, VSTOR | the 0.5 mm-pitch QFN escape problem, older than the PCM work |
+
+**17 — GND not fully connected**, which is the same five GND pads.
+
+### 6b is a FALSE POSITIVE — do not chase it
+
+`check_drc` ignores pad rotation and twelve 0402s here are at rot 90. Its six
+"violations" are one VSTOR segment against six pads, each off by 0.014 mm,
+which is exactly the w/h swap. `check_board` — shapely, rotation-aware — says
+**0**, and the hand arithmetic gives 0.1065 mm against a 0.10 rule. **Check 2
+is authoritative.**
+
+### What NOT to do next: hand-place taps
+
+I tried it and produced three faults in one commit — two vias **0.502 and
+0.614 mm inside J4.5's pogo contact**, and one track **shorting GND to
+SENSOR_MCU_3V3 at 0.0000 mm**. The via sites were individually legal; I
+validated where copper would END and never asked what the path CROSSED.
+`gnd_taps` and `stitch_open` both run an A* that treats every foreign object as
+an obstacle along the whole route. Do not substitute a straight line for that.
+
+Also note the site search must exclude **J4/J11 even though J4.5 is itself
+GND** — the rule is about the hole ruining a contact face, not clearance.
+Skipping GND pads as blockers is correct for clearance and wrong for pogo.
+
+### The real next step
+
+Improve `gnd_taps`' path search so it can reach sites 1.65–2.15 mm away
+through congestion — it already has the correct obstacle model, the pogo rule
+and the A*. That is a change to one script with a clear success test
+(`taps placed` goes up, check 2 and check 22 stay clean), not more copper
+placed by hand.
