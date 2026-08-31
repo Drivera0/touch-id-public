@@ -205,7 +205,7 @@ def legal(vx, vy, pads, segs, vias, novia):
 
 def main():
     src, dst = sys.argv[1], sys.argv[2]
-    rmax = float(sys.argv[3]) if len(sys.argv) > 3 else 2.5
+    rmax = float(sys.argv[3]) if len(sys.argv) > 3 else 3.0
     t, pads, segs, vias, novia = load(src)
     gnd = [p for p in pads if p["net"] == "GND" and p["ref"] not in POGO_REFS]
     # pogo GND pads get an anchor too, just not one on top of them
@@ -251,16 +251,34 @@ def main():
             # fallback only when the pour could not be read (unfilled board)
             already += 1
             continue
+        # CARTESIAN SCAN, NEAREST FIRST -- the polar one stepped over the answer.
+        #
+        # It swept radius in 0.05 increments and angle in 4 degree increments,
+        # so at r = 1.5 consecutive probes are 0.10 mm apart and any legal
+        # pocket smaller than that falls between them. It reported "NO legal
+        # site within 2.50 mm" for U5.4 while THIS function accepts 292 sites
+        # inside 3.0 mm, the nearest at 1.485 -- a radius the sweep never tried,
+        # since it only ever tested exact multiples of 0.05.
+        #
+        # A grid at the router's own 0.02 pitch cannot skip a pocket that a
+        # 0.40 via would fit in, and sorting by distance keeps the anchor as
+        # close to the pad as it can be.
         found = None
-        r = max(0.30, VIA_D / 2 + CLR)
-        while r <= rmax and not found:
-            for a in range(0, 360, 4):
-                vx = p["x"] + r * math.cos(math.radians(a))
-                vy = p["y"] + r * math.sin(math.radians(a))
-                if legal(vx, vy, pads, segs, vias, novia):
-                    found = (round(vx, 4), round(vy, 4), round(r, 2))
-                    break
-            r += 0.05
+        _step = 0.02
+        _n = int(rmax / _step)
+        _cands = []
+        for _i in range(-_n, _n + 1):
+            for _k in range(-_n, _n + 1):
+                _vx = round(p["x"] + _i * _step, 4)
+                _vy = round(p["y"] + _k * _step, 4)
+                _d = math.hypot(_vx - p["x"], _vy - p["y"])
+                if _d < max(0.30, VIA_D / 2 + CLR) or _d > rmax:
+                    continue
+                _cands.append((_d, _vx, _vy))
+        for _d, _vx, _vy in sorted(_cands):
+            if legal(_vx, _vy, pads, segs, vias, novia):
+                found = (_vx, _vy, round(_d, 2))
+                break
         if found:
             vias.append([found[0], found[1], VIA_D])
             placed.append((p["ref"] + "." + p["pad"], found))
