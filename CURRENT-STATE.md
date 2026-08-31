@@ -34,7 +34,7 @@ Anything in `_archive/` is superseded. Do not take a number from there.
 | file | `cad/pcb-v3/pcb-v6-handoff.kicad_pcb` |
 | size / layers | **20.00 × 19.00 mm** (20 horizontal), 4 layer, **1.20 mm laminate** |
 | finish | ENIG |
-| status | **1 open pad** (C14.2) · clearance 0 · schema clean · see the 2026-08-30 pass below |
+| status | **2 open pads** (U5.2, R6.1) · clearance 0 · schema clean · see the 2026-08-30 pass below |
 | fixings | two **Ø1.20 press-fit pin holes** at (±8.75, 0) — corner coords (1.25, 9.50) and (18.75, 9.50) |
 | gerbers | **none exist for this board.** The old package is archived under `cad/_archive/2026-08-30-superseded-by-v6/v3-handoff-pkg/` |
 | BOM / CPL | **regenerate** into `cad/v6-handoff/assembly/`. `make_bom_cpl.py` is repointed and its origin bug is fixed |
@@ -46,16 +46,29 @@ Anything in `_archive/` is superseded. Do not take a number from there.
 > from those Gerbers.** They have to be re-plotted and re-verified from the
 > file above.
 
-### 2026-08-30 pass — 1 open pad, and SIX checker bugs found
+### 2026-08-30 pass — 2 open pads, from 16
 
-    open pads     1   C14.2 on CELL_NEG (see below)
+    open pads     2   U5.2 (PCM_VDD) and R6.1 (BL_RETURN)
     clearance     0 different-net pairs inside 0.100
     schema        top-level child kinds all known to KiCad
     housing       all 8 boolean clearance checks pass
+    board         606 segments, 90 vias
 
-**C14.2 has ZERO legal via sites within 1.8 mm** and its nearest own-net pad
-(U5.1) is 2.163 mm away through the PCM cluster, the densest on the board. It is
-a hand-jumper or a PCM re-plan, not another routing attempt.
+> [!danger] U5.2 is the cell protection's supply pin
+> U5 is the MC3651 and the cell is BARE, so U5 is the only protection there is.
+> PCM_VDD reaches it through R8 (330R) from VBAT, bypassed by C14. With U5.2
+> open the protection IC is **unpowered**: no over-charge cutoff at 4.280 V, no
+> over-discharge at 2.700 V, no over-current at 0.315 A, on a lithium cell.
+> This one is not optional.
+>
+> It has ZERO legal via sites within 2.5 mm — 36,305 of the blocked points are
+> pogo, because U5 sits inside the pogo block — so it can never take a via. Its
+> net is on F.Cu 2.69 mm away and needs an F.Cu route.
+
+**R6.1 (BL_RETURN)** is the backlight-sense path: J11.4 is the keyboard's RGB
+LED common return, R6 is 100k series into BL_FLAG -> U1.11 with C13 filtering.
+Open, the MCU cannot tell whether the backlight is on — which is the cue
+harvesting depends on. Functional, not safety. Its net is 6.6 mm away.
 
 **The checkers were wronger than the board.** Six real defects, all of which had
 been passing boards as clean:
