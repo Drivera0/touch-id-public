@@ -1,10 +1,16 @@
 ---
-title: MCU swap — MDBT50Q to Fanstel BC840M
+title: MCU swap — MDBT50Q to Fanstel BC840M — REJECTED
 type: project
 updated: 2026-08-30
 ---
 
-# Replacing U1 with a smaller module
+# Replacing U1 with a smaller module — REJECTED 2026-08-30
+
+> [!failure] Verdict: NO SWAP. Keep the Raytac MDBT50Q-1MV2.
+> BC840M's datasheet (Ver 1.08) disqualifies it three ways, and the decisive
+> one is not size. **A smaller module needs MORE board area here**, because
+> the small modules use PCB TRACE antennas and MDBT50Q uses a CERAMIC CHIP
+> antenna. See "Why the swap fails" at the bottom.
 
 **Why:** U1 is 15.5 x 10.5 mm on a 20 x 19 mm board. It is the single largest
 consumer of area and the root cause of the space pressure — the two remaining
@@ -147,3 +153,60 @@ electrically ideal but fails mechanically.
 
 **Conclusion: VDDH is non-negotiable, so the module choice stands on its own.
 BC840M remains the recommendation.**
+
+
+---
+
+## Why the swap fails — datasheet Ver 1.08, checked 2026-08-30
+
+### 1. "Don't use a module with internal antenna inside a metal case"
+
+Verbatim, from *Notes on Antenna and PCB Layout*. It also asks to **"keep all
+external metal at least 30 mm from the antenna area."** The NuPhy Air75 V3's top
+frame is metal and the module sits in a slot in it — 30 mm is not available in
+any direction.
+
+This is the **exact** disqualifier DESIGN-SPEC already used to rule out the
+u-blox ANNA-B112: *"cannot sit in a metal enclosure — the keyboard's top frame
+is metal."* The same test was simply never applied to BC840M.
+
+### 2. The required ground-free width does not fit the board
+
+Datasheet mounting rules for a corner placement:
+* *"the antenna area shall extend **5.5 mm** from the edge of ground plane"*
+* *"Ground plane shall be at least **5 mm** from the edge of the antenna area"*
+
+        antenna area width                10.10 mm
+        + 5 mm ground clearance each side 20.10 mm   required ground-free width
+        board width                       20.00 mm
+        SHORTFALL                         -0.10 mm
+
+It fails before any margin, on a rule with no give in it. The preferred
+placement is worse still — it wants the antenna to **overhang the board edge by
+5.5 mm**, which the slot cannot accommodate.
+
+### 3. The keep-out GROWS, so the area saving is illusory
+
+|  | MDBT50Q (chip ant.) | BC840M (trace ant.) |
+|---|---|---|
+| body | 162.75 mm2 | 87.33 mm2 |
+| ground-free area required | 84.20 mm2 | **110.55 mm2** |
+| ground surviving at the sides | 3.37 mm each | **none — full width** |
+
+The body shrinks by 75.42 mm2 and the mandatory ground-free area grows by
+26.35 mm2, on **both** F.Cu and B.Cu. Net saving is ~49 mm2, not 76 — and it is
+unobtainable anyway because of the 0.10 mm width shortfall.
+
+## The lesson worth keeping
+
+**MDBT50Q is physically bigger because its antenna is a ceramic chip, and that
+is precisely what lets it work here.** A chip antenna tolerates nearby ground
+and nearby metal; a PCB trace antenna does not, and buys its small body by
+demanding clear space around it. On a 20 x 19 mm board inside a metal keyboard,
+the tolerant antenna is worth more than the small body.
+
+Every smaller candidate examined (BC840, BC840M, ISP1807) uses a trace or
+integrated-matching antenna with a keep-out at least as large as MDBT50Q's.
+**Do not re-open this on module BODY size alone** — compare body + mandatory
+keep-out, and check the metal-enclosure note first, because it is the cheapest
+disqualifier to test.
