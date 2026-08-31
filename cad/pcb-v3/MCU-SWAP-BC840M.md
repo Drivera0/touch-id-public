@@ -21,7 +21,9 @@ For scale: the entire 0201 campaign (14 parts) recovered **7.83 mm2**.
 | **Fanstel BC840M** | **7.1 x 12.2 x 1.5** | **86.62 mm2** | **135 m** | **yes, 1.7–5.5 V** | production, $8.86 |
 | Fanstel BC840 | 7.1 x 9.2 x 1.5 | 65.32 mm2 | **4 m** | yes | **SOLD OUT + range risk** |
 | Fanstel BC840E | 7.1 x 12.2 x 1.8 | — | 850 m | yes | **u.FL external antenna — ruled out** |
-| Holyiot 17095 | 9.4 x 9.25 | 86.95 mm2 | ? | **NO** | ruled out, see below |
+| Holyiot 17095 | 9.4 x 9.25 | 86.95 mm2 | ? | **NO** | ruled out — no VDDH |
+| Insight SiP ISP1807 | 8.0 x 8.0 x 1.0 | 64.00 mm2 | 230 m | **NO** | ruled out — see below |
+| Minew MS88SF3 | 18.5 x 12.5 | 231.25 mm2 | 300–350 m | ? | **BIGGER than what we have** |
 
 ### BC840M saves 76.13 mm2 of body area — 9.7x the whole 0201 campaign
 
@@ -36,11 +38,44 @@ keyboard's top frame is metal"* — a 4 m free-space rating inside a metal
 enclosure is the same mistake in a different package. It is also sold out at
 Fanstel. The extra 21.3 mm2 BC840M costs is cheap insurance.
 
+### Why NOT the ISP1807 — the tempting one
+
+8.0 x 8.0 x 1.0 mm, 64 mm2, nRF52840, integrated antenna and matching, an
+on-module 32.768 kHz crystal, and 2.4 GHz proprietary (Gazell). On area alone it
+beats everything. **Two hard blockers, both from datasheet R18:**
+
+1. **No VDDH.** Pin 26 VCC_nRF is the only supply: **1.7–3.6 V, absolute max
+   3.9 V**. The revision history is explicit — *"R6: Correction VCC / VCCH, **No
+   High-Power Mode availability**."* VSTOR reaches 3.912 V, which is PAST its
+   absolute maximum, not merely outside the operating range.
+2. **Antenna keep-out is 18.0 mm min x 4.0 mm** — "no metal, no traces and no
+   components on any application PCB layer". On a 20.00 mm wide board that is
+   the entire antenna end, inside a metal keyboard frame.
+
 ### Why NOT Holyiot 17095
 
 **No 4.2 V direct** — it has no VDDH. VSTOR reaches 3.912 V (VBAT_OV), which is
 above the nRF52840's 3.6 V VDD maximum, so VDDH is not optional here. This is
 the same reason DESIGN-SPEC notes "no non-Nordic module accepts 4.2 V".
+
+## VDDH is ARCHITECTURAL — this is why the small modules keep failing
+
+Two candidates died on VDDH, so it was worth proving the requirement is real
+rather than incidental. It is:
+
+    U1.30  VSTOR      -> VDDH, straight off the storage rail
+    U1.28  NRF_VDD    -> "REG0 output decoupling" (C9)
+
+**REG0 is the nRF52840's INTERNAL high-voltage regulator.** In high-voltage
+mode VDDH is the input and VDD is REG0's *output*, which needs the decoupling
+cap — that is exactly what C9 is. NRF_VDD is not fed by anything on the board.
+
+Both TPS7A2033 LDOs power the SENSOR rails (U3 -> SENSOR_3V3, U4 ->
+SENSOR_MCU_3V3), not the MCU. So there is no existing 3.3 V rail to retarget.
+
+Dropping VDDH would mean **adding a third LDO purely for the MCU**: more parts
+and area on a board already at capacity, and its quiescent current comes
+straight out of the harvest budget. VDDH is a requirement, not a convenience.
 
 ## What BC840M keeps
 
