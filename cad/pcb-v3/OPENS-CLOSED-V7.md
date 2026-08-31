@@ -66,6 +66,33 @@ verdict knowingly); (b) wait for the LiPol reply — protected cell confirmed
 means the cluster is deleted and this heals itself; (c) move U5 south out of
 the pogo shadow — a multi-part, multi-net cascade for a future session.
 
+## RESOLUTION — LiPol confirmed, cluster deleted (2026-08-31, same day)
+
+Option (b) resolved itself within the hour: LiPol quoted the **LPM1254 80 mAh
+with factory PCM and wires** (MOQ 5 @ [pricing redacted], 1-2 weeks,
+assembled Ø12 × 6.7 — fits the as-built Ø14.00 pocket per the envelope
+CELL-SOURCING already evaluated; max discharge **80 mA**, so the 30 mA fear
+dies too). Executed per the handover's own plan:
+
+* `netlist_v3.py`: **U5, R8, R9, C14 deleted**; BT1.2 is **GND** again; nets
+  PCM_VDD / PCM_VM / CELL_NEG gone. Regenerated with `export_netlist.py`
+  (44 parts, 27 nets).
+* Board: 4 footprints removed; 80 segs of PCM_VDD/PCM_VM deleted; VBAT's
+  east feed branch (38 segs + 1 via, it only served R8.1) deleted; the
+  CELL_NEG chain **renamed to GND** (it becomes free ground stitching, and
+  its via at (5.1,-7.0) is now a GND via in the pogo interior) with its two
+  dead tails trimmed.
+* **Every wall around U1.33 vanished with the cluster.** A real-rectangle
+  clearance simulation shows 0.2-0.4 mm of pour room straight down x≈3.9
+  from the U1.32/33 lobe to the GND wall at y-8.55.
+* Bonus: **C6989585 leaves the BOM** — warning 21b now lists only U1's
+  MDBT50Q. 29 placed designators, 19 LCSC codes.
+
+Preflight: 22 PASS, and the only blocker is U1.33-vs-the-STALE-fill; the
+pour-blind connectivity check reports **0 opens**. **One more KiCad refill
+(B, save) and the gate is expected fully green.** The user — not a session —
+places the LiPol order (vendor quote).
+
 ---
 
 

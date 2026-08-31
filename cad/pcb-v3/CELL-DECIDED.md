@@ -5,7 +5,19 @@ type: project
 
 # The cell: LiPol LPM1254 with PCM + wires
 
-## Ranking — enquiry sent 2026-08-28, awaiting reply
+> [!success] **CONFIRMED BY LIPOL — 2026-08-31.** Quote received: LPM1254 3.6 V
+> 80 mAh **with protection circuit and wires**, MOQ 5 @ [pricing redacted]
+> , 1-2 week lead, DHL/UPS/FedEx door-to-door,
+> PayPal or credit card, duties not included. Assembled size **O12 x 6.7 mm**
+> — inside the D13 +-0.5 x 6.5 +-0.3 envelope already evaluated against the
+> as-built O14.00 x 8.4 pocket. **Max discharge 80 mA** (the 30 mA figure was
+> the small variant; load is 25 mA = 31%%). THE USER PLACES THIS ORDER — not a
+> session. Consequence executed the same day: **U5, R8, R9, C14 deleted from
+> netlist_v3.py and the board**; BT1.2 is GND again. PCM-ONBOARD.md and
+> BUY-YOURSELF.md are superseded — the protected wired cell IS a catalogue
+> product after all.
+
+## Ranking — enquiry sent 2026-08-28, REPLY RECEIVED 2026-08-31
 
 | # | option | mAh | reserve* | fits Ø14.00 × 9.21? | specs? | buy how |
 |---|---|---|---|---|---|---|

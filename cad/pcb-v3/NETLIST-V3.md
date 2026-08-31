@@ -13,7 +13,7 @@ updated: 2026-08-27
 **Generated from `netlist_v3.py` by `export_netlist.py` — do not hand-edit.**
 Edit the Python and re-run, or the two will disagree.
 
-48 parts · 186 pins · 52 deliberate no-connects · 30 nets · no single-pin nets
+44 parts · 175 pins · 51 deliberate no-connects · 27 nets · no single-pin nets
 
 > [!warning] Structurally complete is not the same as settled
 > Every pin is accounted for and no net has fewer than two connections. The
@@ -25,20 +25,18 @@ Edit the Python and re-run, or the two will disagree.
 
 | Net | # | Connections |
 |---|---|---|
-| `GND` | 41 | U1-1, U1-2, U1-15, U1-33, U1-55, U1-32, U2-1, U2-3, U2-5, U2-6, U2-15, U2-16, U2-17, U2-21, U3-2, U3-5, U4-2, U4-5, J4-5, J2-6, J3-5, TP8-1, TP9-1, TP10-1, ROV1-2, ROK1-2, C1-2, C2-2, C3-2, C4-2, C5-2, C6-2, C7-2, C8-2, C9-2, C10-2, R5-2, C12-2, C13-2, U5-4, R9-2 |
+| `GND` | 40 | U1-1, U1-2, U1-15, U1-33, U1-55, U1-32, U2-1, U2-3, U2-5, U2-6, U2-15, U2-16, U2-17, U2-21, U3-2, U3-5, U4-2, U4-5, J4-5, J2-6, BT1-2, J3-5, TP8-1, TP9-1, TP10-1, ROV1-2, ROK1-2, C1-2, C2-2, C3-2, C4-2, C5-2, C6-2, C7-2, C8-2, C9-2, C10-2, R5-2, C12-2, C13-2 |
 | `VSTOR` | 11 | U1-30, U2-19, U3-3, U3-4, U4-4, J3-4, TP2-1, C2-1, C3-1, C10-1, R4-1 |
 | `VIN_DC` | 7 | U2-2, TP1-1, R1-2, R2-2, R3-2, L1-2, C1-1 |
 | `SENSOR_3V3` | 5 | U3-1, J2-1, TP5-1, C6-1, C7-1 |
-| `VBAT` | 5 | U2-18, BT1-1, TP3-1, C5-1, R8-1 |
 | `SENSOR_MCU_3V3` | 4 | U4-1, J2-3, TP6-1, C8-1 |
+| `VBAT` | 4 | U2-18, BT1-1, TP3-1, C5-1 |
 | `VBAT_OK` | 4 | U1-16, U2-13, TP4-1, R7-1 |
 | `VBAT_SENSE` | 4 | U1-9, R4-2, R5-1, C12-1 |
 | `BL_FLAG` | 3 | U1-11, R6-2, C13-1 |
 | `BL_RETURN` | 3 | J11-4, TP7-1, R6-1 |
-| `CELL_NEG` | 3 | BT1-2, U5-1, C14-2 |
 | `OK_HYST` | 3 | U2-11, ROK2-1, ROK3-2 |
 | `OK_PROG` | 3 | U2-12, ROK1-1, ROK2-2 |
-| `PCM_VDD` | 3 | U5-2, R8-2, C14-1 |
 | `RESET` | 3 | U1-40, J3-3, R7-2 |
 | `VBAT_OV_SET` | 3 | U2-7, ROV1-1, ROV2-2 |
 | `VRDIV` | 3 | U2-8, ROV2-1, ROK3-1 |
@@ -47,7 +45,6 @@ Edit the Python and re-run, or the two will disagree.
 | `HARV_3` | 2 | J11-3, R3-1 |
 | `LX` | 2 | U2-20, L1-1 |
 | `NRF_VDD` | 2 | U1-28, C9-1 |
-| `PCM_VM` | 2 | U5-3, R9-1 |
 | `SENSOR_RX` | 2 | U1-24, J2-5 |
 | `SENSOR_SW_EN` | 2 | U1-19, U4-3 |
 | `SENSOR_TX` | 2 | U1-22, J2-4 |
@@ -60,14 +57,14 @@ Edit the Python and re-run, or the two will disagree.
 
 ## Parts, pin by pin
 
-### BT1 — Cell wire pads — bare 1254-class cell + factory leads
+### BT1 — Cell wire pads — LiPol LPM1254 80mAh, factory PCM + leads
 
 > 3.0 V discharge cut-off, 4.30 +-0.05 V charge, 210 mA pulse (CP1254 A4X figures). Two O1.4 wire-landing pads on 1.6 mm pitch — NOT a cell footprint. Solder the cell's LEADS here; never put an iron on the cell (CoinPower handbook 8.7). 4.30 V is the cell's charge voltage; the 4.00 V in some notes is the RAPID-charge footnote and does not apply here.
 
 | Pin | Net |
 |---|---|
 | 1 | `VBAT` |
-| 2 | `CELL_NEG` |
+| 2 | `GND` |
 
 ### C1 — 10uF 10V X5R 0402
 
@@ -172,15 +169,6 @@ Edit the Python and re-run, or the two will disagree.
 |---|---|
 | 1 | `BL_FLAG` |
 | 2 | `GND` |
-
-### C14 — 0.1uF 0201
-
-> Datasheet C1. Across VDD and S1, for supply-voltage fluctuation.
-
-| Pin | Net |
-|---|---|
-| 1 | `PCM_VDD` |
-| 2 | `CELL_NEG` |
 
 ### J2 — Sensor pads, HLK-ZW0922 (was ZW0905 — discontinued)
 
@@ -294,24 +282,6 @@ Edit the Python and re-run, or the two will disagree.
 |---|---|
 | 1 | `VBAT_OK` |
 | 2 | `RESET` |
-
-### R8 — 330R 0201
-
-> Datasheet R1. VDD series protection; 330R typ, 470R max.
-
-| Pin | Net |
-|---|---|
-| 1 | `VBAT` |
-| 2 | `PCM_VDD` |
-
-### R9 — 2.7k 0201
-
-> Datasheet R2. FUNCTIONAL, not optional -- every over-current figure in the datasheet is measured with R2 = 2.7k. Omit it and 0.315 A is not 0.315 A.
-
-| Pin | Net |
-|---|---|
-| 1 | `PCM_VM` |
-| 2 | `GND` |
 
 ### ROK1 — 4.3M 0201
 
@@ -553,18 +523,6 @@ Edit the Python and re-run, or the two will disagree.
 | 3 | `SENSOR_SW_EN` |
 | 4 | `VSTOR` |
 | 5 | `GND` |
-
-### U5 — Mitsumi MC3651DF1AAM cell protection, PLP-4E
-
-> Over-charge 4.280 V, over-discharge 2.700 V, discharge over-current 0.315 A. NOTE: the '2.2x the cell's 140 mA rating' that justified this part was the VARTA CP1254's number, carried over when the cell changed. The LPM1254 datasheet says 30 mA max continuous (65 mA on the catalogue page for the 65 mAh variant), so 0.315 A is 10.5x / 4.8x, not 2.2x -- CONFIRM the figure for the variant ordered. No PCM IC trips near 66 mA, so none guards this cell's CONTINUOUS rating; they guard against shorts. Still beats the AP6683's 0.9 A. Iq 3.0 uA typ / 4.5 max = 6.7 % of the 4.0 mWh/day budget. Digi-Key 2508-MC3651DF1AAMCT-ND, US$1.33 at qty 1.
-
-| Pin | Net |
-|---|---|
-| 1 | `CELL_NEG` |
-| 2 | `PCM_VDD` |
-| 3 | `PCM_VM` |
-| 4 | `GND` |
-| 5 | *(no connect)* |
 
 ---
 

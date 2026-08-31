@@ -147,16 +147,18 @@ part("J2", "Sensor pads, HLK-ZW0922 (was ZW0905 — discontinued)", 6, {
 # RAPID charge at 140 mA. TouchID charges from harvest at microamps, so it
 # never applies. The real ceiling on VBAT_OV is the PCM's trip minus 150 mV.
 #
-# THE CELL NO LONGER NEEDS A PCM. As of 2026-08-29 the protection is ON THIS
-# BOARD (U5, Mitsumi MC3651DF1AAM), so BT1 takes a plain BARE 1254-class cell
-# with factory-attached leads -- an ordinary retail product, which is what
-# finally unblocks sourcing. The hunt for a protected+wired cell is over: none
-# exists that an individual can buy. See PCM-ONBOARD.md and BUY-YOURSELF.md.
+# THE CELL CARRIES ITS OWN PCM — REVERSED AGAIN 2026-08-31, this time on a
+# QUOTE, not a guess. LiPol confirmed the LPM1254 80 mAh WITH factory PCM and
+# wires: MOQ 5 @ USD 20/pc + 190 shipping, 1-2 week lead, PayPal, assembled
+# O12 x 6.7 mm (fits the as-built O14.00 pocket; CELL-SOURCING.md evaluated
+# D13 +-0.5 x 6.5 +-0.3 against an 8.4 mm deep pocket), max discharge 80 mA
+# (the 30 mA fear was the small variant). PCM-ONBOARD.md's premise -- "a
+# protected wired cell is not a retail product" -- was wrong; the protected
+# part IS the catalogue product. U5/R8/R9/C14 are deleted below.
 #
-# NOTE PIN 2 IS NOW CELL_NEG, NOT GND. The cell's negative lead goes to the
-# PCM, and the board grounds through it.
-part("BT1", "Cell wire pads — bare 1254-class cell + factory leads", 2,
-     {1: "VBAT", 2: "CELL_NEG"},
+# PIN 2 IS GND AGAIN. The cell's negative lead is protected at the factory.
+part("BT1", "Cell wire pads — LiPol LPM1254 80mAh, factory PCM + leads", 2,
+     {1: "VBAT", 2: "GND"},
      "3.0 V discharge cut-off, 4.30 +-0.05 V charge, 210 mA pulse (CP1254 A4X "
      "figures). Two O1.4 wire-landing pads on 1.6 mm pitch — NOT a cell "
      "footprint. Solder the cell's LEADS here; never put an iron on the cell "
@@ -283,63 +285,14 @@ rc("C12", "10nF 0402", "VBAT_SENSE", "GND", "SAADC sampling reservoir")
 rc("R6", "100k 0402", "BL_RETURN", "BL_FLAG", "series protection only")
 rc("C13", "10nF 0402", "BL_FLAG", "GND")
 
-# ======================= U5 — ON-BOARD CELL PROTECTION =======================
-# Mitsumi MC3651DF1AAM, PLP-4E. Added 2026-08-29.
-#
-# WHY IT IS HERE AND NOT ON THE CELL: no protected 1254-class cell exists that
-# an individual can buy (see BUY-YOURSELF.md). Putting the PCM on the board
-# means ANY bare cell with factory leads will do -- an ordinary retail product.
-# It also lets the housing riser come back down from 6.50 to 4.50 mm.
-#
-# TOPOLOGY (datasheet "Typical application circuit", p.6). The PCM sits in the
-# NEGATIVE path; the positive goes straight through:
-#
-#     cell + (B+) --------------------------------------> VBAT   (= P+)
-#     cell - (B-) --> CELL_NEG --> U5 S1 ... U5 S2 -----> GND    (= P-)
-#                         R8:  VBAT     -> PCM_VDD
-#                         R9:  PCM_VM   -> GND
-#                         C14: PCM_VDD  -> CELL_NEG
-#
-# BT1 pin 2 IS NO LONGER GND. It is CELL_NEG, and the only things on that net
-# are the cell lead, U5's S1 and C14. Everything else grounds THROUGH the PCM,
-# which is the entire point: a short anywhere downstream gets interrupted.
-#
-# The datasheet calls these R1/R2/C1. Renamed R8/R9/C14 because this board
-# already has an R1, R2 and C1 doing something completely different.
-#
-# *** PIN 5 (D) IS THE FET DRAIN AND MUST BE ELECTRICALLY OPEN. ***
-# It is the node between the two series FETs. Connecting it to GND bypasses the
-# protection and leaves a part that looks healthy and does nothing. Solder it
-# for mechanical anchorage only.
-part("U5", "Mitsumi MC3651DF1AAM cell protection, PLP-4E", 5, {
-    1: "CELL_NEG",     # S1  — cell negative / discharge FET source
-    2: "PCM_VDD",      # VDD — cell positive sense, through R8
-    3: "PCM_VM",       # V-  — charger negative sense, through R9
-    4: "GND",          # S2  — charge FET source = pack negative
-    5: "NC",           # D   — drain. MUST STAY OPEN.
-}, "Over-charge 4.280 V, over-discharge 2.700 V, discharge over-current "
-   "0.315 A. NOTE: the '2.2x the cell's 140 mA rating' that justified this "
-   "part was the VARTA CP1254's number, carried over when the cell changed. "
-   "The LPM1254 datasheet says 30 mA max continuous (65 mA on the catalogue "
-   "page for the 65 mAh variant), so 0.315 A is 10.5x / 4.8x, not 2.2x -- "
-   "CONFIRM the figure for the variant ordered. No PCM IC trips near 66 mA, "
-   "so none guards this cell's CONTINUOUS rating; they guard against shorts. "
-   "Still beats "
-   "the AP6683's 0.9 A. Iq 3.0 uA typ / 4.5 max = 6.7 % of the 4.0 mWh/day "
-   "budget. Digi-Key 2508-MC3651DF1AAMCT-ND, US$1.33 at qty 1.")
-
-rc("R8", "330R 0201", "VBAT", "PCM_VDD",
-   "Datasheet R1. VDD series protection; 330R typ, 470R max.")
-rc("R9", "2.7k 0201", "PCM_VM", "GND",
-   "Datasheet R2. FUNCTIONAL, not optional -- every over-current figure in the "
-   "datasheet is measured with R2 = 2.7k. Omit it and 0.315 A is not 0.315 A.")
-rc("C14", "0.1uF 0201", "PCM_VDD", "CELL_NEG",
-   "Datasheet C1. Across VDD and S1, for supply-voltage fluctuation.")
-
-# The datasheet's C2 (S1 to V-) and C3 (across the pack) are drawn DASHED, and
-# the text says "use either C2 or C3, or both, by request of your application".
-# Neither is fitted: the pack side already carries C5 (10uF) on VBAT/GND, and
-# board area is the scarce resource. Revisit if ESD testing says otherwise.
+# ================= U5 CLUSTER DELETED — CELL PCM IS FACTORY-FITTED ==========
+# U5 (MC3651DF1AAM), R8, R9 and C14 were removed 2026-08-31: LiPol quoted the
+# LPM1254 80 mAh WITH factory PCM and wires (see BT1 above). The on-board PCM
+# duplicated it and was the harder half of the last two open pads: U5.2 sat in
+# the pogo no-via shadow with zero legal via sites. Deleting the cluster also
+# freed the pour paths that stranded U1.32/U1.33, and removed C6989585 -- one
+# of the two zero-stock assembly parts. Nets PCM_VDD, PCM_VM and CELL_NEG are
+# gone; the cell negative lands on GND at BT1.2.
 
 
 # ------------------------------------------------------------- the check ----
