@@ -38,13 +38,33 @@ by hand to 0.3). The remaining strandings were real, and were fixed thus:
 **Current preflight: 2 BLOCKERS, both U1.32/U1.33 pour-reach — both expected
 to clear on the next zone refill.** Everything else passes.
 
-### DO THIS NOW (user)
+### RESULT AFTER THE SECOND REFILL (2026-08-31)
 
-1. Open `pcb-v7-zero-opens.kicad_pcb` in KiCad (the matching `.kicad_pro` now
-   carries the real fab rules — do not delete it), **refill zones (B), save**.
-2. Re-run `sexp_check.py` and `preflight.py`. Expected: **0 blockers.**
-3. If U1.32/U1.33 still show open, tell the next session to look at the pour
-   strip x 2.4-3.0, y -6.3..-8.5 on F.Cu — something re-entered it.
+22 checks PASS. The pour strip worked: **U1.32 is bonded.** The strip's price
+was that the PCM column now runs between U1.32 and U1.33, and **U1.33 — the
+final pad on the whole board — is stranded** in a cell walled by the PCM
+column (W), the corridor elbow (N), the U1_PINCH rule area + U5 cluster (E),
+the CELL_NEG feeder (S), and the pogo no-via blanket overhead. Exhaustive
+search (close_open, all layers, via-to-plane) confirms NO legal bond exists.
+Every alternative was worked through and each dies on hard geometry:
+the column must run in one of two N-S slots, the pour needs both, and the
+lane between VRDIV and U5.2's halo — the only E-W corridor in the south
+half — holds exactly one track. Squeezes measured and lost: 4 μm short
+between the GND wall and VRDIV, 22 μm short below C14.2.
+
+**Why this may not matter:** U1.33 is one of the module's many GND
+castellations; U1.32 — the same module-internal ground, 0.8 mm away — is
+bonded, as are U1's other GND pads and the whole GND net (41 pads, now 2
+pieces: main + U1.33 alone). Board-side, U1.33's bond adds only redundancy
+and RF stitching. And **the pending cell decision can dissolve the problem
+entirely**: if the protected LPM1254 is confirmed, U5/R8/C14 come off the
+board, the PCM column and CELL_NEG feeder vanish, and U1.33 bonds trivially
+on the next refill.
+
+Resolution options: (a) accept U1.33 unbonded and order (override the gate's
+verdict knowingly); (b) wait for the LiPol reply — protected cell confirmed
+means the cluster is deleted and this heals itself; (c) move U5 south out of
+the pogo shadow — a multi-part, multi-net cascade for a future session.
 
 ---
 
