@@ -104,3 +104,46 @@ The two open pads (U5.2, R6.1) are in the **pogo block**, not under U1. Freeing
 76 mm2 gives the placer room to move the PCM cluster out of the pogo shadow,
 which is the mechanism by which it should help — but that is a prediction, not
 a result, and it must be proven by a rebuild + reroute + preflight.
+
+---
+
+## Can a different CELL unlock a smaller module? No — asked and answered 2026-08-30
+
+Tempting idea: the 3.6 V wall that kills ISP1807 comes from VSTOR reaching
+3.912 V, and 3.912 V is a Li-ion number. Pick a lower-voltage chemistry and
+VDDH stops being required. **It does not work, for two independent reasons.**
+
+### 1. The ceiling is set by the SOURCE, not the cell
+
+DESIGN-SPEC, "three deliberate deletions": *"a source that cannot exceed
+**3.68 V** cannot overcharge a 4.2 V cell. It self-limits at ~25-30% SOC."*
+There is no charger IC — harvest reaches the cell through ideal diodes, so
+VSTOR tracks the source and tops out at **3.68 V whatever cell is fitted**.
+
+**3.68 V is still above the 3.6 V VDD maximum of every non-VDDH module**, and
+there is no middle tier: modules are either standard-VDD (3.6 V max) or
+high-voltage (5.5 V max). Nothing is rated 3.7-3.8 V. Changing chemistry moves
+a number that was never the binding constraint.
+
+Capping lower is not available either — see
+[[touchid-lm66100-cannot-be-gpio-gated]]: the LM66100's CE is a comparator
+referenced to VIN, so the harvest path cannot be opened under firmware control.
+
+### 2. Small LiFePO4 cells are not a purchasable product
+
+LFP tops out at 3.65 V and would have been the candidate chemistry. At the
+**20-35 mAh** this design needs, it effectively does not exist at retail: LFP is
+an industrial large-format chemistry and the small parts are 20 **Ah**, not
+20 mAh. Same trap as the protected LPM1254 — correct on paper, unbuyable.
+
+### What the cell decision DOES still control
+
+Sourcing and sellability, which is the reason it was raised. Requirements are
+unchanged and modest: **20-35 mAh**, storage impedance **under 3.3 Ohm**, bare
+cell with factory leads (protection lives on-board at U5), and it must be
+buyable singly AND in small production quantity. That is an ordinary small
+LiPo — the VARTA CP1254 A4 (77 mAh, <0.5 Ohm, 210 mA pulse) is noted as
+electrically ideal but fails mechanically.
+
+**Conclusion: VDDH is non-negotiable, so the module choice stands on its own.
+BC840M remains the recommendation.**
