@@ -65,9 +65,12 @@ base = (base.faces("<Z").workplane()
 base = (base.faces(">Z").workplane()
         .rect(BW + 2 * CLR, BH + 2 * CLR).cutBlind(-POCKET_D))
 
-# finger notches on two sides to lift the board out
+# ONE finger notch, on the -Y wall at x=0. Placement is load-bearing, learned
+# twice: a +Y notch undercuts the SPACEBAR ridge/dot, and +-X notches 8 mm wide
+# reach inboard past x=8.15 and swallow the post roots at x=+-8.75. The -Y wall
+# at x=0 is the only edge with nothing rooted near it (pins y=+3, posts y=0).
 base = (base.faces(">Z").workplane()
-        .pushPoints([(0, -(BH / 2 + CLR + WALL / 2)), (0, BH / 2 + CLR + WALL / 2)])
+        .pushPoints([(0, -(BH / 2 + CLR + WALL / 2))])
         .slot2D(12, 8, 0).cutBlind(-POCKET_D - 2))
 
 # pogo pin holes, straight through deck into the cavity
@@ -75,21 +78,28 @@ floor_z = H - POCKET_D
 base = (base.faces(">Z").workplane(offset=-POCKET_D)
         .pushPoints(J3).circle(PIN_HOLE / 2).cutThruAll())
 
-# registration posts up from the pocket floor
+# registration posts up from the pocket floor. Rooted 1 mm INTO the deck:
+# exactly-touching unions tessellate as separate shells in the STL (the
+# "floating pieces" of the first print candidate); overlap makes one solid.
+adds = []
 for (px, py) in REG:
-    base = base.union(
-        cq.Workplane("XY", origin=(px, py, floor_z))
-        .circle(POST_D / 2).extrude(POST_UP)
-        .faces(">Z").chamfer(0.3))
+    adds.append(cq.Workplane("XY", origin=(px, py, floor_z - 1.0))
+                .circle(POST_D / 2).extrude(POST_UP + 1.0)
+                .faces(">Z").chamfer(0.3).val())
 
-# orientation marks: arrow bar + 'SPACEBAR' edge ridge on the +Y wall top
-base = base.union(
-    cq.Workplane("XY", origin=(0, W / 2 - WALL / 2, H))
-    .box(10, 1.2, 0.6, centered=(True, True, False)))
-# small dot marking pin 1 (SWDIO) corner, on the -X wall top
-base = base.union(
-    cq.Workplane("XY", origin=(-(L / 2 - WALL / 2), 3.0, H))
-    .circle(0.9).extrude(0.6))
+# orientation marks on the +Y wall top (now uncut, fully solid below):
+# a ridge marking the SPACEBAR edge, and a dot at x=-8 marking the SWDIO column
+adds.append(cq.Workplane("XY", origin=(2.0, W / 2 - WALL / 2, H - 0.5))
+            .box(10, 1.2, 1.1, centered=(True, True, False)).val())
+adds.append(cq.Workplane("XY", origin=(-8.0, W / 2 - WALL / 2, H - 0.5))
+            .circle(0.9).extrude(1.1).val())
+# one explicit boolean fuse -- Workplane.union() was leaving a COMPOUND of
+# touching solids, which slices as floating pieces
+fused = base.val()
+for a in adds:
+    fused = fused.fuse(a)
+fused = fused.clean()
+base = cq.Workplane("XY").newObject([fused])
 
 cq.exporters.export(base, os.path.join(OUT, "flash_jig.stl"))
 cq.exporters.export(base, os.path.join(OUT, "flash_jig.step"))
