@@ -17,7 +17,7 @@ import sexp
 HERE = os.path.dirname(os.path.abspath(__file__)) or "."
 import sys as _sys
 BOARD = (_sys.argv[1] if len(_sys.argv)>1 else None) or os.environ.get("BOARD") \
-        or os.path.join(HERE, "pcb-v6-handoff.kicad_pcb")  # was hardcoded; same defect as make_bom_cpl
+        or os.path.join(HERE, "pcb-v7-zero-opens.kicad_pcb")  # was hardcoded; same defect as make_bom_cpl
 GD = os.path.join(HERE, "..", "v6-handoff", "gerbers")
 
 fails, rows = [], []

@@ -17,7 +17,7 @@ import sexp
 HERE = os.path.dirname(os.path.abspath(__file__)) or "."
 import sys as _sys
 BOARD = (_sys.argv[1] if len(_sys.argv)>1 else None) or os.environ.get("BOARD") \
-        or os.path.join(HERE, "pcb-v6-handoff.kicad_pcb")  # was hardcoded; same defect as make_bom_cpl
+        or os.path.join(HERE, "pcb-v7-zero-opens.kicad_pcb")  # was hardcoded; same defect as make_bom_cpl
 EXP = os.path.join(HERE, "..", "exports")
 # v3 filenames were stale (third tool with this defect today) -- take the
 # newest touchid-*-CPL/BOM in the assembly dir instead, overridable by env.
