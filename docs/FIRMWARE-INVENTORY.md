@@ -52,10 +52,20 @@ a custom board (the Raytac dev-board target is NOT this PCB) with:
   settle baked into the DTS so code can't violate the sequencing
 - every pin from the handoff table in `touchid_module.dts` (deliverable 4)
 
+## Decided since (2026-08-31, same day)
+
+- **Protocol: EF-01**, implemented in full and verified against the
+  Hi-Link manual in the vault — see docs/SENSOR-PROTOCOL.md.
+- **Transport: custom GATT + Mac helper** (user decision, over HID).
+  Service in `ble.c`: auth-result notify, challenge write, control write
+  (enroll/delete — the no-button enrollment path). Encrypted chars,
+  bonds persisted to the storage partition.
+
 ## Still open
 
-- **ZW0922 byte-level UART protocol** — in the spec PDF only; stubs in
-  `sensor_zw0922.c` return -ENOSYS until filled in against it. Do NOT
-  assume the 0xEF01 family from the .ino applies.
-- **HID vs custom GATT** for the auth report (bring-up step 4).
-- BL_FLAG voltage thresholds — measure on real hardware.
+- On-hardware verification of everything (first flash pending).
+- **Crypto binding**: the auth notify currently echoes the helper's
+  nonce; replace with HMAC once key provisioning is designed
+  (candidate key home: sensor Notepad pages, see SENSOR-PROTOCOL.md).
+- The Mac helper's BLE rewrite (design kept in reference/tinytouch/).
+- Sleep/advertising policy vs the ~6 µA budget; BL_FLAG thresholds.
