@@ -166,3 +166,76 @@ category, and buys nothing on that front.
 **Verdict: stay with a pre-wired cell.** The wired-cell rarity that motivated
 this is better solved by [the LPM1254 sourcing above](#) — LiPol sell wired
 assemblies at MOQ 5 with card payment.
+
+---
+
+## LiPol quotation received 2026-08-30 — resolves two open questions
+
+**Quoted:** LPM1254 3.6 V **80 mAh**, with protection circuit and wires.
+MOQ 5 @ [pricing redacted].
+Lead time 1-2 weeks, DHL/UPS/FedEx door-to-door 7 days, PayPal/card, duties excluded.
+
+### 1. Max discharge current is 80 mA for this variant — a THIRD figure
+
+| source | max continuous |
+|---|---|
+| VARTA CP1254 — **wrong cell**, corrected 2026-08-30 | 140 mA |
+| LPM1254 60 mAh datasheet | 30 mA |
+| LPM1254 65 mAh catalogue page | 65 mA |
+| **LPM1254 80 mAh — vendor, for the part quoted** | **80 mA** |
+
+The rating scales with capacity, which is why three numbers were all "right".
+**For the 80 mAh part the load of 25 mA is 31% of rating** — comfortable, not
+the 83% that the 60 mAh datasheet implied. U5's 0.315 A trip is **3.9x** the
+cell rating (not 2.2x, not 10.5x).
+
+### 2. The assembled size — the housing file asked for exactly this
+
+`touchid_module_v6.py` says, verbatim:
+
+> *"LIPOL CONTRADICT THEMSELVES ON DIAMETER, so this is built to the WORSE one
+> ... Resolve it with LiPol before production."*
+> *"The datasheet publishes NO assembled thickness, so 8.4 is still the
+> website's '+3.0 mm' blanket adder on a 5.4 cell -- NOT a per-model figure."*
+
+**Vendor answer, with PCM: 6.7 mm thick x 12 mm diameter.** Both guesses were
+conservative:
+
+| | modelled | actual | |
+|---|---|---|---|
+| diameter | 13.5 | **12.0** | 1.50 mm smaller |
+| thickness | 8.4 | **6.7** | 1.70 mm smaller |
+
+O12.0 clears even the SHORT pocket (O13.00) by 1.00 mm.
+
+### 3. So the PROTECTED cell is now the SHORTER build, not the taller one
+
+Module height = `riser_h + 8.36`.
+
+| build | riser | cell | module | vs the 8.36 knob module |
+|---|---|---|---|---|
+| tall, as built | 6.50 | 8.4 budget | 14.86 | 1.78x |
+| **re-cut for the real protected cell** | **4.80** | **6.7 actual** | **13.16** | **1.57x** |
+| short (bare-cell plan of record) | 4.50 | 5.6 | 12.86 | 1.54x |
+
+**The protected cell costs only 0.30 mm of height over the bare-cell plan** —
+and it deletes U5, R8 and C14 from the board, which removes the U5.2 open pad
+and one of the two zero-stock BOM lines (`C6989585`). That is a much better
+trade than the 2.00 mm the "tall" variant was reserving.
+
+### 4. The shipping is the problem, and it is probably a fixed DG fee
+
+    [volume pricing redacted]
+   [volume pricing redacted]
+   [volume pricing redacted]
+   [volume pricing redacted]
+
+Lithium cells ship as dangerous goods (**UN3480**, cells shipped on their own),
+which carries a per-SHIPMENT surcharge plus DG packaging and paperwork. If that
+is what the [shipping] is, it barely moves with quantity or destination — so the
+question to ask is whether it **scales**, not just whether it can be reduced.
+
+**Still to ask:** price WITHOUT the PCM (for comparison, though the protected
+part now looks better on both board and housing), shipping to a US address
+(destination redacted), whether [shipping] is a DG surcharge and how it scales, and
+production pricing versus the sample fee.
