@@ -279,7 +279,18 @@ Design NSMD: **copper 0.9 × 0.4, mask opening 1.04 × 0.54**.
 
 ---
 
-## 5. BT1 — VARTA CoinPower CP 1254 A4
+## 5. BT1 — VARTA CoinPower CP 1254 A4  ⚠️ SUPERSEDED
+
+> [!warning] This is NOT the cell being used. Do not read numbers off it.
+> The cell is the **LiPol LPM1254**. This CP1254 section is kept for the
+> comparison only. Its **140 mA continuous / 210 mA pulse** figures leaked into
+> `PCM-ONBOARD.md` and the U5 netlist note as if they described the current
+> cell — corrected 2026-08-30. The LPM1254 is **30 mA max continuous**
+> (65 mA on the catalogue page for the 65 mAh variant). See `CELL-SOURCING.md`.
+>
+> VARTA is ruled out anyway: both A4X parts NRND, no North American CoinPower
+> distributor, and no protected variant exists.
+
 
 Source: **VARTA preliminary data sheet, issue 2020-02-18**, type number **63125**,
 cell code INR1254 (`elektronik.ropla.eu/pdf/stock/vmb/cp1254a4.pdf`).

@@ -50,30 +50,30 @@ J11,3,HARV_3,"Keyboard slot, 4-pin pogo block (RIGHT)",1/2/3 are the RGB LED ano
 J11,4,BL_RETURN,"Keyboard slot, 4-pin pogo block (RIGHT)",1/2/3 are the RGB LED anodes. 4 is the LED common return.
 L1,1,LX,22uH,LBOOST -> VIN_DC. Package NOT verified.
 L1,2,VIN_DC,22uH,LBOOST -> VIN_DC. Package NOT verified.
-R1,1,HARV_1,1k 0402,caps awake draw to ~1.1 mA/pin
-R1,2,VIN_DC,1k 0402,caps awake draw to ~1.1 mA/pin
-R2,1,HARV_2,1k 0402,
-R2,2,VIN_DC,1k 0402,
-R3,1,HARV_3,1k 0402,
-R3,2,VIN_DC,1k 0402,
+R1,1,HARV_1,1k 0201,caps awake draw to ~1.1 mA/pin
+R1,2,VIN_DC,1k 0201,caps awake draw to ~1.1 mA/pin
+R2,1,HARV_2,1k 0201,
+R2,2,VIN_DC,1k 0201,
+R3,1,HARV_3,1k 0201,
+R3,2,VIN_DC,1k 0201,
 R4,1,VSTOR,4.7M 0402,
 R4,2,VBAT_SENSE,4.7M 0402,
 R5,1,VBAT_SENSE,1M 0402,
 R5,2,GND,1M 0402,
 R6,1,BL_RETURN,100k 0402,series protection only
 R6,2,BL_FLAG,100k 0402,series protection only
-R7,1,VBAT_OK,1k 0402,1k so an SWD programmer can still override RESET
-R7,2,RESET,1k 0402,1k so an SWD programmer can still override RESET
+R7,1,VBAT_OK,1k 0201,1k so an SWD programmer can still override RESET
+R7,2,RESET,1k 0201,1k so an SWD programmer can still override RESET
 R8,1,VBAT,330R 0201,"Datasheet R1. VDD series protection; 330R typ, 470R max."
 R8,2,PCM_VDD,330R 0201,"Datasheet R1. VDD series protection; 330R typ, 470R max."
 R9,1,PCM_VM,2.7k 0201,"Datasheet R2. FUNCTIONAL, not optional -- every over-current figure in the datasheet is measured with R2 = 2.7k. Omit it and 0.315 A is not 0.315 A."
 R9,2,GND,2.7k 0201,"Datasheet R2. FUNCTIONAL, not optional -- every over-current figure in the datasheet is measured with R2 = 2.7k. Omit it and 0.315 A is not 0.315 A."
-ROK1,1,OK_PROG,4.53M 0402,VBAT_OK falling = 3.12 V
-ROK1,2,GND,4.53M 0402,VBAT_OK falling = 3.12 V
-ROK2,1,OK_HYST,7.15M 0402,
-ROK2,2,OK_PROG,7.15M 0402,
-ROK3,1,VRDIV,1.33M 0402,VBAT_OK rising = 3.47 V
-ROK3,2,OK_HYST,1.33M 0402,VBAT_OK rising = 3.47 V
+ROK1,1,OK_PROG,4.3M 0201,VBAT_OK falling = 1.21*(1+6.8/4.3) = 3.123 V (was 3.120 at 4.53M/7.15M)
+ROK1,2,GND,4.3M 0201,VBAT_OK falling = 1.21*(1+6.8/4.3) = 3.123 V (was 3.120 at 4.53M/7.15M)
+ROK2,1,OK_HYST,6.8M 0201,
+ROK2,2,OK_PROG,6.8M 0201,
+ROK3,1,VRDIV,1.33M 0201,VBAT_OK rising = 1.21*(1+(6.8+1.33)/4.3) = 3.498 V (was 3.470)
+ROK3,2,OK_HYST,1.33M 0201,VBAT_OK rising = 1.21*(1+(6.8+1.33)/4.3) = 3.498 V (was 3.470)
 ROV1,1,VBAT_OV_SET,6.04M 0402 1%,"VBAT_OV = 1.5*1.21*(1+6.98/6.04) = 3.912 V, 3.955 V worst case. The cell's charge voltage is 4.30 V, NOT the 4.00 V some notes claimed — 4.00 is the rapid-charge footnote. The binding ceiling is the PCM's over-charge trip minus 150 mV, so pick the cell's PCM before retuning this divider."
 ROV1,2,GND,6.04M 0402 1%,"VBAT_OV = 1.5*1.21*(1+6.98/6.04) = 3.912 V, 3.955 V worst case. The cell's charge voltage is 4.30 V, NOT the 4.00 V some notes claimed — 4.00 is the rapid-charge footnote. The binding ceiling is the PCM's over-charge trip minus 150 mV, so pick the cell's PCM before retuning this divider."
 ROV2,1,VRDIV,6.98M 0402 1%,
@@ -180,8 +180,8 @@ U4,2,GND,TI TPS7A2033 3.3 V LDO (switched sensor-MCU rail),"Fed from VSTOR rathe
 U4,3,SENSOR_SW_EN,TI TPS7A2033 3.3 V LDO (switched sensor-MCU rail),"Fed from VSTOR rather than cascaded off SENSOR_3V3: cascading would leave no headroom, and this also keeps the sensor's 25 mA scan current off the always-on standby rail."
 U4,4,VSTOR,TI TPS7A2033 3.3 V LDO (switched sensor-MCU rail),"Fed from VSTOR rather than cascaded off SENSOR_3V3: cascading would leave no headroom, and this also keeps the sensor's 25 mA scan current off the always-on standby rail."
 U4,5,GND,TI TPS7A2033 3.3 V LDO (switched sensor-MCU rail),"Fed from VSTOR rather than cascaded off SENSOR_3V3: cascading would leave no headroom, and this also keeps the sensor's 25 mA scan current off the always-on standby rail."
-U5,1,CELL_NEG,"Mitsumi MC3651DF1AAM cell protection, PLP-4E","Over-charge 4.280 V, over-discharge 2.700 V, discharge over-current 0.315 A -- 2.2x the cell's 140 mA rating, and the reason this part beat the AP6683's 0.9 A. Iq 3.0 uA typ / 4.5 max = 6.7 % of the 4.0 mWh/day budget. Digi-Key 2508-MC3651DF1AAMCT-ND, US$1.33 at qty 1."
-U5,2,PCM_VDD,"Mitsumi MC3651DF1AAM cell protection, PLP-4E","Over-charge 4.280 V, over-discharge 2.700 V, discharge over-current 0.315 A -- 2.2x the cell's 140 mA rating, and the reason this part beat the AP6683's 0.9 A. Iq 3.0 uA typ / 4.5 max = 6.7 % of the 4.0 mWh/day budget. Digi-Key 2508-MC3651DF1AAMCT-ND, US$1.33 at qty 1."
-U5,3,PCM_VM,"Mitsumi MC3651DF1AAM cell protection, PLP-4E","Over-charge 4.280 V, over-discharge 2.700 V, discharge over-current 0.315 A -- 2.2x the cell's 140 mA rating, and the reason this part beat the AP6683's 0.9 A. Iq 3.0 uA typ / 4.5 max = 6.7 % of the 4.0 mWh/day budget. Digi-Key 2508-MC3651DF1AAMCT-ND, US$1.33 at qty 1."
-U5,4,GND,"Mitsumi MC3651DF1AAM cell protection, PLP-4E","Over-charge 4.280 V, over-discharge 2.700 V, discharge over-current 0.315 A -- 2.2x the cell's 140 mA rating, and the reason this part beat the AP6683's 0.9 A. Iq 3.0 uA typ / 4.5 max = 6.7 % of the 4.0 mWh/day budget. Digi-Key 2508-MC3651DF1AAMCT-ND, US$1.33 at qty 1."
-U5,5,NC,"Mitsumi MC3651DF1AAM cell protection, PLP-4E","Over-charge 4.280 V, over-discharge 2.700 V, discharge over-current 0.315 A -- 2.2x the cell's 140 mA rating, and the reason this part beat the AP6683's 0.9 A. Iq 3.0 uA typ / 4.5 max = 6.7 % of the 4.0 mWh/day budget. Digi-Key 2508-MC3651DF1AAMCT-ND, US$1.33 at qty 1."
+U5,1,CELL_NEG,"Mitsumi MC3651DF1AAM cell protection, PLP-4E","Over-charge 4.280 V, over-discharge 2.700 V, discharge over-current 0.315 A. NOTE: the '2.2x the cell's 140 mA rating' that justified this part was the VARTA CP1254's number, carried over when the cell changed. The LPM1254 datasheet says 30 mA max continuous (65 mA on the catalogue page for the 65 mAh variant), so 0.315 A is 10.5x / 4.8x, not 2.2x -- CONFIRM the figure for the variant ordered. No PCM IC trips near 66 mA, so none guards this cell's CONTINUOUS rating; they guard against shorts. Still beats the AP6683's 0.9 A. Iq 3.0 uA typ / 4.5 max = 6.7 % of the 4.0 mWh/day budget. Digi-Key 2508-MC3651DF1AAMCT-ND, US$1.33 at qty 1."
+U5,2,PCM_VDD,"Mitsumi MC3651DF1AAM cell protection, PLP-4E","Over-charge 4.280 V, over-discharge 2.700 V, discharge over-current 0.315 A. NOTE: the '2.2x the cell's 140 mA rating' that justified this part was the VARTA CP1254's number, carried over when the cell changed. The LPM1254 datasheet says 30 mA max continuous (65 mA on the catalogue page for the 65 mAh variant), so 0.315 A is 10.5x / 4.8x, not 2.2x -- CONFIRM the figure for the variant ordered. No PCM IC trips near 66 mA, so none guards this cell's CONTINUOUS rating; they guard against shorts. Still beats the AP6683's 0.9 A. Iq 3.0 uA typ / 4.5 max = 6.7 % of the 4.0 mWh/day budget. Digi-Key 2508-MC3651DF1AAMCT-ND, US$1.33 at qty 1."
+U5,3,PCM_VM,"Mitsumi MC3651DF1AAM cell protection, PLP-4E","Over-charge 4.280 V, over-discharge 2.700 V, discharge over-current 0.315 A. NOTE: the '2.2x the cell's 140 mA rating' that justified this part was the VARTA CP1254's number, carried over when the cell changed. The LPM1254 datasheet says 30 mA max continuous (65 mA on the catalogue page for the 65 mAh variant), so 0.315 A is 10.5x / 4.8x, not 2.2x -- CONFIRM the figure for the variant ordered. No PCM IC trips near 66 mA, so none guards this cell's CONTINUOUS rating; they guard against shorts. Still beats the AP6683's 0.9 A. Iq 3.0 uA typ / 4.5 max = 6.7 % of the 4.0 mWh/day budget. Digi-Key 2508-MC3651DF1AAMCT-ND, US$1.33 at qty 1."
+U5,4,GND,"Mitsumi MC3651DF1AAM cell protection, PLP-4E","Over-charge 4.280 V, over-discharge 2.700 V, discharge over-current 0.315 A. NOTE: the '2.2x the cell's 140 mA rating' that justified this part was the VARTA CP1254's number, carried over when the cell changed. The LPM1254 datasheet says 30 mA max continuous (65 mA on the catalogue page for the 65 mAh variant), so 0.315 A is 10.5x / 4.8x, not 2.2x -- CONFIRM the figure for the variant ordered. No PCM IC trips near 66 mA, so none guards this cell's CONTINUOUS rating; they guard against shorts. Still beats the AP6683's 0.9 A. Iq 3.0 uA typ / 4.5 max = 6.7 % of the 4.0 mWh/day budget. Digi-Key 2508-MC3651DF1AAMCT-ND, US$1.33 at qty 1."
+U5,5,NC,"Mitsumi MC3651DF1AAM cell protection, PLP-4E","Over-charge 4.280 V, over-discharge 2.700 V, discharge over-current 0.315 A. NOTE: the '2.2x the cell's 140 mA rating' that justified this part was the VARTA CP1254's number, carried over when the cell changed. The LPM1254 datasheet says 30 mA max continuous (65 mA on the catalogue page for the 65 mAh variant), so 0.315 A is 10.5x / 4.8x, not 2.2x -- CONFIRM the figure for the variant ordered. No PCM IC trips near 66 mA, so none guards this cell's CONTINUOUS rating; they guard against shorts. Still beats the AP6683's 0.9 A. Iq 3.0 uA typ / 4.5 max = 6.7 % of the 4.0 mWh/day budget. Digi-Key 2508-MC3651DF1AAMCT-ND, US$1.33 at qty 1."

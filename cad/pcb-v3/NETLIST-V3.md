@@ -240,7 +240,7 @@ Edit the Python and re-run, or the two will disagree.
 | 1 | `LX` |
 | 2 | `VIN_DC` |
 
-### R1 — 1k 0402
+### R1 — 1k 0201
 
 > caps awake draw to ~1.1 mA/pin
 
@@ -249,14 +249,14 @@ Edit the Python and re-run, or the two will disagree.
 | 1 | `HARV_1` |
 | 2 | `VIN_DC` |
 
-### R2 — 1k 0402
+### R2 — 1k 0201
 
 | Pin | Net |
 |---|---|
 | 1 | `HARV_2` |
 | 2 | `VIN_DC` |
 
-### R3 — 1k 0402
+### R3 — 1k 0201
 
 | Pin | Net |
 |---|---|
@@ -286,7 +286,7 @@ Edit the Python and re-run, or the two will disagree.
 | 1 | `BL_RETURN` |
 | 2 | `BL_FLAG` |
 
-### R7 — 1k 0402
+### R7 — 1k 0201
 
 > 1k so an SWD programmer can still override RESET
 
@@ -313,25 +313,25 @@ Edit the Python and re-run, or the two will disagree.
 | 1 | `PCM_VM` |
 | 2 | `GND` |
 
-### ROK1 — 4.53M 0402
+### ROK1 — 4.3M 0201
 
-> VBAT_OK falling = 3.12 V
+> VBAT_OK falling = 1.21*(1+6.8/4.3) = 3.123 V (was 3.120 at 4.53M/7.15M)
 
 | Pin | Net |
 |---|---|
 | 1 | `OK_PROG` |
 | 2 | `GND` |
 
-### ROK2 — 7.15M 0402
+### ROK2 — 6.8M 0201
 
 | Pin | Net |
 |---|---|
 | 1 | `OK_HYST` |
 | 2 | `OK_PROG` |
 
-### ROK3 — 1.33M 0402
+### ROK3 — 1.33M 0201
 
-> VBAT_OK rising = 3.47 V
+> VBAT_OK rising = 1.21*(1+(6.8+1.33)/4.3) = 3.498 V (was 3.470)
 
 | Pin | Net |
 |---|---|
@@ -556,7 +556,7 @@ Edit the Python and re-run, or the two will disagree.
 
 ### U5 — Mitsumi MC3651DF1AAM cell protection, PLP-4E
 
-> Over-charge 4.280 V, over-discharge 2.700 V, discharge over-current 0.315 A -- 2.2x the cell's 140 mA rating, and the reason this part beat the AP6683's 0.9 A. Iq 3.0 uA typ / 4.5 max = 6.7 % of the 4.0 mWh/day budget. Digi-Key 2508-MC3651DF1AAMCT-ND, US$1.33 at qty 1.
+> Over-charge 4.280 V, over-discharge 2.700 V, discharge over-current 0.315 A. NOTE: the '2.2x the cell's 140 mA rating' that justified this part was the VARTA CP1254's number, carried over when the cell changed. The LPM1254 datasheet says 30 mA max continuous (65 mA on the catalogue page for the 65 mAh variant), so 0.315 A is 10.5x / 4.8x, not 2.2x -- CONFIRM the figure for the variant ordered. No PCM IC trips near 66 mA, so none guards this cell's CONTINUOUS rating; they guard against shorts. Still beats the AP6683's 0.9 A. Iq 3.0 uA typ / 4.5 max = 6.7 % of the 4.0 mWh/day budget. Digi-Key 2508-MC3651DF1AAMCT-ND, US$1.33 at qty 1.
 
 | Pin | Net |
 |---|---|

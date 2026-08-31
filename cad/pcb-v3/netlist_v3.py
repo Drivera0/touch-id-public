@@ -318,7 +318,13 @@ part("U5", "Mitsumi MC3651DF1AAM cell protection, PLP-4E", 5, {
     4: "GND",          # S2  — charge FET source = pack negative
     5: "NC",           # D   — drain. MUST STAY OPEN.
 }, "Over-charge 4.280 V, over-discharge 2.700 V, discharge over-current "
-   "0.315 A -- 2.2x the cell's 140 mA rating, and the reason this part beat "
+   "0.315 A. NOTE: the '2.2x the cell's 140 mA rating' that justified this "
+   "part was the VARTA CP1254's number, carried over when the cell changed. "
+   "The LPM1254 datasheet says 30 mA max continuous (65 mA on the catalogue "
+   "page for the 65 mAh variant), so 0.315 A is 10.5x / 4.8x, not 2.2x -- "
+   "CONFIRM the figure for the variant ordered. No PCM IC trips near 66 mA, "
+   "so none guards this cell's CONTINUOUS rating; they guard against shorts. "
+   "Still beats "
    "the AP6683's 0.9 A. Iq 3.0 uA typ / 4.5 max = 6.7 % of the 4.0 mWh/day "
    "budget. Digi-Key 2508-MC3651DF1AAMCT-ND, US$1.33 at qty 1.")
 

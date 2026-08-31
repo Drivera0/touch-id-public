@@ -16,12 +16,32 @@ bare wired 1254 is an ordinary retail product, a protected one is not.
 
 | # | part | over-current trip | Iq | area (IC only) | verdict |
 |---|---|---|---|---|---|
-| **1** | **MC3651DF1AAM** | **0.315 A = 2.2×** cell rating | 3.0 typ / 4.5 max µA | 3.56 mm² | **only one that protects the cell** |
+| **1** | **MC3651DF1AAM** | **0.315 A** — see the correction below | 3.0 typ / 4.5 max µA | 3.56 mm² | **only one that protects the cell** |
 | 2 | ALLPOWER AP6683 | 0.9 A = 6.4× | **0.7 µA** | **1.00 mm²** | smallest, but typicals-only, obscure vendor |
 | 3 | ABLIC S-82A1A + FET + R | settable ±3 mV | 2.0 / 4.0 µA | 8.02 mm² | exact trip, but 3 parts and 0 stock |
 | 4 | Diodes AP9211 | 2.2 A = 15.7× | 3.0 / 4.5 µA | 6.00 mm² | **OBSOLETE — waiting won't help** |
 
-The cell is rated **140 mA continuous**. A 0.9 A trip protects the wiring, not
+> [!danger] CORRECTED 2026-08-30 — 140 mA was the WRONG CELL's number
+> **140 mA continuous / 210 mA pulse is the VARTA CP1254**, which this design
+> no longer uses. It was carried over when the cell became the LiPol LPM1254
+> and never re-derived. See `CELL-SOURCING.md`.
+>
+> The **LPM1254 datasheet (MD_9241_10) says 30 mA max continuous** discharge,
+> 12 mA standard; the catalogue page for the 65 mAh variant says 65 mA.
+> **Confirm the figure for the exact variant ordered** — `CELL-DECIDED.md`
+> already flagged this and it was not carried through.
+>
+> So 0.315 A is **10.5x** (at 30 mA) or **4.8x** (at 65 mA) the cell rating,
+> not 2.2x. **No protection IC trips anywhere near 66 mA**, so none of them
+> guards this cell's *continuous* rating — they guard against shorts. The
+> ranking below still holds on that basis (0.315 A is the tightest trip
+> available), but not for the reason originally given.
+>
+> The real load is **25 mA** (50 scans/day at 25 mA for 1.5 s), which against
+> 30 mA is **83% of rating** — inside spec, but a 17% margin, not the ~6x the
+> 140 mA figure implied.
+
+A 0.9 A trip protects the wiring, not
 the cell. At 0.315 A the protection engages while the cell is still
 recoverable. Mitsumi (Minebea) also publish **guaranteed maxima**, where the
 AP6683 gives typicals "guaranteed by design, not tested in production" — for a
