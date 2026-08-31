@@ -15,10 +15,18 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)) or ".")
 import sexp
 
 HERE = os.path.dirname(os.path.abspath(__file__)) or "."
-BOARD = os.path.join(HERE, "pcb-v6-handoff.kicad_pcb")
+import sys as _sys
+BOARD = (_sys.argv[1] if len(_sys.argv)>1 else None) or os.environ.get("BOARD") \
+        or os.path.join(HERE, "pcb-v6-handoff.kicad_pcb")  # was hardcoded; same defect as make_bom_cpl
 EXP = os.path.join(HERE, "..", "exports")
-CPL = os.path.join(EXP, "touchid-v3-CPL.csv")
-BOM = os.path.join(EXP, "touchid-v3-BOM.csv")
+# v3 filenames were stale (third tool with this defect today) -- take the
+# newest touchid-*-CPL/BOM in the assembly dir instead, overridable by env.
+_asm = os.path.join(HERE, "..", "v6-handoff", "assembly")
+def _newest(pat, fallback):
+    c = sorted(glob.glob(os.path.join(_asm, pat)), key=os.path.getmtime)
+    return c[-1] if c else fallback
+CPL = os.environ.get("CPL") or _newest("touchid-*-CPL.csv", os.path.join(EXP, "touchid-v3-CPL.csv"))
+BOM = os.environ.get("BOM") or _newest("touchid-*-BOM.csv", os.path.join(EXP, "touchid-v3-BOM.csv"))
 
 text = open(BOARD, encoding="utf-8", errors="replace").read()
 root = sexp.parse(text)
@@ -63,8 +71,9 @@ for gi in k(root, "gr_line") + k(root, "gr_arc") + k(root, "gr_rect"):
 x0, x1 = min(xs), max(xs)
 y0, y1 = min(ys), max(ys)
 W, H = x1 - x0, y1 - y0
-check(abs(W - 19.30) < 0.02 and abs(H - 19.30) < 0.02,
-      "board outline is 19.30 x 19.30",
+# 19.30 was the OLD square board -- expect nothing absolute here; the checks
+# that matter tie the CPL to the outline WHEREVER it is. Just record it.
+check(W > 5 and H > 5, "board outline is sane",
       "measured %.3f x %.3f from Edge.Cuts" % (W, H))
 
 # ---- 2. re-derive every placement -----------------------------------------

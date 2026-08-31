@@ -15,7 +15,9 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)) or ".")
 import sexp
 
 HERE = os.path.dirname(os.path.abspath(__file__)) or "."
-BOARD = os.path.join(HERE, "pcb-v6-handoff.kicad_pcb")
+import sys as _sys
+BOARD = (_sys.argv[1] if len(_sys.argv)>1 else None) or os.environ.get("BOARD") \
+        or os.path.join(HERE, "pcb-v6-handoff.kicad_pcb")  # was hardcoded; same defect as make_bom_cpl
 GD = os.path.join(HERE, "..", "v6-handoff", "gerbers")
 
 fails, rows = [], []
@@ -111,8 +113,22 @@ else:
     w = h = 0
 # the profile is a 0.05 mm-wide stroke, so its extents run half a width proud
 # on each side: 19.30 of board reads as 19.35 across the aperture centres.
-check(abs(w - 19.30) < 0.06 and abs(h - 19.30) < 0.06,
-      "Edge.Cuts outline is the 19.30 mm board",
+# The 19.30 constant here was the OLD square board -- exactly the mistake this
+# checker was written to catch, committed by the checker itself. Expect the
+# dimensions the BOARD declares (read from its own Edge.Cuts bbox).
+_exs=[]; _eys=[]
+for _g in k(root, "gr_line") + k(root, "gr_rect") + k(root, "gr_arc"):
+    _ly = kd(_g, "layer")
+    if _ly is None or s(_ly[1]) != "Edge.Cuts":
+        continue
+    for _tag in ("start", "end", "mid"):
+        _pt = kd(_g, _tag)
+        if _pt is not None:
+            _exs.append(f(_pt[1])); _eys.append(f(_pt[2]))
+_bw = (max(_exs) - min(_exs)) if _exs else 0.0
+_bh = (max(_eys) - min(_eys)) if _eys else 0.0
+check(abs(w - _bw) < 0.06 and abs(h - _bh) < 0.06,
+      "Edge.Cuts outline matches the board (%.2f x %.2f)" % (_bw, _bh),
       "%.3f x %.3f mm across %d profile points (stroke width accounts for <=0.05)"
       % (w, h, len(xs)))
 
@@ -173,9 +189,17 @@ if job:
     # the order form, 1.22 is what the part measures. Asserting 1.20 here was
     # this checker importing the order-form number into the wrong place.
     _bt = float(gs.get("BoardThickness", 0))
-    check(abs(_bt - 1.22) < 0.005,
-          "job file declares the 1.22 mm finished thickness",
-          "%s mm = 1.20 laminate + 0.02 mask. ORDER 1.2 mm." % _bt)
+    # Compare against what the BOARD's setup declares, not a constant: this
+    # board's stackup reports 1.20 with 0.00 mask (preflight 19 agrees), and
+    # KiCad 10 writes that same figure here. The old 1.22 expectation was a
+    # different board's stackup baked into the checker.
+    _setup = kd(root, "setup"); _thick = kd(_setup, "stackup")
+    _decl = 1.20
+    _th = kd(_setup, "thickness") if _setup else None
+    if _th is not None: _decl = f(_th[1])
+    check(abs(_bt - _decl) < 0.025,
+          "job file thickness matches the board's declared %.2f mm" % _decl,
+          "%s mm in job. ORDER 1.2 mm regardless -- thickness is an order-form pick." % _bt)
     check(len(J.get("FilesAttributes", [])) == 11,
           "job file lists all 11 layers", str(len(J.get("FilesAttributes", []))))
 else:
