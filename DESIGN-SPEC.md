@@ -80,6 +80,17 @@ column and the numbers moved:
 | cell pocket | — | Ø12.50 | **Ø14.00** |
 | clearance above cell | — | 1.61 mm | **0.81 mm** |
 
+> [!info] **v6 "quoted" variant added 2026-08-31 — new plan of record.**
+> LiPol quoted the protected LPM1254 in writing: assembled **Ø12 × 6.7 mm**
+> (`cad/pcb-v3/CELL-QUOTE-2026-08-31.md`), replacing the guessed Ø13.5 × 8.4
+> the v5.2 riser was oversized for. Worst-cased with datasheet bands
+> (12.5 × 7.0), same 0.81 mm clearance rule: **riser 5.10, cell pocket
+> Ø13.00, top face z 12.26, total module 13.46 mm** — 1.40 shorter than
+> v5.2. Generator: `cad/scripts/touchid_module_v6.py` (default variant);
+> all boolean checks pass. "tall" (riser 6.50) is kept as the fallback if a
+> delivered cell measures over 7.0 mm; "short" is dead — its on-board PCM
+> premise was deleted from the board the same day.
+
 > [!success] **The riser costs nothing — the module stands proud by design.**
 > **Corrected 2026-08-29.** This box previously called the riser height "the
 > biggest open risk in the project" and demanded a slot measurement. It was

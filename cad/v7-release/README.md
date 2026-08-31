@@ -16,6 +16,8 @@ this folder rather than editing it.
 | `assembly/touchid-v7-BOM.csv` | 19 lines, 29 parts, all with LCSC codes | **JLCPCB upload, assembly** |
 | `assembly/touchid-v7-CPL.csv` | 29 placements, corner-based, matches the gerbers | **JLCPCB upload, assembly** |
 | `assembly/touchid-v7-BOM-annotated.csv` | same BOM with sourcing notes | your reference, don't upload |
+| `housing/touchid_housing_v5_diagonal_quoted.stl` | THE housing, "quoted" variant: riser 5.10, pocket Ø13.00, sized to LiPol's quoted Ø12×6.7 cell (+datasheet bands), module 13.46 mm | 3D print |
+| `housing/touchid_assembly_v5_diagonal_quoted.step` | full assembly model (housing+board+cell+sensor) | reference / fit checks |
 | `flash-jig/flash_jig.stl` | 3D-printable programming jig (28×27×19 mm, no supports) | any FDM printer |
 | `flash-jig/flash_jig.step` | same jig, editable CAD | if the print needs tweaks |
 | `flash-jig/J3-flashing-hookup.png` | which J3 pad is which, bottom view | your bench |
