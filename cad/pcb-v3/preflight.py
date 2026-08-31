@@ -184,9 +184,42 @@ unrouted = [x for x in re.findall(r"^    ([A-Z_0-9]+) \(\d+ pads\)", o, re.M) if
 # Counting only disconnected pads lets a router delete a whole net and look
 # better for it -- that is exactly what happened while chasing 8 -> 3.
 dead_pads = sum(cnt[n] for n in unrouted if n in cnt)
-rec(opens == 0 and not unrouted, "6  every connection routed",
-    "TRUE open pads = %d (%d disconnected + %d in zero-copper nets: %s)"
-    % (opens + dead_pads, opens, dead_pads, ", ".join(unrouted) or "none"))
+# check_connected WALKS TRACKS AND VIAS ONLY -- IT CANNOT SEE A POUR.
+#
+# On a poured board that makes it over-report: U4.2 and U4.5 have no GND track
+# and no GND via, they are bonded by the ground pour through thermal spokes,
+# which is ordinary practice and a real connection. check_connected called them
+# disconnected and this gate reported 3 open pads where there was 1.
+#
+# A gate that cries wolf is not safe just because it errs strict -- it buries
+# the one real failure in noise, which is exactly what it did to C14.2.
+#
+# pour_truth is the authority here BY DESIGN: it judges against the
+# filled_polygon geometry KiCad actually computed rather than a model of it.
+# Use it, and keep check_connected's answer alongside so a divergence is
+# visible instead of silent.
+try:
+    import pour_truth as _pt6
+    _p6, _s6, _v6, _poly6 = _pt6.parse(BOARD)
+    if not _poly6:
+        _true_open, _how = opens + dead_pads, "zones UNFILLED, fell back to check_connected"
+    else:
+        _true_open = _pt6.count_open(BOARD) if hasattr(_pt6, "count_open") else None
+        if _true_open is None:
+            import subprocess as _sp6
+            _o6 = _sp6.run([sys.executable, os.path.join(HERE, "pour_truth.py"), BOARD],
+                           capture_output=True, text=True).stdout
+            _m6 = re.search(r"pads open against the pour KiCad actually computed\s*:\s*(\d+)", _o6)
+            _true_open = int(_m6.group(1)) if _m6 else opens + dead_pads
+        _how = "against the pour KiCad computed"
+        if _true_open != opens + dead_pads:
+            _how += "; check_connected says %d (pour-blind)" % (opens + dead_pads)
+except Exception as _e6:
+    _true_open, _how = opens + dead_pads, "pour_truth failed (%s)" % _e6
+rec(_true_open == 0 and not unrouted, "6  every connection routed",
+    "TRUE open pads = %d, %s%s"
+    % (_true_open, _how,
+       ("; zero-copper nets: " + ", ".join(unrouted)) if unrouted else ""))
 
 o = run(os.path.join(KRT, "py_router", "check_drc.py"), BOARD,
         "--clearance", str(DESIGN_CU),
@@ -739,12 +772,26 @@ if not _zt:
     _gnd_bad.append("no filled GND zone on any layer")
 if _gv == 0 and _gs == 0 and not _zt:
     _gnd_bad.append("no GND copper of any kind")
-# the authority on whether the fill actually reaches the pads
-_cc = run(os.path.join(KRT, "py_router", "check_connected.py"), BOARD, cwd=KRT, env=env)
-if "ALL NETS FULLY CONNECTED" not in _cc:
-    _m2 = re.search(r"^  GND \((?:net \d+|\d+ pads)\):(.*?)(?=\n  \w|\Z)", _cc, re.S | re.M)
-    if _m2 or re.search(r"^    GND \(\d+ pads\)", _cc, re.M):
-        _gnd_bad.append("check_connected reports GND NOT fully connected")
+# THE COMMENT SAID "the authority on whether the fill actually reaches the
+# pads" AND THEN ASKED A TOOL THAT CANNOT SEE FILL. check_connected walks
+# tracks, vias and pads; a pour is none of those. So every GND pad bonded only
+# by the plane -- which is most of the point of having a plane -- read as
+# disconnected, and this check failed on a board whose ground was fine.
+#
+# pour_truth is the actual authority: it unions the filled_polygon geometry
+# KiCad computed with the copper and asks whether the pad is in the same piece.
+_gnd_open = []
+try:
+    import subprocess as _sp17
+    _o17 = _sp17.run([sys.executable, os.path.join(HERE, "pour_truth.py"), BOARD],
+                     capture_output=True, text=True).stdout
+    _blk = re.search(r"^  OPEN  GND\b(.*?)(?=^  (?:OPEN|OK)\b|\Z)", _o17, re.S | re.M)
+    if _blk:
+        _gnd_open = re.findall(r"^\s+(\S+)\s+at ", _blk.group(1), re.M)
+        _gnd_bad.append("GND has %d pad(s) the pour does not reach: %s"
+                        % (len(_gnd_open), ", ".join(_gnd_open[:4])))
+except Exception as _e17:
+    _gnd_bad.append("pour_truth could not judge GND (%s)" % _e17)
 rec(not _gnd_bad, "17 ground plane is connected",
     "; ".join(_gnd_bad) or "%d filled GND zone(s), %d GND vias, %d GND segs, "
     "check_connected: all nets connected" % (len(_zt), _gv, _gs))
