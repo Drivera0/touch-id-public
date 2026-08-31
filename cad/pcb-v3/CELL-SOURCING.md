@@ -93,3 +93,76 @@ Chase that enquiry before changing the board.
 > budget". This page's numbers come from LiPol's own datasheet; any substitute
 > needs the same treatment. The 140 mA figure is exactly the failure that
 > warning describes.
+
+---
+
+## Coin cell HOLDER — evaluated and rejected, 2026-08-30
+
+The idea: fit a holder with wires, buy generic LIR1254 cells off the shelf, keep
+the protection on the board. It solves the "wired cells are rare" problem
+cleanly. **It fails on four counts, and the second is the serious one.**
+
+### 1. It does not fit the pocket
+
+    housing body OD                18.37 mm
+    sensor window ID               15.60 mm
+    cell pocket, SHORT             13.00 mm   <-- plan of record
+    cell pocket, TALL              14.00 mm
+    the cell                       12.50 mm dia
+
+A holder must wrap a retaining wall, side clips and contacts **around** a
+12.5 mm cell. The smallest practical 12 mm holders are ~15.5-16.0 mm across.
+
+    SHORT pocket 13.00  ->  short by 2.50-3.00 mm
+    TALL  pocket 14.00  ->  short by 1.50-2.00 mm
+
+Widening the pocket to 16 mm leaves a **1.2 mm collar wall** against 18.37 OD,
+and the sensor window is already 15.60.
+
+### 2. It makes the biggest unmeasured risk in the project worse
+
+The module is already **12.86 mm (short) / 14.86 mm (tall) against the 8.36 mm
+knob module it replaces** — 1.5x to 1.8x. A holder adds 1.5-3.0 mm on top,
+taking it to **~16.4-17.9 mm, or 2.0-2.1x**.
+
+The housing file says it plainly: *"a slot depth NOBODY HAS MEASURED ... If the
+slot turns out shallow this is the first thing to give."* Spending 3 mm of
+height on a convenience, against an unmeasured limit, is the wrong bet — and
+**measuring the slot is cheap.** Do that first, whatever else is decided.
+
+### 3. Spring contacts under a device that gets PRESSED
+
+The impedance budget survives it — contacts add ~20-50 mOhm against 3.3 Ohm.
+Reliability is the issue: **a fingerprint reader is a button.** Repeated axial
+force on a spring-held coin cell risks momentary contact break, and a momentary
+break on a BLE device is a reset mid-transaction. The wired cell has no such
+failure mode.
+
+### 4. Reese's Law — this one matters for selling them
+
+**16 CFR 1263**, from Reese's Law, issued March 2024 and **in effect September
+2024**. For consumer products with button/coin cells it requires:
+
+* battery compartments with **replaceable** cells to be secured so they need
+  **a tool, or two independent and simultaneous hand movements** to open;
+* the compartment to survive **use-and-abuse testing** without liberating the
+  cell;
+* warnings on the packaging, on the product where practicable, and in the
+  instructions.
+
+A sealed, wired cell inside a glued housing is a far smaller compliance surface
+than a user-accessible coin-cell compartment. Adding a holder converts a sealed
+product into one carrying the full compartment requirement — exactly the wrong
+direction for selling these.
+
+### And it does not actually solve the PCM question
+
+Generic **LIR1254 cells are BARE** — a Li-ion coin in a can, no protection. So
+"keep the PCM" means keeping **U5 on the board**, which is what the design
+already does. The holder changes how the cell is *mounted*, not whether the
+board carries protection. It costs height, fit, reliability and a regulatory
+category, and buys nothing on that front.
+
+**Verdict: stay with a pre-wired cell.** The wired-cell rarity that motivated
+this is better solved by [the LPM1254 sourcing above](#) — LiPol sell wired
+assemblies at MOQ 5 with card payment.
