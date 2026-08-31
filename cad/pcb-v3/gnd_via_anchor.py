@@ -49,8 +49,40 @@ import json, math, os, re, sys
 import sexp
 
 HERE = os.path.dirname(os.path.abspath(__file__))
-VIA_D, VIA_DRILL = 0.45, 0.20
-HALF, EDGE, CORNER_R = 9.65, 0.30, 2.00
+# READ THE FAB FLOOR. These were frozen at 0.45/0.20 and HALF 9.65 -- the via
+# rung and the board this project had MONTHS ago. The board is 20.00 x 19.00
+# and the fab floor has said via 0.40 since 2026-08-29.
+#
+# Both errors push the same way: a 0.45 via needs 0.025 mm more room per side
+# than the 0.40 we actually buy, and in a tight pocket that is decisive. U5.4
+# and R9.2 were reported as "NO legal site within 2.50 mm" while sites for a
+# 0.40 via existed 1.485 and 1.381 mm away. It would also have PLACED 0.45
+# vias on a board preflight check 8 grades at 0.40.
+def _floor():
+    v = {}
+    _fp = os.path.join(os.path.dirname(os.path.abspath(__file__)),
+                       "fab_floor_touchid.txt")
+    if os.path.exists(_fp):
+        for _l in open(_fp):
+            _l = _l.split("#")[0]
+            if "=" in _l:
+                _k, _val = [s.strip() for s in _l.split("=", 1)]
+                try:
+                    v[_k] = float(_val)
+                except ValueError:
+                    pass
+    return v
+
+
+_FL = _floor()
+VIA_D = _FL.get("via_diameter", 0.40)
+VIA_DRILL = _FL.get("via_drill", 0.20)
+# The outline is NOT square any more. One HALF silently applied the X extent to
+# Y as well; on 20.00 x 19.00 that is 0.35 mm wrong in one axis and 0.15 in the
+# other, in opposite directions.
+HALF_X, HALF_Y = 10.00, 9.50
+HALF = min(HALF_X, HALF_Y)          # legacy name; prefer the axis
+EDGE, CORNER_R = _FL.get("board_edge", 0.30), 2.00
 H2H = 0.20
 POGO_REFS = ("J4", "J11")
 
@@ -127,8 +159,7 @@ def _in_poly(x, y, pts):
 
 def legal(vx, vy, pads, segs, vias, novia):
     r = VIA_D / 2.0
-    lim = HALF - EDGE - r
-    if abs(vx) > lim or abs(vy) > lim:
+    if abs(vx) > HALF_X - EDGE - r or abs(vy) > HALF_Y - EDGE - r:
         return False
     ac = HALF - CORNER_R
     for sx in (-1, 1):
@@ -183,9 +214,41 @@ def main():
           (VIA_D, VIA_DRILL, CLR, rmax))
     print("GND pads: %d" % len(gnd))
     placed, already, nosite = [], 0, []
+    # WHICH GND PADS ARE ACTUALLY CONNECTED, per the pour KiCad computed.
+    #
+    # This used to skip any pad with a via within rmax (2.50 mm) and call it
+    # "already anchored". That is a PROXY for connected, and it is not the same
+    # thing: a via 1.4 mm away touches nothing. U5.4 and R9.2 were skipped on
+    # exactly that basis while sitting 2.30 and 2.78 mm from the nearest GND
+    # copper, open, with legal via sites 1.4 mm away that this tool never tried.
+    #
+    # Ask the fill instead. Pads the pour genuinely reaches need nothing; pads
+    # it does not reach are the whole job.
+    _connected = set()
+    try:
+        import subprocess as _sp, sys as _sy, re as _re
+        _out = _sp.run([_sy.executable, os.path.join(os.path.dirname(
+            os.path.abspath(__file__)), "pour_truth.py"), src],
+            capture_output=True, text=True).stdout
+        _blk = _re.search(r"^  OPEN  GND\b(.*?)(?=^  (?:OPEN|OK)\b|\Z)",
+                          _out, _re.S | _re.M)
+        _open_refs = set(_re.findall(r"^\s+(\S+)\s+at ", _blk.group(1), _re.M)) \
+            if _blk else set()
+        if "pads open against the pour" in _out:
+            _connected = {"%s.%s" % (q["ref"], q["pad"]) for q in gnd} - _open_refs
+    except Exception as _e:
+        print("  [pour read failed: %s]" % _e)
+        _connected = set()
+    print("  pads the pour already reaches : %d" % len(_connected))
+
     for p in sorted(gnd, key=lambda q: (q["ref"], q["pad"])):
-        # already anchored?
-        if any(math.hypot(p["x"] - v[0], p["y"] - v[1]) <= rmax for v in vias):
+        _tag = "%s.%s" % (p["ref"], p["pad"])
+        if _connected:
+            if _tag in _connected:
+                already += 1
+                continue
+        elif any(math.hypot(p["x"] - v[0], p["y"] - v[1]) <= rmax for v in vias):
+            # fallback only when the pour could not be read (unfilled board)
             already += 1
             continue
         found = None
