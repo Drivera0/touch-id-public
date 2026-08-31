@@ -12,11 +12,14 @@ Board facts (verified, pcb-v7-zero-opens):
   register holes NPTH O1.20 at (+-8.75, 0)
   J3 pads        (-8..0, +3.0), 2.0 mm pitch: SWDIO SWCLK RESET VSTOR GND
 
-EJECTION -- no mechanism, springs: the five wired P75 pins under J3 plus TWO
-UNWIRED lifter pins at (0, +6.5) and (5.25, +1.05) push the board up ~1 mm
-the moment finger pressure releases. Both spots were SCANNED against the
-board's real B.Cu: >=0.95 mm clear of every pad, via and track (the first
-pick at (0,-2.0) sat straight on two vias). They connect to nothing.
+EJECTION -- a real BUTTON now (3 printed parts). A seesaw lever lies in the
+wiring cavity: its button pokes out the front wall; press DOWN ~2 mm and the
+long arm (2:1 advantage) drives a O3 plunger up through the deck at
+(0, +6.5) -- the one spot on the board's bottom scanned fully clear of
+copper -- popping the board ~4 mm off the posts. The five J3 springs plus
+one unwired helper pin at (-5.25, +0.55) (also scanned, 0.92 clear) keep it
+level. Lever axle snaps up into downward-opening pivot slots; the plunger's
+bottom flange rests on the lever tip plate.
 
 ORIENTATION -- the old ridge/dot marks confused their one user and are gone.
 Instead an engraved arrow on the deck points at the cable wall, and the rule
@@ -48,7 +51,14 @@ os.makedirs(OUT, exist_ok=True)
 BW, BH, BT = 20.00, 19.00, 1.20
 REG = [(-8.75, 0.0), (8.75, 0.0)]
 J3 = [(-8.0, 3.0), (-6.0, 3.0), (-4.0, 3.0), (-2.0, 3.0), (0.0, 3.0)]
-LIFTERS = [(0.0, 6.5), (5.25, 1.05)]        # unwired ejector pogo pins
+LIFTERS = [(-5.25, 0.55)]                   # one unwired helper spring pin
+PLUNGER_XY = (0.0, 6.5)                     # ejector plunger, board's clearest
+                                            # bottom spot (scanned vs B.Cu)
+PLUNGER_BORE = 3.5                          # for the O3.0 printed plunger
+PIVOT_Y = -8.5                              # lever axle line, inside cavity
+LEVER_W, LEVER_T = 6.0, 3.0                 # bar width (x), thickness (z)
+LEVER_X0, LEVER_X1 = 1.5, 7.5               # bar span, clear of the GND tail
+AXLE_D = 3.0
 
 # ----- core (same numbers as the proven jig) -----
 CLR, POCKET_D = 0.15, 1.0
@@ -102,11 +112,21 @@ base = (base.faces(">Z").workplane(centerOption="CenterOfBoundBox")
         .pushPoints([(0, CORE_FRONT + WALL / 2)])
         .slot2D(12, 8, 0).cutBlind(-POCKET_D - 2))
 
-# wired pin bores + lifter bores, through the deck
+# wired pin bores + lifter bore, through the deck
 floor_z = H - POCKET_D
 base = (base.faces(">Z").workplane(offset=-POCKET_D, centerOption="CenterOfBoundBox")
         .center(0, -((oy0+oy1)/2))
         .pushPoints(J3 + LIFTERS).circle(PIN_HOLE / 2).cutThruAll())
+# ejector plunger bore
+base = base.cut(cq.Workplane("XY", origin=(PLUNGER_XY[0], PLUNGER_XY[1], -1))
+                .circle(PLUNGER_BORE / 2).extrude(H + 2))
+# front-wall slot for the lever (below the finger notch, which stays up top)
+base = base.cut(cq.Workplane("XY").workplane(offset=1.5)
+                .moveTo(LEVER_X0 - 1.0, CORE_FRONT - 1)
+                .lineTo(LEVER_X1 + 1.0, CORE_FRONT - 1)
+                .lineTo(LEVER_X1 + 1.0, CORE_FRONT + WALL + 1)
+                .lineTo(LEVER_X0 - 1.0, CORE_FRONT + WALL + 1)
+                .close().extrude(6.5))
 
 # tray cavity + cable slots + wire tunnel
 tray = (cq.Workplane("XY").workplane(offset=TRAY_Z0)
@@ -137,6 +157,16 @@ for zx in (-14.0, 14.0):
 
 # ---------------- fused additions (posts + engraved marks) ----------------
 adds = []
+# pivot bosses hanging from the cavity ceiling, with downward-opening slots
+# (0.25 mm lip pinch) that the lever's O3 axle stubs snap up into
+for bx in (LEVER_X0 - 2.5, LEVER_X1 + 2.5):
+    boss = (cq.Workplane("XY", origin=(bx, PIVOT_Y, 1.6))
+            .rect(3.0, 5.0).extrude(CAVITY_T - 1.6 + 1.0))       # into deck 1mm
+    slot = (cq.Workplane("YZ", origin=(bx - 1.6, PIVOT_Y, 3.5))
+            .circle(AXLE_D / 2 + 0.2).extrude(3.2)
+            .union(cq.Workplane("XY", origin=(bx, PIVOT_Y, 0))
+                   .rect(3.4, AXLE_D - 0.5).extrude(3.5)))
+    adds.append(boss.cut(slot).val())
 for (px, py) in REG:
     adds.append(cq.Workplane("XY", origin=(px, py, floor_z - 1.0))
                 .circle(POST_D / 2).extrude(POST_UP + 1.0)
@@ -158,6 +188,38 @@ base = base.cut(arrow)
 base = base.cut(cq.Workplane("XY", origin=(-(CORE_L / 2 - WALL / 2), 3.0, H - 0.5))
                 .circle(0.9).extrude(1.0))
 
+# ---------------- separate parts: lever + plunger ----------------
+BTN_Y = -16.5
+lever = (cq.Workplane("XY").workplane(offset=1.5)
+         .moveTo(LEVER_X0, BTN_Y - 1.5).lineTo(LEVER_X1, BTN_Y - 1.5)
+         .lineTo(LEVER_X1, 5.0).lineTo(LEVER_X0, 5.0).close()
+         .extrude(LEVER_T))
+# tip plate reaching west to sit under the plunger at (0, 6.5)
+lever = lever.union(cq.Workplane("XY").workplane(offset=1.5)
+                    .moveTo(-2.0, 4.5).lineTo(LEVER_X1, 4.5)
+                    .lineTo(LEVER_X1, 8.5).lineTo(-2.0, 8.5).close()
+                    .extrude(LEVER_T))
+# button cap, pressable above the wall slot
+lever = lever.union(cq.Workplane("XY").workplane(offset=1.5)
+                    .moveTo(LEVER_X0 - 1.5, BTN_Y - 1.5)
+                    .lineTo(LEVER_X1 + 1.5, BTN_Y - 1.5)
+                    .lineTo(LEVER_X1 + 1.5, BTN_Y + 3.0)
+                    .lineTo(LEVER_X0 - 1.5, BTN_Y + 3.0).close()
+                    .extrude(LEVER_T + 4.0))
+# axle stubs
+for sx in (LEVER_X0 - 2.6, LEVER_X1):
+    lever = lever.union(cq.Workplane("YZ", origin=(sx, PIVOT_Y, 3.0))
+                        .circle(AXLE_D / 2).extrude(2.6))
+lfused = None
+for s in lever.solids().vals():
+    lfused = s if lfused is None else lfused.fuse(s)
+lever = cq.Workplane("XY").newObject([lfused.clean()])
+
+plunger = (cq.Workplane("XY").circle(5.0 / 2).extrude(1.5)
+           .faces(">Z").workplane().circle(3.0 / 2).extrude(11.7))
+
+cq.exporters.export(lever, os.path.join(OUT, "flash_station_lever.stl"))
+cq.exporters.export(plunger, os.path.join(OUT, "flash_station_plunger.stl"))
 cq.exporters.export(base, os.path.join(OUT, "flash_station.stl"))
 cq.exporters.export(base, os.path.join(OUT, "flash_station.step"))
 print("wrote 3dmodels/flash_station.stl / .step")
