@@ -33,6 +33,7 @@ import pour_truth as pt
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 CLR = 0.10
+VIA_D = 0.40        # from the fab floor; used to check vias dragged by a push
 MARGIN = 0.010          # aim this far past the rule, not exactly at it
 
 
@@ -151,10 +152,54 @@ def main():
         if (mx - p["x"]) * nx + (my - p["y"]) * ny < 0:
             nx, ny = -nx, -ny
         done = False
+        # A MOVED ENDPOINT DRAGS ITS VIA WITH IT, AND THE VIA NEEDS CHECKING.
+        #
+        # The rewrite at the bottom matches every "(at x y)" equal to a moved
+        # coordinate, which is right -- a via sitting on a track end must travel
+        # with it or the net comes apart. But only the SEGMENT was re-validated.
+        # So this tool fixed a 0.0995 mm track-vs-pad graze by shoving a HARV_1
+        # via 0.0934 mm from a VBAT_OV_SET via: it traded a violation for a
+        # violation, in a class it does not check, and reported success.
+        def _via_ok(px, py, net):
+            for v in vias:
+                if abs(v["x"] - px) < 1e-6 and abs(v["y"] - py) < 1e-6:
+                    continue
+                if v["net"] == net:
+                    continue
+                if math.hypot(px - v["x"], py - v["y"]) < v["d"] / 2 + VIA_D / 2 + CLR:
+                    return False
+            for p2 in pads:
+                if p2["net"] == net:
+                    continue
+                if pad_dist(px, py, p2) < VIA_D / 2 + CLR:
+                    return False
+            # AND against foreign TRACKS. Leaving these out is how the first
+            # version of this guard still let a dragged VBAT via land 0.0901 mm
+            # from a HARV_1 track: it checked the via against vias and pads,
+            # which are the obvious neighbours, and forgot the one class that
+            # covers most of the board.
+            for s2 in segs:
+                if s2["net"] == net:
+                    continue
+                if pt.seg_dist(px, py, s2["x1"], s2["y1"], s2["x2"], s2["y2"]) \
+                        < s2["w"] / 2 + VIA_D / 2 + CLR:
+                    return False
+            return True
+
+        def _moves_a_via(ox, oy):
+            return any(abs(v["x"] - ox) < 1e-6 and abs(v["y"] - oy) < 1e-6
+                       for v in vias)
+
         for mult in (1.0, 1.5, 2.0, 3.0, 4.0):
             d = need * mult
             a = (round(s["x1"] + nx * d, 4), round(s["y1"] + ny * d, 4))
             b = (round(s["x2"] + nx * d, 4), round(s["y2"] + ny * d, 4))
+            if _moves_a_via(round(s["x1"], 4), round(s["y1"], 4)) and \
+                    not _via_ok(a[0], a[1], s["net"]):
+                continue
+            if _moves_a_via(round(s["x2"], 4), round(s["y2"], 4)) and \
+                    not _via_ok(b[0], b[1], s["net"]):
+                continue
             if seg_ok(a[0], a[1], b[0], b[1], s):
                 moves[(round(s["x1"], 4), round(s["y1"], 4))] = a
                 moves[(round(s["x2"], 4), round(s["y2"], 4))] = b
