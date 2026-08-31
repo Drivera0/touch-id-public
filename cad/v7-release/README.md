@@ -20,7 +20,8 @@ this folder rather than editing it.
 | `housing/touchid_assembly_v5_diagonal_quoted.step` | full assembly model (housing+board+cell+sensor) | reference / fit checks |
 | `housing/touchid_housing_v5_diagonal_tall.stl` | FALLBACK housing (riser 6.50) — only if a delivered cell measures >7.0 mm | 3D print (fallback) |
 | `housing/PRINTING.md` | orientation, material and slicer settings — read before slicing | your printer |
-| `flash-jig/flash_jig.stl` | 3D-printable programming jig (28×27×19 mm, no supports) | any FDM printer |
+| `flash-jig/flash_station.stl` | **the one to print**: self-contained USB-C flashing station (68×68×19) — pocket + spring self-eject + rear tray holding the DAPLink and a USB-C buck module (set to 3.6 V!), two cable slots in the rear wall. Board's spacebar/module edge points at the cables (engraved arrow; dot = SWDIO end). Wiring guide in `pcb-v3/gen_flash_station.py` header | any FDM printer |
+| `flash-jig/flash_jig.stl` | minimal jig (28×27×19, no electronics bay) — superseded by the station but kept | any FDM printer |
 | `flash-jig/flash_jig.step` | same jig, editable CAD | if the print needs tweaks |
 | `flash-jig/J3-flashing-hookup.png` | which J3 pad is which, bottom view | your bench |
 
