@@ -173,7 +173,17 @@ cannot restore material.
 
 ## The cell — decided, awaiting quote
 
-**LiPol LPM1254 with PCM and wires fitted.** Enquiry sent 2026-08-28.
+**LiPol LPM1254, BARE CELL with wires fitted.** Enquiry sent 2026-08-28.
+
+> [!danger] The cell is UNPROTECTED. U5 is its only protection.
+> This line said "with PCM" and that was superseded the next day.
+> `PCM-ONBOARD.md`, dated 2026-08-29: *"The cell will be a plain bare cell with
+> factory leads; the protection lives on the board."* The board carries U5,
+> a Mitsumi MC3651DF1AAM — over-charge 4.280 V, over-discharge 2.700 V,
+> discharge over-current 0.315 A.
+>
+> The contradiction mattered: it made U5's supply pin look like a redundant
+> second layer of protection when it is the ONLY layer.
 
 | | |
 |---|---|
