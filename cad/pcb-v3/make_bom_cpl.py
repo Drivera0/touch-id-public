@@ -54,7 +54,14 @@ import collections, csv, os, re, sys
 import sexp
 
 HERE = os.path.dirname(os.path.abspath(__file__))
-BOARD = os.path.join(HERE, "pcb-v6-handoff.kicad_pcb")
+# The board used to be hard-coded here, and on 2026-08-31 that silently built
+# a BOM containing four parts (U5/R8/R9/C14) that had been DELETED from the
+# real board -- the same constant-shadows-the-input defect as handroute's old
+# track rules. Argument first, $BOARD second, old default last.
+import sys as _sys
+BOARD = (_sys.argv[1] if len(_sys.argv) > 1 else None) \
+        or os.environ.get("BOARD") \
+        or os.path.join(HERE, "pcb-v6-handoff.kicad_pcb")
 OUT = os.path.join(HERE, "..", "v6-handoff", "assembly")
 os.makedirs(OUT, exist_ok=True)
 # WAS `HALF = 9.65` FOR BOTH AXES, hard-coded, "board is 19.30 square".
