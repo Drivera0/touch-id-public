@@ -93,6 +93,20 @@ pour-blind connectivity check reports **0 opens**. **One more KiCad refill
 (B, save) and the gate is expected fully green.** The user — not a session —
 places the LiPol order (vendor quote).
 
+## GATE GREEN — 2026-08-31, after the third refill
+
+**0 BLOCKERS. 0 open pads against the pour KiCad computed. GND fully
+connected. VERDICT: "orderable once the warnings are accepted."** (commit
+8f84fec). The three warnings are order-form actions, not board defects.
+BOM/CPL regenerated for the 29-part board (`make_bom_cpl.py` was silently
+hardcoded to the old handoff board — fixed to take an argument; the old
+assembly package contained the four deleted parts).
+
+Remaining before money: plot Gerbers from KiCad (none exist for 20×19; run
+`verify_gerbers.py` + `verify_handoff.py` after), re-check U1 MDBT50Q stock,
+place the LiPol cell order, and the order-form checkboxes (1.20 mm thickness,
+0.40/0.20 via option, Confirm Parts Placement = Yes, depaneling).
+
 ---
 
 
