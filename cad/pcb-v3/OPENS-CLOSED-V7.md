@@ -1,5 +1,54 @@
 # OPENS CLOSED — pcb-v7-zero-opens.kicad_pcb (2026-08-31)
 
+## UPDATE — after the first zone refill (same day)
+
+The user's refill exposed what the stale fills had been hiding: the honest pour
+strands GND pads. Three of the "blockers" it reported were bookkeeping, not
+geometry — KiCad's save created a fresh `.kicad_pro` with default rules
+(clearance 0.2, edge 0.5) and check_drc grades against the project file, so 589
+"violations" appeared on copper that had not changed. `make_kicad_pro.py`
+regenerated it from the fab floor (note: that tool writes the old key
+`copper_edge_clearance`; KiCad 10 reads `min_copper_edge_clearance` — patched
+by hand to 0.3). The remaining strandings were real, and were fixed thus:
+
+* **3 island vias** re-placed by `island_via.py`: U3.2/U3.5/C10.2 island at
+  (-8.036, 1.874), R9.2/U5.4 island at (8.045, -6.557), J4.5 island at
+  (-6.576, -1.696).
+* **U4.2/U4.5 island**: no legal via site exists (pin-hole no-via zone + the
+  island is a 0.2-0.3 mm ribbon). Hand-laid a 0.45 mm GND stitch at x=-7.72,
+  y 0.90→1.35, threading the 0.35 mm gap between U3.1 and U3.4; worst
+  clearance on the stitch is 0.25 mm (a SENSOR_SW_EN via).
+* **TP10.1**: unbondable where it was — the CELL_NEG and SENSOR_TX In1
+  diagonals bracket the pad (no via can clear both) and a single HARV_1 B.Cu
+  track at y=-6.80 rings the island against any stitch. It is a bare test pad
+  with no routes, so it MOVED to (8.0, 6.7), inside the via-bonded top-right
+  B.Cu pour, 0.8 mm clear of everything.
+* **U1.32/U1.33 island** — the hard one. It is walled by the pogo no-via
+  blanket (no via can sit between the J11 pads: 0.5 mm gap vs 0.6 mm needed)
+  and, on every side, by routed copper. The fix is topological: PCM_VDD's
+  C14.1 leg was re-routed as a single column at x≈3.3 through
+  `U1_SOUTH_GND_ESCAPE` (that rule area is now **tracks allowed** — it was
+  reserved to keep the GND escape open, and this change is what actually
+  reopens the escape), approaching C14.1 from the south at y≈-8.1. That
+  vacates the old channel at x2.45-3.0 entirely, leaving a verified ≥0.25 mm
+  copper-free strip from the island's west side down to the GND wall at
+  y=-8.55. **The pour bonds U1.32/U1.33 through this strip on the next
+  refill** — a shapely simulation of the fill clearances confirms the path.
+
+**Current preflight: 2 BLOCKERS, both U1.32/U1.33 pour-reach — both expected
+to clear on the next zone refill.** Everything else passes.
+
+### DO THIS NOW (user)
+
+1. Open `pcb-v7-zero-opens.kicad_pcb` in KiCad (the matching `.kicad_pro` now
+   carries the real fab rules — do not delete it), **refill zones (B), save**.
+2. Re-run `sexp_check.py` and `preflight.py`. Expected: **0 blockers.**
+3. If U1.32/U1.33 still show open, tell the next session to look at the pour
+   strip x 2.4-3.0, y -6.3..-8.5 on F.Cu — something re-entered it.
+
+---
+
+
 **Both TRUE open pads from HANDOVER-OPEN-PADS.md are closed. Preflight: 0 BLOCKERS,
 VERDICT "orderable once the warnings are accepted."** Board: `pcb-v7-zero-opens.kicad_pcb`
 (built from `pcb-v6-handoff.kicad_pcb`; originals untouched).
