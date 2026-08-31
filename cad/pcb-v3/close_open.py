@@ -266,6 +266,39 @@ def main():
     body = H.t.rstrip()
     assert body.endswith(")")
     body = body[:-1].rstrip("\n") + "\n" + "\n".join(added) + "\n)\n"
+
+    # THIS TOOL ONLY EVER ADDS. ENFORCE THAT BEFORE WRITING.
+    #
+    # It writes handroute's IN-MEMORY text, and the search rips a net's copper
+    # to retry. When the retry fails, the ripped state is what reaches disk: a
+    # NO PATH run once saved a board missing 33 segments, 23 vias and EVERY
+    # filled polygon, while printing only "NO PATH" -- which reads like nothing
+    # happened. I nearly shipped that file, and caught it by comparing object
+    # counts along the pipeline rather than by anything this tool said.
+    #
+    # So compare the output against the input and refuse to write if a single
+    # object went missing. Cheap, and it turns a silent data-loss bug into a
+    # loud one.
+    import pour_truth as _pt_guard
+    import tempfile as _tf
+    with _tf.NamedTemporaryFile("w", suffix=".kicad_pcb", delete=False,
+                                encoding="utf-8", newline="\n") as _tmp:
+        _tmp.write(body)
+        _probe = _tmp.name
+    _si, _vi, _zi = _pt_guard.parse(SRC)[1:]
+    _so, _vo, _zo = _pt_guard.parse(_probe)[1:]
+    os.unlink(_probe)
+    _lost = []
+    if len(_so) < len(_si):
+        _lost.append("%d segment(s)" % (len(_si) - len(_so)))
+    if len(_vo) < len(_vi):
+        _lost.append("%d via(s)" % (len(_vi) - len(_vo)))
+    if len(_zo) < len(_zi):
+        _lost.append("%d filled polygon(s)" % (len(_zi) - len(_zo)))
+    if _lost:
+        sys.exit("REFUSING TO WRITE: output is missing %s that the input had. "
+                 "close_open only adds; this means the rip-and-retry left the "
+                 "board degraded. %s is unchanged." % (", ".join(_lost), DST))
     # handroute reads in text mode, so CRLF arrives as \n and writing it back
     # straight converts the whole file to LF -- a one-line change becomes a
     # 16000-line diff. Restore whatever the ORIGINAL used.
