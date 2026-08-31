@@ -143,8 +143,8 @@ SRC = {
     # 25 V, NOT the cheaper 10 V part. DC bias already forced C1/C2 from 4.7uF
     # to 10uF once; at 4.3 V a 10 V X5R gives most of its capacitance away.
     "C14":  ("C76939",    "extended", 2377451, "Murata GRM033R61E104KE14D 100nF 25V X5R 0201"),
-    "C3":   ("C1525",     "BASIC",   35834447, "Samsung CL05B104KO5NNNC 100nF 16V X7R 0402"),
-    "C10":  ("C1525",     "BASIC",   35834447, "Samsung CL05B104KO5NNNC 100nF 16V X7R 0402"),
+    "C3":   ("C76939",    "extended", 2377451, "Murata GRM033R61E104KE14D 100nF 25V X5R 0201"),
+    "C10":  ("C76939",    "extended", 2377451, "Murata GRM033R61E104KE14D 100nF 25V X5R 0201"),
     "C4":   ("C22400107", "extended",   72632, "Murata GRM1555C1H103JE01D 10nF 50V C0G 0402"),
     # C5 was C18164635 (CCTC TCC0603X5R106K160CT). Identical spec, 1.1 M in
     # stock, and JLCPCB's part search finds it instantly by code -- but its BOM
@@ -164,8 +164,8 @@ SRC = {
     "C8":   ("C52923",    "BASIC",   11865003, "Samsung CL05A105KA5NQNC 1uF 25V X5R 0402"),
     "C9":   ("C52923",    "BASIC",   11865003, "Samsung CL05A105KA5NQNC 1uF 25V X5R 0402"),
     "C7":   ("C20416425", "extended", 1168621, "CCTC TCC0603X5R226M100CT 22uF 10V X5R 0603"),
-    "C12":  ("C15195",    "BASIC",    8405016, "Samsung CL05B103KB5NNNC 10nF 50V X7R 0402"),
-    "C13":  ("C15195",    "BASIC",    8405016, "Samsung CL05B103KB5NNNC 10nF 50V X7R 0402"),
+    "C12":  ("C85930",    "extended",  358122, "Murata GRM033R71E103KE14D 10nF 25V X7R 0201"),
+    "C13":  ("C85930",    "extended",  358122, "Murata GRM033R71E103KE14D 10nF 25V X7R 0201"),
 
     # ---- the 1k group, moved to 0201 2026-08-29 ----
     # R1/R2/R3 are the harvest series resistors at ~1.1 mA/pin -> 1.21 mW in a
@@ -180,9 +180,9 @@ SRC = {
     "R2":   ("C270365",   "extended",  1407015, "UNI-ROYAL 0201WMF1001TEE 1k 1% 0201"),
     "R3":   ("C270365",   "extended",  1407015, "UNI-ROYAL 0201WMF1001TEE 1k 1% 0201"),
     "R7":   ("C270365",   "extended",  1407015, "UNI-ROYAL 0201WMF1001TEE 1k 1% 0201"),
-    "R4":   ("C3013173",  "extended",  263891, "FOJAN FRC0402F4704TS 4.7M 1% 0402"),
-    "R5":   ("C26083",    "BASIC",    3470670, "UNI-ROYAL 0402WGF1004TCE 1M 1% 0402"),
-    "R6":   ("C25741",    "BASIC",   14849306, "UNI-ROYAL 0402WGF1003TCE 100k 1% 0402"),
+    "R4":   ("C778408",   "extended",   11047, "UNI-ROYAL 0201WMF4704TEE 4.7M 1% 0201"),
+    "R5":   ("C473482",   "extended",  166472, "UNI-ROYAL 0201WMF1004TEE 1M 1% 0201"),
+    "R6":   ("C270364",   "extended", 1263154, "UNI-ROYAL 0201WMF1003TEE 100k 1% 0201"),
     # ---- OK divider, moved to 0201 2026-08-29 ----
     # Stock checked at LCSC AND in JLCPCB's own assembly library, because they
     # are different numbers and the assembly one is what binds. 4.53M and 7.15M
