@@ -70,23 +70,36 @@ BLE Auth Result of docs/AUTH-CRYPTO.md, so:
 
 The dongle's job is delivery plus link state, nothing more.
 
-## OPEN QUESTION — one K or two?
+## DECIDED (2026-08-31): two keys, two ratchets
 
-docs/CODING-PLAN.md also wants the dongle to be the FIDO2 authenticator,
-verifying knob proofs *itself* to gate its own signing. That needs a K on
-the dongle. But the rule above needs a K on the host that the dongle
-cannot know, or the Mac's lock screen is only as trustworthy as any USB
-device someone plugs in.
+The dongle is also the FIDO2 authenticator, so it must verify knob
+proofs *itself* to gate its own signing — that needs a key on the
+dongle. But the relay rule needs a key on the host that the dongle
+cannot know, or Mac login is only as trustworthy as whatever USB device
+is plugged in. So there are two, with independent ratchets:
 
-Recommended: **two independent keys and ratchets** — `K_kd` shared
-knob↔dongle for FIDO2 decisions, `K_kh` shared knob↔host relayed
-transparently for the CTK lane. The knob keeps two slots' worth of key
-state and answers each challenge with the matching key. Costs 32 bytes of
-NVS and one selector byte in the ESB payload.
+| key | shared between | gates |
+|---|---|---|
+| `K_kd` | knob ↔ dongle | the dongle's own FIDO2 signing |
+| `K_kh` | knob ↔ host | the Mac CTK lane (relayed, opaque to the dongle) |
 
-The alternative (dongle verifies, tells the host "ok") is simpler but
-makes the dongle a trusted intermediary for Mac login. Decide before
-writing the knob's ESB code, since it changes the on-air format.
+Consequences, all cheap:
+
+- **The MAC input does not change.** It stays
+  `HMAC(K, nonce ‖ status ‖ slot_be16)` exactly as in docs/AUTH-CRYPTO.md,
+  so `crypto.py`, `AuthCrypto.swift` and every existing test vector stay
+  valid. Two keys need no format change because a verifier holding the
+  wrong key simply fails the MAC — key confusion is not possible, so the
+  selector never needs to be authenticated.
+- **The selector lives on the ESB link only**, as one byte alongside the
+  challenge nonce, telling the knob which key to answer with. It never
+  crosses USB.
+- **This USB protocol is unchanged.** Host-side ops are always the host
+  lane: `PROVISION_KEY` installs `K_kh`. `K_kd` is established during ESB
+  pairing and never crosses USB, so the host never learns the dongle's
+  key and the dongle never learns the host's.
+- **The knob stores two key slots** with independent ratchet state; the
+  one-step resync rule applies per key, separately.
 
 ## Dongle firmware checklist
 

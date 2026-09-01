@@ -61,13 +61,41 @@ sc_auth identities                  # the knob token should be listed
 sc_auth pair -u $USER -h <hash>     # or the System Settings pairing prompt
 ```
 
-On macOS 26/27 `sc_auth pair` fails with CryptoTokenKit -8 (ctkbind
-rejects the identity before ever asking the token; cause unknown). The
-functional equivalent that loginwindow/pam_smartcard actually match on:
+If `sc_auth pair` fails with CryptoTokenKit **-8 (badParameter)**, the
+token's key is being rejected as *unsuitable*, not the pairing: macOS
+smart-card login does not merely sign — it wraps a secret to the card
+and unwraps it via **ECDH at login**. A signature-only key cannot pair.
+The token must therefore:
 
-```sh
-sudo dscl . -append /Users/$USER AltSecurityIdentities 'pubkeyhash;<HASH>'
-```
+- support `.performKeyExchange` with `ecdhKeyExchangeStandard`
+  (`TokenDriver.swift`),
+- set `canPerformKeyExchange` on its `TKTokenKeychainKey`, and
+- carry **keyAgreement** in the certificate's keyUsage, not just
+  digitalSignature (`CertBuilder.swift`).
+
+With those three, pairing succeeds and `sc_auth identities` reports
+"Paired identities which are used for authentication".
+
+Pairing lives in the user's **AuthenticationAuthority** (`;tokenidentity;<HASH>`,
+legacy `;pubkeyhash;<HASH>`) — *not* AltSecurityIdentities. `sc_auth` is a
+shell script; read it for the truth.
+
+## VERIFIED WORKING (2026-08-31, simulated knob)
+
+With a `SimulatedTransport` standing in for the hardware, on this Mac:
+
+- `sudo id -u` → `0`, authenticated **by the card**, account password
+  never entered.
+- The signature returned through CryptoTokenKit verifies against the
+  card's own certificate, and a tampered message is rejected.
+- **The gate is load-bearing:** with the simulator off and no hardware
+  present, the identical `sudo` attempt fails. No proof, no root.
+
+So the whole Mac lane is proven end to end except the radio and the
+finger. Run it yourself with:
+`open --env KNOBTOKEN_SIMULATE=1 ~/Applications/KnobToken.app`
+(debug builds only; the simulator approves every touch, which is why it
+is compiled out of release and gated on that variable).
 
 ## macOS 26+ gotchas (all hit in practice, 2026-08-31)
 
