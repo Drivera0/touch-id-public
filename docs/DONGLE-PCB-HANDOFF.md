@@ -59,6 +59,37 @@ Logi-Bolt-small, USB-C.
 6. **Power:** bus-powered from USB (no battery). Simple.
 7. Optional: one small status LED.
 
+## FIRST-DRAFT BOM (bare-chip route, for the ~9-10 mm target)
+
+Derived 2026-09-01 by diffing against the knob's netlist. The knob is
+mostly harvest + sensor parts (U2 BQ25505, U3/U4 TPS7A2033, BT1, L1, the
+ROV/ROK/divider resistors, J2) — the dongle DROPS all of that. It keeps
+only the nRF52840 core and ADDS a USB front end.
+
+| # | part | qty | purpose |
+|---|---|---|---|
+| 1 | nRF52840 (aQFN73 bare) — or MDBT50Q module for a dev board | 1 | MCU + 2.4 GHz radio + USB + FIDO2 crypto (CryptoCell CC310) |
+| 2 | 32 MHz crystal (HFXO) + 2 load caps | 1 | required for USB (RC not accurate enough) |
+| 3 | 32.768 kHz crystal (LFXO) + 2 caps | 0-1 | OPTIONAL — omit and use RC, like the knob does |
+| 4 | antenna — chip antenna or PCB trace | 1 | 2.4 GHz link to the knob |
+| 5 | RF matching network (pi: ~2C + 1L, 0402) | ~3 | antenna tuning; values by measurement |
+| 6 | USB-C connector | 1 | data + power (knob has NO USB) |
+| 7 | USB ESD protection (TVS, e.g. USBLC6-2SC6) | 1 | protect D+/D- |
+| 8 | decoupling caps (100 nF x several + a few bulk uF) | ~8 | power-pin stability |
+| 9 | DC/DC inductors (per Nordic reference) | 2 | internal buck; optional (LDO mode works on USB) |
+| 10 | status LED + resistor | 0-2 | optional, YubiKey-style |
+| 11 | secure element (SE050 / ATECC608) | 0-1 | OPTIONAL — certified-grade key storage, later |
+| 12 | flashing: SWD pads or USB bootloader | 0 | no added parts either way |
+
+Exact crystal/inductor/cap values: copy Nordic's published nRF52840
+reference design — do NOT invent them. Module route (MDBT50Q) folds
+items 1-5, 8-9 into the module.
+
+**No knob parts are removed by adding the dongle** — the two devices have
+disjoint jobs (knob = harvest + sensor + radio; dongle = USB + FIDO2),
+and the knob is frozen at v7 regardless. FIDO2 and the 2.4 GHz protocol
+are firmware on the knob's existing nRF52840, not separate parts.
+
 ## WHAT TO PRODUCE
 
 1. A parts list (BOM) with real, orderable parts — nRF52840 module,
