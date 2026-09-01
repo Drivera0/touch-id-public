@@ -28,6 +28,10 @@ five wired pin tails, route them out the bottom arches (west/east/rear) to
 the DAPLink (SWDIO, SWCLK, GND) and the 3.6 V supply (VSTOR, GND). RESET
 tail stays parked. The helper pin and plunger connect to nothing.
 
+PINS: P75-E2 only (O1.02 barrel, O1.3 conical head, 16.5 mm). Drop each pin
+in from the top; the head seats in its O1.45 recess. Solder wires to the
+tails in the cavity below. Lee's P125-B does NOT fit (see bore comment).
+
 Usage: python gen_flash_jig.py -> 3dmodels/flash_jig.stl + _lever + _plunger
 """
 import os
@@ -82,6 +86,14 @@ base = (base.faces(">Z").workplane()
 floor_z = H - POCKET_D
 base = (base.faces(">Z").workplane(offset=-POCKET_D)
         .pushPoints(J3 + [LIFTER]).circle(PIN_HOLE / 2).cutThruAll())
+# v2.1 SEATED PINS (user's idea): a O1.45 x 1.0 counterbore at each bore's
+# top recesses and REGISTERS the P75-E2's O1.3 conical head, so every tip is
+# centred on its pad instead of leaning in the loose barrel bore; the O1.15
+# bore below is the small pass-through for barrel + wire tail. (Lee's P125-B
+# was ruled out: O2.0 barrels on the 2.0 mm J3 pitch touch -> all signals
+# short through the jig.)
+base = (base.faces(">Z").workplane(offset=-POCKET_D)
+        .pushPoints(J3 + [LIFTER]).circle(1.45 / 2).cutBlind(-1.0))
 base = base.cut(cq.Workplane("XY", origin=(PLUNGER_XY[0], PLUNGER_XY[1], -1))
                 .circle(PLUNGER_BORE / 2).extrude(H + 2))
 base = base.cut(cq.Workplane("XY").workplane(offset=1.5)
