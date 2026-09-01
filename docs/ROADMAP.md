@@ -39,6 +39,19 @@
 >
 > **The dongle is the knob's wired ambassador: radio to the knob, real
 > USB device to the OS.**
+>
+> **KNOB<->DONGLE TRANSPORT (2026-08-31): proprietary 2.4 GHz (Nordic
+> ESB/Gazell), not BLE.** BLE is itself 2.4 GHz; the choice is protocol.
+> Since we own both ends, BLE's interoperability is wasted — ESB wins on
+> POWER (critical for the ~6 uA harvest budget: shorter radio-on, no
+> connection upkeep) and LATENCY, with simpler pairing. ESB has no link
+> encryption, but our security is app-layer (HMAC challenge-proof +
+> ratchet, docs/AUTH-CRYPTO.md), transport-independent, so nothing is
+> lost. Consequence: the knob can no longer talk to a host DIRECTLY over
+> BLE — everything routes host->USB->dongle->2.4 GHz->knob, so the dongle
+> is mandatory (already the decision). The Mac keycard's BLE-direct
+> sketch (KnobClient.swift) becomes dongle-mediated. nRF52840 does both,
+> so this is a firmware choice, reversible if needed.
 > - Lock screens: dongle types the login password as a USB keyboard,
 >   but only after the knob's challenge-proof — password never on the
 >   knob, never on the radio. Beats knob-HID on every axis.
