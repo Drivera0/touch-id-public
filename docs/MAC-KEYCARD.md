@@ -89,37 +89,42 @@ fingerprint touch is the check. If macOS shows a PIN field, any input
 passes *when the knob can answer*, and nothing passes when it cannot,
 which is precisely why rule 1 matters.
 
-### Why lock-screen login stays off (the residual risk we cannot close)
+### The PIN label is cosmetic — the password still works (TESTED)
 
-macOS has ONE credential slot and relabels it. Its own login window
-strings prove it:
+macOS relabels its single credential slot when a card is present:
 
     TOUCH_ID_OR_PASSWORD => "Touch ID or Enter Password"
     TOUCH_ID_OR_PIN      => "Touch ID or Enter PIN"
 
-The password is **replaced, not joined**. So while a card is present the
-lock screen offers Touch ID or a PIN — never the password. Rule 1 mostly
-saves us (knob gone → card gone → password returns), but it depends on
-the app being alive to notice. If the app is force-killed, or the
-machine restarts uncleanly while a login-capable card is registered, the
-card survives with nothing able to answer for it.
+**Relabelled is not replaced.** Tested on this Mac 2026-08-31 with the
+card present, paired and login-enabled: typing the *account password*
+into the PIN-labelled authorization dialog authenticated successfully
+(`do shell script … with administrator privileges` ran as root), while
+the card simultaneously kept producing valid touch-gated signatures.
+Both credentials are live at once — tap or type, as it should be.
 
-Residual escape hatch: **FileVault**. Its pre-boot screen runs before
-macOS, CryptoTokenKit or any of our code exists, and takes the account
-password. A restart therefore always gets you in. That is a recovery
-path, not a UX, so:
+The gate for card-only is `enforceSmartCard` (a loginwindow preference,
+with its own "Smart Card Required" UI state). It is NOT set by default,
+and we never set it. Do not set it.
 
-**Do not enable lock-screen login.** `TokenSetup.loginEnabled` defaults
-false and there is deliberately NO menu item for it — turning it on
-requires `defaults write com.drivera.KnobToken allowLockScreenLogin
--bool YES`, an intentional act. The card's safe home is
-sudo/authorization, where the PAM chain gives card OR password and the
-password never disappears.
+So the earlier claim in this file that a paired card removes the
+password was WRONG, and was corrected by testing rather than by reading
+strings. The real hazard was never the label — it was a card that could
+not answer (fixed by rule 1) plus a PIN that was never explained.
 
-This is an honest limit of the CTK keycard route against ROADMAP goal 1:
-it can authenticate the Mac, but on the lock screen it does so by taking
-the password field away, and it can only be made safe by being removable
-— which is not guaranteed when the process that removes it has died.
+### Why lock-screen login is still off by default
+
+Not because the password disappears — it does not. Because of the
+residual case: if the app is force-killed or the machine restarts
+uncleanly while a login-capable card is registered, the card survives
+with nothing able to answer it. The password still works, so this is a
+confusing lock screen rather than a lockout, and FileVault's pre-boot
+screen (which runs before any of this exists) is a further backstop.
+
+`TokenSetup.loginEnabled` therefore defaults false with deliberately NO
+menu item — enabling it needs
+`defaults write com.drivera.KnobToken allowLockScreenLogin -bool YES`.
+Turn it on when there is hardware worth unlocking with.
 
 Recovery, if a dead card is ever registered again: run the
 `--remove-token` teardown above (no password needed), then
