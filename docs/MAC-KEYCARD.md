@@ -112,6 +112,49 @@ password was WRONG, and was corrected by testing rather than by reading
 strings. The real hazard was never the label — it was a card that could
 not answer (fixed by rule 1) plus a PIN that was never explained.
 
+### THE control is the pairing record, not any flag of ours (TESTED)
+
+`TokenSetup.loginEnabled` / `isSuitableForLogin` is **not** what decides
+whether the card can log you in. Tested: with `allowLockScreenLogin` set
+false and a card registered, `sc_auth` still reported *"Paired
+identities which are used for authentication"* — because the
+`;tokenidentity;` entry in the account's AuthenticationAuthority is what
+makes a card a credential.
+
+With that record removed and a card still present, `sc_auth list -u
+<user>` returns **empty** — nothing on the card can authenticate the
+account, and the authorization prompt reverts to "Password".
+
+So the safety order is:
+
+1. **No pairing record** → a card, even a stale registered one, can
+   never be used to log in. This is the real switch.
+2. No card registered (rules above) → nothing is offered anyway.
+3. `loginEnabled` is a secondary hint only. Do not rely on it.
+
+Un-pairing completely (all three forms, since `sc_auth unpair` misses
+the legacy one):
+
+```sh
+sudo sc_auth unpair -u $USER -h <HASH>
+sudo dscl . -delete /Users/$USER AuthenticationAuthority ";tokenidentity;<HASH>"
+sudo dscl . -delete /Users/$USER AuthenticationAuthority ";pubkeyhash;<HASH>"
+sudo sc_auth remove -u $USER
+```
+
+### Verified failure-mode matrix (2026-08-31)
+
+| case | result |
+|---|---|
+| launch, no hardware | no card registered |
+| hardware present | card registered |
+| app quit normally | card removed |
+| app `kill -9` with card up | card SURVIVES (no process to clean up) |
+| stale card, pairing record present | still a login credential — the hazard |
+| stale card, **no** pairing record | not a credential; prompt says Password |
+| `--remove-token` | clears the card, needs no password |
+| concurrent register/deregister | no crash (serialized queue) |
+
 ### Why lock-screen login is still off by default
 
 Not because the password disappears — it does not. Because of the
