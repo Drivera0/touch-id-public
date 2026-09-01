@@ -64,8 +64,10 @@ a custom board (the Raytac dev-board target is NOT this PCB) with:
 ## Still open
 
 - On-hardware verification of everything (first flash pending).
-- **Crypto binding**: the auth notify currently echoes the helper's
-  nonce; replace with HMAC once key provisioning is designed
-  (candidate key home: sensor Notepad pages, see SENSOR-PROTOCOL.md).
-- The Mac helper's BLE rewrite (design kept in reference/tinytouch/).
+- The Mac helper's BLE rewrite — must implement the crypto contract in
+  docs/AUTH-CRYPTO.md (HMAC verify + one-step ratchet resync).
 - Sleep/advertising policy vs the ~6 µA budget; BL_FLAG thresholds.
+
+Crypto binding is DONE firmware-side (2026-08-31): LESC-only pairing,
+HMAC-SHA256 challenge-response with helper-provisioned key in NVS, hash
+ratchet per successful auth — docs/AUTH-CRYPTO.md.
