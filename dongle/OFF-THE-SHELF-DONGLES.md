@@ -121,3 +121,14 @@ shipping product.
 | [DigiKey Canada](https://www.digikey.ca/en/products/detail/nordic-semiconductor-asa/NRF52840-DONGLE/9491124) | CA$17.22 | 0, backorder already past due, 16-week lead — skip |
 | [RobotShop Canada — Seeed MDK dongle](https://ca.robotshop.com/products/seeedstudio-nrf52840-mdk-usb-dongle) | CA$19.53 | same chip, NOT the Nordic board (UF2 bootloader, different pinout) |
 | Amazon.ca | CA$50+ | GeeekPi/Taidacent markups — skip |
+
+### Local bench-target check (2026-09-01)
+
+Shipping kills the mail-order options for a bench tool: BC Robotics wants
+$20 shipping on the $39.95 Feather; Mouser's $16.20 genuine dongle is a
+3-week backorder plus shipping. **DECISION: [Seeed XIAO nRF52840 Sense Plus,
+CA$45 at Lee's](https://leeselectronic.com/en/product/18072-seeed-studio-xiao-nrf52840-sense-plus.html)
+— walk-in, same trip as the jig supplies.** Same nRF52840, Zephyr `xiao_ble`
+target, UF2 + USB-C; firmware written on it ports to the MDBT50Q. (Lee's
+Circuit Playground Bluefruit CA$35 is also nRF52840 but a worse dev proxy.)
+This is the BENCH tool; the shippable receiver remains the Raytac CX-40.
