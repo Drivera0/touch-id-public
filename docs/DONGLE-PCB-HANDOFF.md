@@ -6,23 +6,25 @@ USB-C receiver**: compact, sealed, barely protrudes from the port. This
 doc is the brief. The person is a **beginner at electronics — explain,
 don't assume; never invent a part number or dimension.**
 
-## SIZE IS NOT A PROBLEM — proof (read this first)
+## SIZE — the honest budget is in docs/DONGLE-SIZE-BUDGET.md; read it first
 
-The user's main worry is that the dongle must be Logi-Bolt small or it
-won't sell. It can be. This is a solved size class, not a risk:
+Do NOT hand-wave "the chip is 7 mm so it's fine." A prior session traced
+the real mechanical floor; the summary:
 
-- nRF52840 does radio + USB in ONE chip, 7.0 x 7.0 mm (aQFN73); a WLCSP
-  variant is ~3.5 x 3.6 mm. The silicon is smaller than the USB
-  connector.
-- A YubiKey 5C Nano (a full security key + USB-C) is ~12 x 10 x 4 mm and
-  sits flush in the port. Our BOM is that class.
-- The dongle needs only: nRF52840 (or a small module), USB-C connector,
-  printed/chip antenna, a few passives, one LED. Nothing bulky.
+- Width and height ARE Logi-Bolt-class already. Only LENGTH is over.
+- The whole length overage is the **antenna keep-out** on a pre-certified
+  module, not the silicon. YubiKey Nano is NOT a valid size proof — it
+  has no radio, so no antenna keep-out.
+- Smallest pre-certified nRF52840 module with USB brought out is the
+  **Insight SiP ISP1807 (8x8x1.0)**; its 4 mm keep-out pushes the nub to
+  roughly **YubiKey-5C size (~20 mm visible), not Bolt (~9 mm)**.
+- Realistic v1: accept the ~20 mm nub, and/or shrink the keep-out on
+  purpose (the link is a 1 m desk hop, so a few dB loss is fine — build
+  two boards and measure). True-Bolt-tiny needs a bare nRF52840 + own
+  antenna + full intentional-radiator certification — NOT a v1 move.
 
-The chunky boards the user has seen (Seeed XIAO, Nordic PCA10059) are
-DEV boards — headers and breakout pins make them big. The production
-board strips all that. Dev-board size != product size. Design target:
-a sealed nub in the Logi-Bolt / YubiKey-Nano class.
+Design target: a sealed YubiKey-5C-class nub. Full trace, part numbers,
+and the length budget: **docs/DONGLE-SIZE-BUDGET.md**.
 
 ## WHAT THIS DONGLE IS
 
