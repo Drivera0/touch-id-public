@@ -66,6 +66,33 @@ are strain-relieved through the arches); stranded silicone is just nicer.
 | 5 | **3.6 V supply** for VSTOR while flashing | 1 | Chosen: MiniWare MDP-P906, official AliExpress store (see chat notes) — not DigiKey | bench-style CC/CV; NEVER 5 V onto VSTOR |
 | 6 | Thin solder (0.5–0.8 mm) + flux | — | anywhere | — |
 
+## Desoldering the sensor's XH-1.00 6-pin connector (+ tools) — Lee's, verified 2026-09-01
+
+The ZW0922's vertical connector is 4.5 mm tall and MUST come off (0.4 mm of
+room above the cell). Buy at Lee's, ~CA$29–42:
+
+| Item | Price | Why |
+|---|---|---|
+| [Desoldering wick, anti-hot, 1.5 mm / 2 m](https://leeselectronic.com/en/product/18659-desoldering-wick-anti-hot-15mm-2-meter.html) | CA$8.50 | 1.5 mm matches the 1.0 mm-pitch pads — wider braid bridges neighbors |
+| [Soldering paste flux, 10 g](https://leeselectronic.com/en/product/42381-soldering-paste-flux-10g.html) | CA$4.80 | wick barely works dry; flux makes it drink solder |
+| [Side cutter 5" RT-100](https://leeselectronic.com/en/product/10781-tool-5-side-cutter-rt-100.html) | CA$7.50 | to cut the connector's plastic shroud off first |
+| [Tweezer, antistatic, fine tip TST-10](https://leeselectronic.com/en/product/10263-10263tooltweezerfinetipwl2010.html) (or [narrow TST-11](https://leeselectronic.com/en/product/16494-tool-tweezer-fine-narrow-tip-tst-11.html)) | CA$3.95 | to pull each freed pin |
+| [Isopropyl 99.9%, 100 ml](https://leeselectronic.com/en/product/4285-isoproyl-alcohol-824-100ml.html) | CA$13.50 | flux-residue cleanup (a pharmacy 99% bottle also works, cheaper) |
+| optional: [Xcelite flush cutter 170MVN](https://leeselectronic.com/en/product/16956-xcelite-diagonal-shear-cutter-5-flush-jaw-20-awg.html) | CA$25.55 | nicer cutter, not required |
+
+**Beginner method — never lever all 6 pins at once:**
+1. Snip the connector's plastic shroud away with the cutter until only six
+   bare pins stand in the pads. Cut plastic, never pull on pads.
+2. One pin at a time: grip with tweezers, touch the iron to its joint, lift
+   it out the moment the solder melts.
+3. Flux on the pads, lay the wick on, press the iron on top of the wick —
+   lift wick and iron TOGETHER (a cooled wick stuck to the pad rips it off).
+4. Swab with isopropyl. Pads should be flat and shiny; then solder the wires.
+
+The sensor die is on the other side of that little board — keep each iron
+touch under ~3 s, rest between. Buy a spare module; the first one is
+practice (BUY-YOURSELF.md already says this).
+
 ## Assembly reminders
 
 - Wiring map: `J3-flashing-hookup.png` in this folder. SWDIO SWCLK RESET
