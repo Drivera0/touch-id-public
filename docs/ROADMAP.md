@@ -13,6 +13,17 @@ The flagship. Three routes, all compatible with each other:
 Recommended order: HID mode first (fast, works everywhere), platform
 plug-ins after the module is proven in daily use.
 
+Multi-host requirements (user has Mac + Windows, 2026-08-31):
+- bonds for both machines; secrets stored PER-BOND (login password and
+  vault key K each tagged to the bond that provisioned them — the
+  encryption handshake proves host identity, so the knob can never type
+  the wrong machine's password). NOTE: current firmware stores a single
+  K; per-bond storage is a required change for HID mode.
+- switching: prefer last-used host; finger held ~3 s = drop host and
+  connect to the other bond (the sensor is the only button).
+- production flashes set APPROTECT (debug-port lockout) since the login
+  password lives in knob flash.
+
 ## GOAL 2: fingerprint autofill of passwords (Apple Touch-ID-autofill style)
 
 - Today: `knobauth.typer` types a vault secret into the focused field
