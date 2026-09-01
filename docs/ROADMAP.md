@@ -8,7 +8,7 @@ The flagship. Three routes, all compatible with each other:
 |---|---|---|---|
 | firmware HID mode: knob types the login password as a real BLE keyboard — lock screens accept real keyboards | both OSes, day one with hardware | login password stored on knob; types at whatever it's paired to | NOT BUILT — next firmware feature |
 | Windows credential provider (DLL loaded into the lock screen; the Duo mechanism) | Windows, properly | C++ COM, system install, wrapped password storage | phase 2 |
-| macOS authorization plugin (the Jamf Connect mechanism) | Mac, properly | needs a Mac to build/test | phase 2 |
+| macOS **CryptoTokenKit token** — helper presents the knob as a smart card; macOS natively pairs cards with local accounts (login/unlock/sudo). The "keycard" idea from tinyTouch's deleted smartcard firmware, reborn without USB. Preferred over an authorization plugin. | Mac, properly | Swift/CTK work, needs a Mac | phase 2 |
 
 Recommended order: HID mode first (fast, works everywhere), platform
 plug-ins after the module is proven in daily use.
