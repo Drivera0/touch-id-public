@@ -27,6 +27,21 @@ partition (settings/NVS).
 Defeats: replay (fresh nonce), a spoofed peripheral or compromised BLE
 stack (no K, no valid mac).
 
+## 2b. Two keys (decided 2026-08-31, when the dongle arrived)
+
+The knob now holds **two** independent keys, each with its own ratchet:
+`K_kd` shared with the dongle (gates the dongle's FIDO2 signing) and
+`K_kh` shared with the host (gates the Mac CTK lane, relayed through the
+dongle unread). Rationale and provisioning split:
+docs/DONGLE-HOST-PROTOCOL.md.
+
+Everything below is **unchanged** by this. The MAC input is identical,
+so both implementations and all test vectors stay valid — two keys need
+no format change, because a verifier holding the wrong key just fails
+the MAC. Which key to answer with is one selector byte carried with the
+challenge on the ESB link; it needs no authentication, since guessing it
+wrong only produces a proof the verifier rejects.
+
 ## 3. Hash ratchet
 
 After each successful **authenticated OK** exchange, both ends step

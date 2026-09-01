@@ -19,14 +19,22 @@ signs when the knob's challenge-proof says your finger touched it.
 
 ```
 KnobToken.app (menu-bar app)
- ├─ KnobClient.swift    CoreBluetooth central — our GATT protocol
- ├─ AuthCrypto.swift    HMAC verify + one-step ratchet (port of
- │                      knobauth/crypto.py, same test vectors)
+ ├─ KnobTransport.swift  the seam: requestTouch/provision/enroll
+ ├─ DongleClient.swift   USB HID to the dongle (vendor page 0xFF00);
+ │                       docs/DONGLE-HOST-PROTOCOL.md
+ ├─ AuthCrypto.swift     HMAC verify + one-step ratchet (port of
+ │                       knobauth/crypto.py, same test vectors)
  └─ TokenExtension (CTK persistent token, extension point
     com.apple.ctk-tokens)
      └─ exposes 1 ECDSA P-256 key + self-signed cert; every sign
-        request → XPC to the app → knob touch proof → sign
+        request → CFMessagePort to the app → knob touch proof → sign
 ```
+
+Transport: knob →(2.4 GHz ESB)→ dongle →(USB HID)→ Mac. The dongle
+relays the knob's proof verbatim, so the Mac verifies the HMAC itself
+and the ratchet still runs knob↔Mac. The earlier BLE-direct client is
+kept in `software/mac-helper/archive/ble-direct/` — it works against
+the knob's *current* firmware, which is still a BLE peripheral.
 
 - **v1 key location:** generated on the Mac, Keychain-held, ACL'd to
   the app. Touch gating is enforced by the app (it refuses to sign
@@ -42,8 +50,129 @@ KnobToken.app (menu-bar app)
 2. `cd software/mac-helper && xcodegen && open KnobToken.xcodeproj`
 3. Set your signing team on both targets (free Apple ID works for
    local development; CTK tokens need no restricted entitlement).
-4. Run the app once (registers the extension), approve it in
-   System Settings → Privacy & Security → Extensions → Smart Cards.
+4. Run the app once (registers the extension), then enable it. The
+   Smart Cards pane may not exist on macOS 26+; this always works:
+   `pluginkit -e use -i com.drivera.KnobToken.TokenExtension`
+
+## SAFETY RULES (learned the hard way, 2026-08-31 — do not regress)
+
+A smart card that cannot be removed is a **lockout**. During testing a
+paired token was left registered with no hardware present; macOS then
+offered that dead card for the lock screen *and* for the authorization
+dialog needed to unpair it, asking for a PIN that does not exist. Three
+rules now prevent that, and all three are enforced in code:
+
+1. **The card exists only while the hardware does.** `SetupState.follow`
+   registers the token on connect and deregisters it on disconnect;
+   `AppDelegate.applicationWillTerminate` deregisters on quit. No knob,
+   no card, normal password prompt. This is what makes it behave like a
+   physical card you can pull out.
+2. **Lock-screen login is OFF by default** (`isSuitableForLogin` follows
+   `TokenSetup.loginEnabled`, default false). Why the asymmetry:
+   - `sudo` / authorization is safe by construction — `/etc/pam.d/sudo`
+     has `pam_smartcard` **sufficient** then `pam_opendirectory`
+     **required**, i.e. card OR password. You can always type your
+     password.
+   - the login window / lock screen has **no** PAM smartcard line;
+     macOS's own UI takes over and shows a card PIN field. We do not
+     control that UI and have not verified the password stays reachable
+     there. Do not enable this without checking, on the actual lock
+     screen, that a password option is present.
+3. **There is always a way out that needs no credentials**: the menu's
+   "Remove smart card now", or
+   `KnobToken.app/Contents/MacOS/KnobToken --remove-token`. Both
+   deregister the card immediately; macOS falls straight back to
+   password and Touch ID.
+
+There is no PIN. The token never had one and never validates one — the
+fingerprint touch is the check. If macOS shows a PIN field, any input
+passes *when the knob can answer*, and nothing passes when it cannot,
+which is precisely why rule 1 matters.
+
+### The PIN label is cosmetic — the password still works (TESTED)
+
+macOS relabels its single credential slot when a card is present:
+
+    TOUCH_ID_OR_PASSWORD => "Touch ID or Enter Password"
+    TOUCH_ID_OR_PIN      => "Touch ID or Enter PIN"
+
+**Relabelled is not replaced.** Tested on this Mac 2026-08-31 with the
+card present, paired and login-enabled: typing the *account password*
+into the PIN-labelled authorization dialog authenticated successfully
+(`do shell script … with administrator privileges` ran as root), while
+the card simultaneously kept producing valid touch-gated signatures.
+Both credentials are live at once — tap or type, as it should be.
+
+The gate for card-only is `enforceSmartCard` (a loginwindow preference,
+with its own "Smart Card Required" UI state). It is NOT set by default,
+and we never set it. Do not set it.
+
+So the earlier claim in this file that a paired card removes the
+password was WRONG, and was corrected by testing rather than by reading
+strings. The real hazard was never the label — it was a card that could
+not answer (fixed by rule 1) plus a PIN that was never explained.
+
+### THE control is the pairing record, not any flag of ours (TESTED)
+
+`TokenSetup.loginEnabled` / `isSuitableForLogin` is **not** what decides
+whether the card can log you in. Tested: with `allowLockScreenLogin` set
+false and a card registered, `sc_auth` still reported *"Paired
+identities which are used for authentication"* — because the
+`;tokenidentity;` entry in the account's AuthenticationAuthority is what
+makes a card a credential.
+
+With that record removed and a card still present, `sc_auth list -u
+<user>` returns **empty** — nothing on the card can authenticate the
+account, and the authorization prompt reverts to "Password".
+
+So the safety order is:
+
+1. **No pairing record** → a card, even a stale registered one, can
+   never be used to log in. This is the real switch.
+2. No card registered (rules above) → nothing is offered anyway.
+3. `loginEnabled` is a secondary hint only. Do not rely on it.
+
+Un-pairing completely (all three forms, since `sc_auth unpair` misses
+the legacy one):
+
+```sh
+sudo sc_auth unpair -u $USER -h <HASH>
+sudo dscl . -delete /Users/$USER AuthenticationAuthority ";tokenidentity;<HASH>"
+sudo dscl . -delete /Users/$USER AuthenticationAuthority ";pubkeyhash;<HASH>"
+sudo sc_auth remove -u $USER
+```
+
+### Verified failure-mode matrix (2026-08-31)
+
+| case | result |
+|---|---|
+| launch, no hardware | no card registered |
+| hardware present | card registered |
+| app quit normally | card removed |
+| app `kill -9` with card up | card SURVIVES (no process to clean up) |
+| stale card, pairing record present | still a login credential — the hazard |
+| stale card, **no** pairing record | not a credential; prompt says Password |
+| `--remove-token` | clears the card, needs no password |
+| concurrent register/deregister | no crash (serialized queue) |
+
+### Why lock-screen login is still off by default
+
+Not because the password disappears — it does not. Because of the
+residual case: if the app is force-killed or the machine restarts
+uncleanly while a login-capable card is registered, the card survives
+with nothing able to answer it. The password still works, so this is a
+confusing lock screen rather than a lockout, and FileVault's pre-boot
+screen (which runs before any of this exists) is a further backstop.
+
+`TokenSetup.loginEnabled` therefore defaults false with deliberately NO
+menu item — enabling it needs
+`defaults write com.drivera.KnobToken allowLockScreenLogin -bool YES`.
+Turn it on when there is hardware worth unlocking with.
+
+Recovery, if a dead card is ever registered again: run the
+`--remove-token` teardown above (no password needed), then
+`sudo sc_auth unpair -u $USER -h <HASH>` and `sudo sc_auth remove -u $USER`
+for the legacy record.
 
 ## Pair with your account
 
@@ -52,13 +181,41 @@ sc_auth identities                  # the knob token should be listed
 sc_auth pair -u $USER -h <hash>     # or the System Settings pairing prompt
 ```
 
-On macOS 26/27 `sc_auth pair` fails with CryptoTokenKit -8 (ctkbind
-rejects the identity before ever asking the token; cause unknown). The
-functional equivalent that loginwindow/pam_smartcard actually match on:
+If `sc_auth pair` fails with CryptoTokenKit **-8 (badParameter)**, the
+token's key is being rejected as *unsuitable*, not the pairing: macOS
+smart-card login does not merely sign — it wraps a secret to the card
+and unwraps it via **ECDH at login**. A signature-only key cannot pair.
+The token must therefore:
 
-```sh
-sudo dscl . -append /Users/$USER AltSecurityIdentities 'pubkeyhash;<HASH>'
-```
+- support `.performKeyExchange` with `ecdhKeyExchangeStandard`
+  (`TokenDriver.swift`),
+- set `canPerformKeyExchange` on its `TKTokenKeychainKey`, and
+- carry **keyAgreement** in the certificate's keyUsage, not just
+  digitalSignature (`CertBuilder.swift`).
+
+With those three, pairing succeeds and `sc_auth identities` reports
+"Paired identities which are used for authentication".
+
+Pairing lives in the user's **AuthenticationAuthority** (`;tokenidentity;<HASH>`,
+legacy `;pubkeyhash;<HASH>`) — *not* AltSecurityIdentities. `sc_auth` is a
+shell script; read it for the truth.
+
+## VERIFIED WORKING (2026-08-31, simulated knob)
+
+With a `SimulatedTransport` standing in for the hardware, on this Mac:
+
+- `sudo id -u` → `0`, authenticated **by the card**, account password
+  never entered.
+- The signature returned through CryptoTokenKit verifies against the
+  card's own certificate, and a tampered message is rejected.
+- **The gate is load-bearing:** with the simulator off and no hardware
+  present, the identical `sudo` attempt fails. No proof, no root.
+
+So the whole Mac lane is proven end to end except the radio and the
+finger. Run it yourself with:
+`open --env KNOBTOKEN_SIMULATE=1 ~/Applications/KnobToken.app`
+(debug builds only; the simulator approves every touch, which is why it
+is compiled out of release and gated on that variable).
 
 ## macOS 26+ gotchas (all hit in practice, 2026-08-31)
 

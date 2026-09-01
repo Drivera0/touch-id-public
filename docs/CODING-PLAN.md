@@ -68,14 +68,24 @@ extra, NEVER a requirement for a buyer.
 - [x] Fake sensor tool for jig-day (firmware/tools/fake_zw0922.py)
 - [ ] **Swap knob radio from BLE GATT to ESB** toward the dongle
       (currently ble.c is BLE peripheral; becomes ESB peer)
+- [ ] **Two key slots in NVS** (`K_kd`, `K_kh`) with independent ratchet
+      state and per-key resync; answer each challenge with the key its
+      selector byte names (authkey.c currently stores a single K)
 - [ ] Per-bond/per-host handling if knob ever pairs >1 dongle
 - [ ] Sleep/advertising → sleep/ESB-listen policy vs ~6 uA budget
 - [ ] First flash + on-hardware verification (needs knob PCB)
 
 ### Firmware — dongle (nRF52840, dev on XIAO) — NOT STARTED
 - [ ] Bring-up: flash a XIAO, USB enumerates, LED blinks
+- [ ] **Vendor HID control channel to the host** — the Mac host side is
+      already written and waiting: docs/DONGLE-HOST-PROTOCOL.md has the
+      full report format and a firmware checklist
 - [ ] ESB link to the knob (pair, exchange the HMAC challenge/proof)
-- [ ] Port the auth crypto to the dongle (reuse authkey.c)
+- [ ] Port the auth crypto to the dongle (reuse authkey.c). **Two keys,
+      decided 2026-08-31**: `K_kd` knob↔dongle gates FIDO2 signing,
+      `K_kh` knob↔host is relayed opaquely for the Mac lane. MAC input
+      unchanged (existing vectors stay valid); selector byte rides with
+      the challenge on ESB only. See docs/DONGLE-HOST-PROTOCOL.md.
 - [ ] **USB HID keyboard personality** — type a stored login password
       after a verified knob proof (Windows lock-screen route)
 - [ ] **FIDO2/CTAP2 authenticator** — fork OpenSK; knob touch = user
@@ -83,16 +93,46 @@ extra, NEVER a requirement for a buyer.
 - [ ] U2F (CTAP1) fallback (near-free with OpenSK)
 - [ ] Per-host secret storage (Mac vs Windows login passwords)
 
-### Mac software (software/mac-helper/, Swift) — SCAFFOLDED
-- [x] xcodegen project, BLE client sketch, AuthCrypto Swift port
-- [ ] **Rework: talk to the DONGLE over USB, not the knob over BLE**
-      (KnobClient.swift is BLE-direct; architecture is now dongle-mediated)
+### Mac software (software/mac-helper/, Swift) — TOKEN WORKS, TRANSPORT MID-REWORK
+- [x] xcodegen project, AuthCrypto Swift port (verified against the
+      Python vectors), CTK token extension
+- [x] First-launch key + self-signed cert generation (CertBuilder emits
+      the X.509 by hand; checked against `openssl x509`)
+- [x] Keychain persistence for the ratcheting key (KeyStore)
+- [x] App↔extension sign bridge, gating every signature on a verified
+      touch — CFMessagePort, not NSXPC (a plain app can't host a launchd
+      mach service); Sources/Shared/KnobIPC.swift says why
+- [x] **PROVEN END TO END on this Mac (simulated knob, 2026-08-31):**
+      `sudo id -u` → `0` authenticated by the card, password never
+      typed; signature verifies against the card's cert; and with the
+      simulator off it correctly FAILS, so the touch gate is
+      load-bearing. Needed three things nobody documents: the token must
+      support **ECDH key exchange** (login unwraps a secret to the card —
+      a signature-only key fails pairing with CTK -8), the key needs
+      `canPerformKeyExchange`, and the cert needs **keyAgreement** in
+      keyUsage. Pairing lives in AuthenticationAuthority, not
+      AltSecurityIdentities.
+- [x] Build + verify on a real Mac: token loads, keychain vends the
+      identity, login window lists it, `sudo` PAM already smartcard-ready.
+      macOS 26+ landmines documented in docs/MAC-KEYCARD.md — flat
+      `com.apple.ctk.class-id` keys (the documented legacy dict
+      **crash-loops ctkd**), never set NSExtensionPrincipalClass,
+      TKTokenDriver.Configuration is blocking XPC, and `sc_auth pair` is
+      broken → pair via `dscl` AltSecurityIdentities pubkeyhash
+- [~] **Rework: talk to the DONGLE over USB, not the knob over BLE** —
+      host side DONE and building: `KnobTransport` seam, `DongleClient`
+      over IOHIDManager (vendor usage page 0xFF00, no driver/TCC prompt),
+      wire format in docs/DONGLE-HOST-PROTOCOL.md. BLE client preserved
+      in software/mac-helper/archive/ble-direct/. **Blocked on dongle
+      firmware existing before it can be run against hardware.**
+- [ ] Custom TKTokenAuthOperation = knob touch (still the stock PIN op:
+      the lock screen shows a PIN field, type anything — the touch is
+      the real gate)
 - [ ] Remove the menu-bar app; fold link into the CTK token extension
-      (appless, seamless — user requirement)
-- [ ] First-launch key + self-signed cert generation
-- [ ] Custom TKTokenAuthOperation = knob touch; XPC wiring
-- [ ] Keychain persistence for the ratcheting key
-- [ ] Build + verify on a real Mac (cannot be tested off-Mac)
+      (appless, seamless — user requirement). Now plausible: with USB
+      instead of BLE the extension could own the link itself. Open
+      question is where provisioning/enrollment UI lives — a setup-only
+      app that isn't resident is probably the answer.
 
 ### Windows software (software/windows-helper/, Python) — HELPER DONE
 - [x] Vault (Credential Locker), git credential adapter, askpass
