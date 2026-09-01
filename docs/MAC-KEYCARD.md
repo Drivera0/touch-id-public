@@ -19,14 +19,22 @@ signs when the knob's challenge-proof says your finger touched it.
 
 ```
 KnobToken.app (menu-bar app)
- ├─ KnobClient.swift    CoreBluetooth central — our GATT protocol
- ├─ AuthCrypto.swift    HMAC verify + one-step ratchet (port of
- │                      knobauth/crypto.py, same test vectors)
+ ├─ KnobTransport.swift  the seam: requestTouch/provision/enroll
+ ├─ DongleClient.swift   USB HID to the dongle (vendor page 0xFF00);
+ │                       docs/DONGLE-HOST-PROTOCOL.md
+ ├─ AuthCrypto.swift     HMAC verify + one-step ratchet (port of
+ │                       knobauth/crypto.py, same test vectors)
  └─ TokenExtension (CTK persistent token, extension point
     com.apple.ctk-tokens)
      └─ exposes 1 ECDSA P-256 key + self-signed cert; every sign
-        request → XPC to the app → knob touch proof → sign
+        request → CFMessagePort to the app → knob touch proof → sign
 ```
+
+Transport: knob →(2.4 GHz ESB)→ dongle →(USB HID)→ Mac. The dongle
+relays the knob's proof verbatim, so the Mac verifies the HMAC itself
+and the ratchet still runs knob↔Mac. The earlier BLE-direct client is
+kept in `software/mac-helper/archive/ble-direct/` — it works against
+the knob's *current* firmware, which is still a BLE peripheral.
 
 - **v1 key location:** generated on the Mac, Keychain-held, ACL'd to
   the app. Touch gating is enforced by the app (it refuses to sign
@@ -42,8 +50,9 @@ KnobToken.app (menu-bar app)
 2. `cd software/mac-helper && xcodegen && open KnobToken.xcodeproj`
 3. Set your signing team on both targets (free Apple ID works for
    local development; CTK tokens need no restricted entitlement).
-4. Run the app once (registers the extension), approve it in
-   System Settings → Privacy & Security → Extensions → Smart Cards.
+4. Run the app once (registers the extension), then enable it. The
+   Smart Cards pane may not exist on macOS 26+; this always works:
+   `pluginkit -e use -i com.drivera.KnobToken.TokenExtension`
 
 ## Pair with your account
 
