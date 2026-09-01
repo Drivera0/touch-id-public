@@ -109,3 +109,15 @@ Order **one** MDBT50Q-CX-40 from DigiKey. Confirm it enumerates, flash a Zephyr
 hello-world over DFU, measure the actual protrusion with calipers, and confirm
 the radio talks to the knob. That is a ~$10 experiment that de-risks the entire
 dongle half of the project before a single PCB is designed.
+
+## Canadian sourcing check — genuine Nordic PCA10059 (2026-09-01, live)
+
+Wanted as a BENCH TOOL only (dev/test target); rejected above as the
+shipping product.
+
+| Seller | Price | Stock |
+|---|---|---|
+| [Mouser Canada](https://www.mouser.ca/ProductDetail/Nordic-Semiconductor/nRF52840-Dongle) | **CA$16.20** | 0 now — **1,200 arriving 2026-09-16**, backorder today and it ships in ~2–3 wk. **Best option.** |
+| [DigiKey Canada](https://www.digikey.ca/en/products/detail/nordic-semiconductor-asa/NRF52840-DONGLE/9491124) | CA$17.22 | 0, backorder already past due, 16-week lead — skip |
+| [RobotShop Canada — Seeed MDK dongle](https://ca.robotshop.com/products/seeedstudio-nrf52840-mdk-usb-dongle) | CA$19.53 | same chip, NOT the Nordic board (UF2 bootloader, different pinout) |
+| Amazon.ca | CA$50+ | GeeekPi/Taidacent markups — skip |
