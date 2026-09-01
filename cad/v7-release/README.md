@@ -44,3 +44,19 @@ this folder rather than editing it.
 * Superseded boards (v3–v6): `../pcb-v3/_archive-superseded/`
 * The old `../v6-handoff/` folder holds the same gerber/assembly outputs under
   their original names; this folder is the curated copy.
+
+## CART STAGED 2026-09-01 (JLCONE desktop app) — NOT PAID
+
+Four items sit in the JLCPCB cart, fully configured, awaiting the USER's payment:
+1. PCB ×5 — 1.2 mm, 4-layer, 0.2 mm via option, edge rounding, remove mark — C$61.29
+2. Standard PCBA ×5, top side, Confirm Parts Placement=Yes (auto-confirm OFF),
+   depaneling=Yes, 23/24 BOM lines placed — C$129.01
+3+4. JLC3DP housings: quoted ×2 + tall ×1, MJF PA12-HP nylon, dyed black — C$4.33
+Total ≈ C$194.63 + shipping (~C$36); coupons (C$27.75 + C$20.81) apply at checkout.
+
+**U1 (MDBT50Q, C5118826) is still ZERO STOCK — marked "Do not place".**
+Boards will arrive with every part EXCEPT the radio module. Before paying,
+decide: (a) wait for restock and re-add U1 to the order, or (b) pay now and
+hand-solder a module bought from DigiKey/Mouser (Raytac castellations are
+hand-solderable). The 0201-vs-0402 BOM text mismatches JLC flagged were
+verified against the board (pads ARE 0201) and confirmed as-matched.
