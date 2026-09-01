@@ -20,7 +20,8 @@ The flagship. Three routes, all compatible with each other:
 | route | works | cost | status |
 |---|---|---|---|
 | firmware HID mode: knob types the login password as a real BLE keyboard — lock screens accept real keyboards | both OSes, day one with hardware | login password stored on knob; types at whatever it's paired to | NOT BUILT — next firmware feature |
-| Windows credential provider (DLL loaded into the lock screen; the Duo mechanism) | Windows, properly | C++ COM, system install, wrapped password storage | phase 2 |
+| Windows credential provider (DLL loaded into the lock screen; the Duo mechanism) | Windows login only | C++ COM, system install, wrapped password storage | phase 2 |
+| **Windows Biometric Framework (WBF) driver** — knob becomes a REAL Windows Hello fingerprint sensor: login, UAC, Chrome's manager, Hello prompts all accept it. Binds to the USB dongle; engine adapter maps our match-on-sensor slots. The Windows north star. (CDF would have been easier but is deprecated/removed.) | Windows, total integration | hardest build in the project: WBDI driver + 3 adapter DLLs in the biometric service; attestation signing or test-signing mode | endgame, after the dongle bridge works |
 | macOS **CryptoTokenKit token** — helper presents the knob as a smart card; macOS natively pairs cards with local accounts (login/unlock/sudo). The "keycard" idea from tinyTouch's deleted smartcard firmware, reborn without USB. Preferred over an authorization plugin. | Mac, properly | Swift/CTK work, needs a Mac | phase 2 |
 
 Recommended order: HID mode first (fast, works everywhere), platform
