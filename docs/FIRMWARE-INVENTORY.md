@@ -30,9 +30,9 @@ enter into it.
 
 | was | verdict | now |
 |---|---|---|
-| `firmware/tiny_touch_keyboard/` (ESP32 .ino) | STALE — abandoned wired architecture. Study material: 0xEF01 sensor flow, HMAC/AES-CTR session crypto, nonce replay protection | `reference/tinytouch/keyboard-firmware/` |
+| `firmware/tiny_touch_keyboard/` (ESP32 .ino) | STALE — abandoned wired architecture. Study material: 0xEF01 sensor flow, HMAC/AES-CTR session crypto, nonce replay protection | kept as reference, removed 2026-08-31 (git history) |
 | `firmware/tiny_touch_smartcard/` (ESP-IDF, USB CCID/PIV) | STALE — USB smartcard, no USB on this product | deleted |
-| `software/macos-helper/` | STALE as code, KEEP as design source: nonce flow, Keychain, launchd helper | `reference/tinytouch/macos-helper/` |
+| `software/macos-helper/` | STALE as code, KEEP as design source: nonce flow, Keychain, launchd helper | kept as reference, removed 2026-08-31 (git history) |
 | `web/flasher/`, `web/recovery/` (+ prebuilt ESP32 .bins) | STALE — esptool-js serial flashing; nRF52840 flashes over SWD, no serial bootloader | deleted |
 | `tinytouch` CLI, `packaging/`, `software/api/`, `tests/` | STALE — upstream's release/distribution machinery | deleted |
 | `.github/`, `VERSION`, `hardware/case/` | not ours (workflows, funding, upstream case) | deleted |
