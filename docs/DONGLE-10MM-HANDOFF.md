@@ -129,7 +129,35 @@ This is how every hardware company does it, not a compromise:
    the RF + (if selling) certification effort. Same firmware throughout,
    so nothing is wasted.
 
-## 9. WHAT TO HAND A SPECIALIST
+## 9. ENCLOSURE / MOLDING (the plastic shell)
+
+Separate job from the PCB, and it splits by volume:
+
+- **PoC / small runs: resin (SLA) 3D printing**, NOT injection molding.
+  FDM is too coarse at 10 mm; SLA gives fine detail. Order alongside the
+  board at JLCPCB / PCBWay 3D printing, or a ~$200 desktop resin printer.
+- **Production (100s-1000s): injection molding** (the Logitech method).
+  Needs a metal **mold/tooling** first — the up-front cost (~$1k-5k small
+  mold from China, more for steel/complex), then pennies per part. Volume
+  only. Vendors: PCBWay, Xometry, Protolabs (fast/Western/pricier),
+  Shenzhen/Dongguan molders via Alibaba (cheapest, longer lead).
+- **One-stop:** PCBWay/JLCPCB already fab + assemble the board and can
+  make the shell too — least friction for this project.
+
+Two constraints specific to a Bolt-style nub:
+1. It's a **mechanical-CAD task** — a two-part shell CAD'd so the USB-C
+   plug protrudes exactly and walls stay thin. Real receivers are two
+   molded halves ultrasonically welded, or the PCB is overmolded. Use an
+   industrial designer / the molder's DFM service.
+2. **The case must respect the antenna:** no metal, metallic paint, or
+   foil near the antenna end — it detunes the radio. Enclosure design and
+   RF layout must agree on the antenna keep-out. Plastic is fine.
+
+Recommendation: 3D-print the shell for the PoC; injection-mold only at
+production volume — same "prove small-batch, tool up later" logic as the
+board.
+
+## 10. WHAT TO HAND A SPECIALIST
 
 - This doc + DONGLE-SIZE-BUDGET.md (size math, part numbers, sources).
 - The BOM (section 3) and Nordic's nRF52840 reference design.
