@@ -13,22 +13,27 @@ closest match (0906-1-15-20-75-14-11-0) is only 5.9 mm long — checked
 
 ## NO-WASTE PLAN (user's preference: buy only what's needed) — 2026-09-01
 
-**Lee's Electronics walk-in (4131 Fraser St, Mon–Fri 9–5:30), ~CA$18:**
+**Lee's Electronics walk-in (4131 Fraser St, Mon–Fri 9–5:30), ~CA$22 — all
+links verified live 2026-09-01:**
 
-| Item | Qty | Price |
-|---|---|---|
-| 30 AWG wire-wrap wire, 50 ft spools (pick 5 colors) | 5 | CA$3.80 each = $19.00 — or buy 2–3 colors ($7.60–11.40) and tag wires with tape labels |
-| Heat shrink 2.0 mm 2:1, per length | 2 | CA$0.90–1.10 each |
-| Solder, 60/40 rosin core, 17 g mini spool | 1 | CA$4.00 (their 1 lb spools are $22.50–58 — skip) |
+| Item | Qty | Price | Link |
+|---|---|---|---|
+| [Wire-wrap wire 30 AWG BLACK, 50 ft](https://leeselectronic.com/en/product/1018800-wire-wrapping-wire-30awg-black-50ft-pkg.html) | 1 | CA$3.80 | product 1018800 |
+| [RED](https://leeselectronic.com/en/product/1018802-wire-wrapping-wire-30awg-red-50ft-pkg.html) · [ORANGE](https://leeselectronic.com/en/product/1018803-wire-wrapping-wire-30awg-orange-50ft-pkg.html) · [YELLOW](https://leeselectronic.com/en/product/1018804-wire-wrapping-wire-30awg-yellow-50ft-pkg.html) · [GREEN](https://leeselectronic.com/en/product/1018805-wire-wrapping-wire-30awg-green-50ft-pkg.html) · [BLUE](https://leeselectronic.com/en/product/1018806-wire-wrapping-wire-30awg-blue-50ft-pkg.html) | 4 of these | CA$3.80 each | 5 colors total → one per J3 signal |
+| [Heat shrink 2.0 mm 2:1 BLACK, per metre](https://leeselectronic.com/en/product/176020-heat-shrink-20mm-2-1-black.html) ([CLEAR](https://leeselectronic.com/en/product/177020-heat-shrink-20mm-2-1-clear.html) / [RED](https://leeselectronic.com/en/product/170020-heat-shrink-20mm-2-1-red.html)) | 1 m | CA$1.10 | one metre covers all six joints many times over |
+| [Solder 60/40 rosin core, **0.8 mm**, 14 g](https://leeselectronic.com/en/product/10693-10693solderleadedrosincore08mm17.html) | 1 | CA$4.00 | 0.8 mm beats the 1.0 mm at the same price for these small joints |
+
+Lee's total: 5 × $3.80 + $1.10 + $4.00 = **CA$24.10** (or $16.50 with 3 wire colors).
 
 **Pogo pins — the one thing Lee's can't supply.** Their only pogo is the
 P125-B (Ø2.0 mm): five of those barrels on the J3 row's 2.0 mm pitch touch
 each other and short every signal — ruled out by geometry, not preference.
-Smallest sane P75-E2 buys:
-* **AliExpress: 10–20 pc packs, ~CA$2–4** — add to the MuseLab DAPLink order,
-  same cart, no extra shipping, no 94 spare pins. Slow (2–4 wk) but the
-  probe order sets the timeline anyway.
-* Amazon.ca 100-pack CA$9.99 (amazon.ca/dp/B0D48VHRY4) — only if speed matters.
+No-waste buy, verified live:
+* **[AliExpress: "10pc P75 Series Pogo Pins 1.02mm Dia" — 10 pcs, C$1.40](https://www.aliexpress.com/item/1005008087364831.html)**
+  — **pick the "P75-E2" variant** (conical head) in the option selector, it's
+  there. Add it to the MuseLab DAPLink cart: same order, no extra shipping,
+  only 4 spare pins. Slow (2–4 wk) but the probe order sets the timeline.
+* [Amazon.ca 100-pack, CA$9.99](https://www.amazon.ca/dp/B0D48VHRY4) — only if speed matters.
 
 The jig (v2.1) has counterbore head-seats sized for the P75-E2's Ø1.3 conical
 head — the user's seat-and-small-hole idea, applied to the pin that fits.
