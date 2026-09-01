@@ -1,5 +1,18 @@
 # ROADMAP — the user's stated goals (2026-08-31), in priority order
 
+> **ARCHITECTURE SHIFT (2026-08-31, user's dongle idea): add a USB
+> dongle** — nRF52840 USB dongle (Nordic PCA10059, ~$10, same chip and
+> toolchain as the knob; user buys 2). The dongle is the knob's wired
+> ambassador: radio to the knob, real USB device to the OS.
+> - Lock screens: dongle types the login password as a USB keyboard,
+>   but only after the knob's challenge-proof — password never on the
+>   knob, never on the radio. Beats knob-HID on every axis.
+> - FIDO2: dongle is a USB security key (the transport everything
+>   supports, incl. Safari); knob touch = user verification. OpenSK is
+>   the reference implementation on this exact board.
+> - Bonus: two dongles = real-hardware BLE protocol testing before the
+>   knob PCB arrives.
+
 ## GOAL 1: unlock the lock screen (Windows AND Mac)
 
 The flagship. Three routes, all compatible with each other:
