@@ -11,6 +11,22 @@ working flashing station. Quantities come from `cad/pcb-v3/gen_flash_jig.py`.
 closest match (0906-1-15-20-75-14-11-0) is only 5.9 mm long — checked
 2026-09-01, unusable here. Do not substitute; buy P75-E2 where it's sold.
 
+## Best CAD prices (checked live 2026-09-01)
+
+| Item | Price | Link |
+|---|---|---|
+| **P75-E2 pins, 100 pcs, 16.5 mm** (PURPLELILY, ships from Amazon) | **CA$9.99** (only 4 packs left; free ship on $35+) | amazon.ca/dp/B0D48VHRY4 |
+| **BOJACK 30 AWG silicone wire kit, 5 colors × 32.8 ft + 20 heat-shrink tubes + mini stripper** — covers wire AND heat-shrink in one | **CA$19.99**, free delivery next day | amazon.ca — search "BOJACK 30 AWG silicone wire kit heat shrink" |
+| alt: BNTECHGO 30 AWG kit, 10 colors × 10 ft (wire only) | CA$14.26 | amazon.ca — search "BNTECHGO 30 gauge silicone wire kit" |
+| alt: **Lee's Electronics** (4131 Fraser St, walk-in, Mon–Fri 9–5:30) — 30 AWG wire-wrap wire, solid core, CA$3.80 per 50 ft spool per color | CA$19.00 for 5 colors | leeselectronic.com — search "wire wrap 30awg" |
+
+Lee's pogo pins are P125-B (Ø2.0 mm, 33 mm) — too fat for the jig's Ø1.15
+bores, don't substitute. Their heat-shrink kit (CA$20) was out of stock.
+Best combo: pins CA$9.99 + BOJACK kit CA$19.99 ≈ **CA$30 total** — the
+BOJACK's 5 colors map one-per-signal onto SWDIO/SWCLK/RESET/VSTOR/GND.
+Note: 30 AWG solid wire-wrap from Lee's also works fine for this jig (joints
+are strain-relieved through the arches); stranded silicone is just nicer.
+
 ## The list
 
 | # | Item | Qty | Where | Notes |
