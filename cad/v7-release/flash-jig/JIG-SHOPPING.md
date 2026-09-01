@@ -11,6 +11,28 @@ working flashing station. Quantities come from `cad/pcb-v3/gen_flash_jig.py`.
 closest match (0906-1-15-20-75-14-11-0) is only 5.9 mm long — checked
 2026-09-01, unusable here. Do not substitute; buy P75-E2 where it's sold.
 
+## NO-WASTE PLAN (user's preference: buy only what's needed) — 2026-09-01
+
+**Lee's Electronics walk-in (4131 Fraser St, Mon–Fri 9–5:30), ~CA$18:**
+
+| Item | Qty | Price |
+|---|---|---|
+| 30 AWG wire-wrap wire, 50 ft spools (pick 5 colors) | 5 | CA$3.80 each = $19.00 — or buy 2–3 colors ($7.60–11.40) and tag wires with tape labels |
+| Heat shrink 2.0 mm 2:1, per length | 2 | CA$0.90–1.10 each |
+| Solder, 60/40 rosin core, 17 g mini spool | 1 | CA$4.00 (their 1 lb spools are $22.50–58 — skip) |
+
+**Pogo pins — the one thing Lee's can't supply.** Their only pogo is the
+P125-B (Ø2.0 mm): five of those barrels on the J3 row's 2.0 mm pitch touch
+each other and short every signal — ruled out by geometry, not preference.
+Smallest sane P75-E2 buys:
+* **AliExpress: 10–20 pc packs, ~CA$2–4** — add to the MuseLab DAPLink order,
+  same cart, no extra shipping, no 94 spare pins. Slow (2–4 wk) but the
+  probe order sets the timeline anyway.
+* Amazon.ca 100-pack CA$9.99 (amazon.ca/dp/B0D48VHRY4) — only if speed matters.
+
+The jig (v2.1) has counterbore head-seats sized for the P75-E2's Ø1.3 conical
+head — the user's seat-and-small-hole idea, applied to the pin that fits.
+
 ## Best CAD prices (checked live 2026-09-01)
 
 | Item | Price | Link |
