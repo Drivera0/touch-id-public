@@ -111,3 +111,34 @@ that works beats a 9 mm nub that does not exist.
 - Raytac MDBT50Q-1MV2 spec Ver.L — https://www.mouser.com/datasheet/3/1361/1/
 - Logi Bolt USB-C receiver dims — https://www.bhphotovideo.com/c/product/1922726-REG/
 - YubiKey 5C Nano dims — https://www.yubico.com/product/yubikey-5c-nano/
+
+## APPENDIX — BUYABLE CONSUMER DONGLES, SMALLEST FIRST
+
+Added 2026-08-31. Vendors almost never publish receiver dimensions;
+these are the ones that ARE published. Anything not listed here was
+searched for and found undocumented.
+
+| Product | Port | Overall (mm) | Radio? | Source |
+|---|---|---|---|---|
+| YubiKey 5C Nano | USB-C | 12 x 10.1 x 7 | **NO** (wired) | yubico.com |
+| **Logi Bolt USB-C receiver (956-000156)** | USB-C | **15.24 x 12.7 x 7.62** | 2.4 GHz | B&H / Staples listing |
+| Logi Bolt USB-A receiver (956-000007) | USB-A | 18.65 x 14.4 x 6.11 | 2.4 GHz | Logitech spec via B&H |
+| Matias DC20 "USB-C Nano Receiver" | USB-C | **NOT PUBLISHED** ($19.95) | 2.4 GHz | matias.store/products/dc20 |
+| Avantree C81-PC | USB-C | 26 x 14 x 7 | BT 5.3 | Amazon listing |
+| TP-Link UB5A nano | USB-A | 18.9 x 14.8 x 6.8 | BT 5.3 | eTeknix review |
+
+**CONCLUSION: the Logi Bolt USB-C receiver is the smallest consumer
+USB-C dongle with a 2.4 GHz radio that publishes its size.** Nothing
+documented beats it. It is the benchmark to hold against a mock-up.
+
+Note the USB-A Bolt is thinner (6.11 vs 7.62 mm) — a USB-A tongue is a
+thin blade, a USB-C plug is a 2.56 mm-thick shell. **Choosing USB-C
+costs ~1.5 mm of height before any of our parts exist.**
+
+Also on hand for free: the **NuPhy Air75 V3's own 2.4 GHz dongle**.
+Measure it with calipers — it is the most relevant real-world sample
+since it talks to the same keyboard.
+
+**DO NOT plan on gutting a commercial receiver for its shell**
+(**UNCONFIRMED**, but these are welded and molded tightly around their
+own PCB). Their value is as a caliper reference and a 3D-print target.
