@@ -1,5 +1,22 @@
 # ROADMAP — the user's stated goals (2026-08-31), in priority order
 
+> **SPEC-CONFORMANCE TARGET (certified fingerprint-key checklist).**
+> Achievable (3/4):
+> - Biometric AND PIN login — CTAP2 has PIN built in; touch = primary,
+>   PIN = fallback (entered on the host during the browser dialog, since
+>   the device has no keypad).
+> - FIDO U2F + WebAuthn/FIDO2 — via OpenSK on the nRF52840.
+> - Cross-OS/browser (Windows, macOS, ChromeOS, Linux, Chrome, Edge) —
+>   free with FIDO2-over-USB; scope is the SECURITY-KEY role (web login,
+>   passkeys), not desktop lock-screen on all of them.
+> NOT claimable as-is (1/4):
+> - "Fingerprint template in a certified SECURE ELEMENT." We can say
+>   "template stored + matched ON-DEVICE, never transmitted" (true for
+>   ZW0922 match-on-sensor / any match-on-chip sensor), but NOT
+>   "secure element" — that needs a CC/EAL-certified part + certification
+>   we don't have. Wording gap, not a design failure. A real SE is a
+>   future hardware (>v7) change.
+
 > **PRODUCT PIVOT (2026-08-31): FIDO2 IS THE PRODUCT.** For future
 > buyers, the sellable core is the knob+dongle as a fingerprint FIDO2
 > security key (the YubiKey Bio pattern): zero installs — browsers,
