@@ -40,6 +40,16 @@
 > **The dongle is the knob's wired ambassador: radio to the knob, real
 > USB device to the OS.**
 >
+> **WHERE FIDO2 LIVES (2026-08-31): ON THE DONGLE, not the knob.** The
+> dongle is always USB-powered; the knob is harvest-powered and mostly
+> asleep. So the dongle holds the per-site FIDO2 keys and does the
+> signing (the authenticator); the knob's job over 2.4 GHz is only
+> "verified: Daniel's finger — authorized." Keeps crypto off the energy-
+> constrained knob. Consequence: the dongle is slightly smarter than a
+> pure receiver (it signs), but still Logitech-receiver-sized — a
+> production dongle = custom tiny USB-C PCB with just nRF52840 + printed
+> antenna + USB-C (dev on a Seeed XIAO nRF52840, 21x17.5 mm, USB-C).
+>
 > **KNOB<->DONGLE TRANSPORT (2026-08-31): proprietary 2.4 GHz (Nordic
 > ESB/Gazell), not BLE.** BLE is itself 2.4 GHz; the choice is protocol.
 > Since we own both ends, BLE's interoperability is wasted — ESB wins on
