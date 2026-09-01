@@ -77,7 +77,7 @@ room above the cell). Buy at Lee's, ~CA$29–42:
 | [Soldering paste flux, 10 g](https://leeselectronic.com/en/product/42381-soldering-paste-flux-10g.html) | CA$4.80 | wick barely works dry; flux makes it drink solder |
 | [Side cutter 5" RT-100](https://leeselectronic.com/en/product/10781-tool-5-side-cutter-rt-100.html) | CA$7.50 | to cut the connector's plastic shroud off first |
 | [Tweezer, antistatic, fine tip TST-10](https://leeselectronic.com/en/product/10263-10263tooltweezerfinetipwl2010.html) (or [narrow TST-11](https://leeselectronic.com/en/product/16494-tool-tweezer-fine-narrow-tip-tst-11.html)) | CA$3.95 | to pull each freed pin |
-| [Isopropyl 99.9%, 100 ml](https://leeselectronic.com/en/product/4285-isoproyl-alcohol-824-100ml.html) | CA$13.50 | flux-residue cleanup (a pharmacy 99% bottle also works, cheaper) |
+| IPA — CHEAPER than Lee's ($13.50/100 ml): [DELON 99%, 473 ml — **CA$9.99** on Amazon.ca](https://www.amazon.ca/dp/B0DD4FSVT3) | CA$9.99 | 5× the volume for less; any drugstore 99% bottle (~$6–8) also works |
 | optional: [Xcelite flush cutter 170MVN](https://leeselectronic.com/en/product/16956-xcelite-diagonal-shear-cutter-5-flush-jaw-20-awg.html) | CA$25.55 | nicer cutter, not required |
 
 **Beginner method — never lever all 6 pins at once:**
