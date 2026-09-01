@@ -89,6 +89,38 @@ fingerprint touch is the check. If macOS shows a PIN field, any input
 passes *when the knob can answer*, and nothing passes when it cannot,
 which is precisely why rule 1 matters.
 
+### Why lock-screen login stays off (the residual risk we cannot close)
+
+macOS has ONE credential slot and relabels it. Its own login window
+strings prove it:
+
+    TOUCH_ID_OR_PASSWORD => "Touch ID or Enter Password"
+    TOUCH_ID_OR_PIN      => "Touch ID or Enter PIN"
+
+The password is **replaced, not joined**. So while a card is present the
+lock screen offers Touch ID or a PIN — never the password. Rule 1 mostly
+saves us (knob gone → card gone → password returns), but it depends on
+the app being alive to notice. If the app is force-killed, or the
+machine restarts uncleanly while a login-capable card is registered, the
+card survives with nothing able to answer for it.
+
+Residual escape hatch: **FileVault**. Its pre-boot screen runs before
+macOS, CryptoTokenKit or any of our code exists, and takes the account
+password. A restart therefore always gets you in. That is a recovery
+path, not a UX, so:
+
+**Do not enable lock-screen login.** `TokenSetup.loginEnabled` defaults
+false and there is deliberately NO menu item for it — turning it on
+requires `defaults write com.drivera.KnobToken allowLockScreenLogin
+-bool YES`, an intentional act. The card's safe home is
+sudo/authorization, where the PAM chain gives card OR password and the
+password never disappears.
+
+This is an honest limit of the CTK keycard route against ROADMAP goal 1:
+it can authenticate the Mac, but on the lock screen it does so by taking
+the password field away, and it can only be made safe by being removable
+— which is not guaranteed when the process that removes it has died.
+
 Recovery, if a dead card is ever registered again: run the
 `--remove-token` teardown above (no password needed), then
 `sudo sc_auth unpair -u $USER -h <HASH>` and `sudo sc_auth remove -u $USER`
