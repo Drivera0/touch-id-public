@@ -54,6 +54,46 @@ the knob's *current* firmware, which is still a BLE peripheral.
    Smart Cards pane may not exist on macOS 26+; this always works:
    `pluginkit -e use -i com.drivera.KnobToken.TokenExtension`
 
+## SAFETY RULES (learned the hard way, 2026-08-31 — do not regress)
+
+A smart card that cannot be removed is a **lockout**. During testing a
+paired token was left registered with no hardware present; macOS then
+offered that dead card for the lock screen *and* for the authorization
+dialog needed to unpair it, asking for a PIN that does not exist. Three
+rules now prevent that, and all three are enforced in code:
+
+1. **The card exists only while the hardware does.** `SetupState.follow`
+   registers the token on connect and deregisters it on disconnect;
+   `AppDelegate.applicationWillTerminate` deregisters on quit. No knob,
+   no card, normal password prompt. This is what makes it behave like a
+   physical card you can pull out.
+2. **Lock-screen login is OFF by default** (`isSuitableForLogin` follows
+   `TokenSetup.loginEnabled`, default false). Why the asymmetry:
+   - `sudo` / authorization is safe by construction — `/etc/pam.d/sudo`
+     has `pam_smartcard` **sufficient** then `pam_opendirectory`
+     **required**, i.e. card OR password. You can always type your
+     password.
+   - the login window / lock screen has **no** PAM smartcard line;
+     macOS's own UI takes over and shows a card PIN field. We do not
+     control that UI and have not verified the password stays reachable
+     there. Do not enable this without checking, on the actual lock
+     screen, that a password option is present.
+3. **There is always a way out that needs no credentials**: the menu's
+   "Remove smart card now", or
+   `KnobToken.app/Contents/MacOS/KnobToken --remove-token`. Both
+   deregister the card immediately; macOS falls straight back to
+   password and Touch ID.
+
+There is no PIN. The token never had one and never validates one — the
+fingerprint touch is the check. If macOS shows a PIN field, any input
+passes *when the knob can answer*, and nothing passes when it cannot,
+which is precisely why rule 1 matters.
+
+Recovery, if a dead card is ever registered again: run the
+`--remove-token` teardown above (no password needed), then
+`sudo sc_auth unpair -u $USER -h <HASH>` and `sudo sc_auth remove -u $USER`
+for the legacy record.
+
 ## Pair with your account
 
 ```sh
