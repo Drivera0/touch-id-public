@@ -60,3 +60,14 @@ decide: (a) wait for restock and re-add U1 to the order, or (b) pay now and
 hand-solder a module bought from DigiKey/Mouser (Raytac castellations are
 hand-solderable). The 0201-vs-0402 BOM text mismatches JLC flagged were
 verified against the board (pads ARE 0201) and confirmed as-matched.
+
+## 3DP ORDER UPDATE 2026-09-01 (evening)
+
+User PAID the 3D-print order (W2026090116450154, C$17.09): 3 housings + jig +
+lever + plunger, all MJF PA12-HP black. JLC flagged thin walls on both
+housings; the "0.13 mm" was the TIER-JUNCTION CONTACT (user diagnosed it) —
+v6.4 thickened walls to 1.0 where possible, v6.5 added junction ledges
+(0.135 -> 0.85 mm bearing). Both files replaced via JLCONE; status now
+"Reviewing". Verifier: cad/scripts/wall_check.py (thin walls + junction
+contact). PCB+PCBA remain in cart UNPAID awaiting U1 pre-order
+(C5118826: 0 stock, pre-orderable, ~11-day lead, C$25.26/pc).
