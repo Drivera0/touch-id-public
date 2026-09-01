@@ -1,5 +1,16 @@
 # ROADMAP — the user's stated goals (2026-08-31), in priority order
 
+> **PRODUCT PIVOT (2026-08-31): FIDO2 IS THE PRODUCT.** For future
+> buyers, the sellable core is the knob+dongle as a fingerprint FIDO2
+> security key (the YubiKey Bio pattern): zero installs — browsers,
+> OSes, GitHub/Google, password managers (Bitwarden/1Password/
+> KeePassXC unlock), and OpenSSH (ed25519-sk) already speak it.
+> OpenSK (nRF52840) is the implementation base. Everything below the
+> FIDO2 line — vault/helper, HID typing, Mac keycard, WBF driver — is
+> the user's personal power setup / enthusiast extras, NOT a purchase
+> prerequisite. Lock screens remain the one surface FIDO2 doesn't
+> reach on consumer machines.
+
 > **ARCHITECTURE SHIFT (2026-08-31, user's dongle idea): add a USB
 > dongle** — nRF52840 USB dongle (Nordic PCA10059, ~$10, same chip and
 > toolchain as the knob; user buys 2). The dongle is the knob's wired
