@@ -52,13 +52,58 @@ sc_auth identities                  # the knob token should be listed
 sc_auth pair -u $USER -h <hash>     # or the System Settings pairing prompt
 ```
 
+On macOS 26/27 `sc_auth pair` fails with CryptoTokenKit -8 (ctkbind
+rejects the identity before ever asking the token; cause unknown). The
+functional equivalent that loginwindow/pam_smartcard actually match on:
+
+```sh
+sudo dscl . -append /Users/$USER AltSecurityIdentities 'pubkeyhash;<HASH>'
+```
+
+## macOS 26+ gotchas (all hit in practice, 2026-08-31)
+
+- **NSExtensionAttributes schema changed.** Use flat keys
+  `com.apple.ctk.class-id` and `com.apple.ctk.driver-class` (see the
+  system PlatformSSOToken/pivtoken appexes). The old documented
+  `com.apple.ctk-token-driver`/`ClassID` dict yields a nil class-id,
+  and the per-user ctkd **crash-loops** (`abort`, "key cannot be nil")
+  — which in turn makes `TKTokenDriver.Configuration` calls and
+  `sc_auth` hang forever. Never call those on the main thread.
+- **Do not set NSExtensionPrincipalClass.** ExtensionFoundation then
+  instantiates the driver via the generic NSExtensionRequestHandling
+  path, rejects it ("does not conform"), and the token never comes up
+  (SecItem returns errSecInternal -26276). CTK's TKTokenService finds
+  the driver by `com.apple.ctk.driver-class` alone.
+- The extension needs no Settings toggle:
+  `pluginkit -e use -i com.drivera.KnobToken.TokenExtension`.
+
 macOS will now show the card option at lock/login; `sudo` gains it via
 the SmartCard PAM module (`/etc/pam.d/sudo`: ensure pam_smartcard.so).
 
+## App <-> extension bridge (what "XPC" became)
+
+A plain app can't host an NSXPC mach service (that needs a launchd
+agent), so the bridge is a **CFMessagePort** named
+`group.com.drivera.knobtoken.sign`: the app registers it dynamically,
+and the sandboxed extension may look it up because the sandbox permits
+mach-lookup of names prefixed by an app group the process holds. Wire
+format in `Sources/Shared/KnobIPC.swift`. The extension's sign request
+blocks (45 s cap) while the app arms a challenge and waits for the
+verified touch.
+
+## First-run checklist (after build + extension approval)
+
+1. Menu bar → **Provision key** (writes K to the knob, stores it in
+   the Keychain — the Mac twin of `knobauth provision`).
+2. Menu bar → **Enroll finger** → pick a slot; touch, lift, touch.
+3. Menu bar → **Set up smart card** (creates the P-256 key +
+   self-signed cert, registers the persistent token).
+4. **Test touch** to confirm the whole proof path, then pair (below).
+
 ## Open items
 
-- Generate the self-signed cert at first launch (SecKeyCreateRandomKey
-  + SecCertificate creation) — stubbed in TokenDriver.
-- XPC wiring app<->extension (App Group `group.com.drivera.knobtoken`).
+- Custom TKTokenAuthOperation so the PIN sheet reads "touch the knob"
+  instead of accepting any PIN (the touch is still the real gate).
 - Port of the ratchet resync rule is in AuthCrypto.swift; keep it
   byte-identical to the Python (tests/test_crypto.py is the authority).
+- vault/ssh-confirm parity with the Windows helper.
