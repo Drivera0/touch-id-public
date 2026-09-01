@@ -28,10 +28,17 @@
 > prerequisite. Lock screens remain the one surface FIDO2 doesn't
 > reach on consumer machines.
 
-> **ARCHITECTURE SHIFT (2026-08-31, user's dongle idea): add a USB
-> dongle** — nRF52840 USB dongle (Nordic PCA10059, ~$10, same chip and
-> toolchain as the knob; user buys 2). The dongle is the knob's wired
-> ambassador: radio to the knob, real USB device to the OS.
+> **HARDWARE DIRECTION DECIDED (2026-08-31): KNOB + DONGLE.** User chose
+> to keep the knob-in-keyboard (wireless, harvest-powered, v7 board) with
+> a USB dongle as its FIDO2/USB face — NOT the simpler single USB-C
+> fingerprint stick. BLE is therefore required (it is the knob<->dongle
+> link), and the two-device challenge-proof protocol we built stays load-
+> bearing. Dev dongle = Nordic PCA10059 (~$10, flash once over USB, no
+> jig); a production dongle can be a small custom USB-C device (nRF52840
+> has native USB). The round 18mm ZW0922 stays the knob's sensor.
+>
+> **The dongle is the knob's wired ambassador: radio to the knob, real
+> USB device to the OS.**
 > - Lock screens: dongle types the login password as a USB keyboard,
 >   but only after the knob's challenge-proof — password never on the
 >   knob, never on the radio. Beats knob-HID on every axis.
