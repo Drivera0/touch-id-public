@@ -6,6 +6,24 @@ USB-C receiver**: compact, sealed, barely protrudes from the port. This
 doc is the brief. The person is a **beginner at electronics — explain,
 don't assume; never invent a part number or dimension.**
 
+## SIZE IS NOT A PROBLEM — proof (read this first)
+
+The user's main worry is that the dongle must be Logi-Bolt small or it
+won't sell. It can be. This is a solved size class, not a risk:
+
+- nRF52840 does radio + USB in ONE chip, 7.0 x 7.0 mm (aQFN73); a WLCSP
+  variant is ~3.5 x 3.6 mm. The silicon is smaller than the USB
+  connector.
+- A YubiKey 5C Nano (a full security key + USB-C) is ~12 x 10 x 4 mm and
+  sits flush in the port. Our BOM is that class.
+- The dongle needs only: nRF52840 (or a small module), USB-C connector,
+  printed/chip antenna, a few passives, one LED. Nothing bulky.
+
+The chunky boards the user has seen (Seeed XIAO, Nordic PCA10059) are
+DEV boards — headers and breakout pins make them big. The production
+board strips all that. Dev-board size != product size. Design target:
+a sealed nub in the Logi-Bolt / YubiKey-Nano class.
+
 ## WHAT THIS DONGLE IS
 
 The fingerprint sensor and matching live in a separate **knob** module
