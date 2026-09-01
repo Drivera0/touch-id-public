@@ -96,12 +96,34 @@ YubiKey 5C (not Nano) sized nub, not a Bolt.
    full FCC/CE *intentional radiator* certification (thousands) plus RF
    layout skill. **NOT a v1 move.** Revisit only if this sells.
 
-## RECOMMENDATION
+## PRODUCTION TARGET DECIDED (2026-08-31): 9 mm VISIBLE NUB (Bolt-class)
 
-Do not let mechanical size block firmware. Bring up FIDO2 + ESB on the
-two Nordic PCA10059 dongles first (they are ugly and huge and that is
-irrelevant), then spin option 1 with option 2's measurement. A 20 mm nub
-that works beats a 9 mm nub that does not exist.
+The user committed to a Bolt-class 9 mm-protrusion production dongle.
+That means **OPTION 3 is the production route** — a pre-certified module
+cannot hit 9 mm (its fixed antenna keep-out is the whole overage). 9 mm
+is how Logitech/Yubico do it: bare radio silicon + own antenna + self-
+certification. Concretely:
+
+- **Bare nRF52840 (aQFN73, 7x7) or WLCSP** on our own PCB.
+- **Own antenna** (chip antenna or tuned PCB trace) + impedance matching
+  — this is real RF-design work, the actual hard part (not the size).
+- Target length: ~9 mm visible + ~6.5 mm insertion = ~15.5 mm total,
+  matching the Bolt (15.24). Width/height already fit.
+- **Certification is a SELLING cost, not a building cost.** A bare-chip
+  9 mm dongle for the user's OWN use needs no certification. Selling it
+  needs FCC/CE intentional-radiator cert: ~$3-10k + test lab.
+
+### Sequencing (do NOT build the 9 mm board first)
+
+This is how every hardware company does it, not a compromise:
+1. Firmware bring-up on the ugly dev dongles (PCA10059) — size irrelevant.
+2. Optional intermediate: ISP1807 module board (~20 mm) to prove the
+   real link + enclosure cheaply, no RF-design or cert needed.
+3. Production: the 9 mm bare-chip certified board — LAST, once the
+   product is proven and there's reason to spend the RF + cert effort.
+
+The firmware is identical across all three, so nothing is wasted.
+A 20 mm nub that works today does not block the 9 mm nub later.
 
 ## SOURCES
 
