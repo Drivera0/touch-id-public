@@ -1,0 +1,118 @@
+TouchID v3 handoff — verification report
+generated 2026-08-28 22:04 UTC
+
+### sexp_check
+pcb-v3-handoff.kicad_pcb
+  line endings : 12021 CRLF, 0 bare LF
+  PARSE OK     : 628 top-level children
+  footprints 46   pads 134   segments 458   vias 65   zones 17
+
+### preflight.py
+==========================================================================
+PREFLIGHT — pcb-v3-handoff.kicad_pcb
+==========================================================================
+  PASS     1  s-expression balanced           depth 0
+  PASS     2  copper clearance >= 0.100       0 violating pairs
+  PASS     3  every pad can escape            2 boxed-in
+  PASS     4  netlist <-> board pad/net match 124 pins matched
+  PASS     5  no single-pad (dangling) nets   none
+  PASS     6  every connection routed         TRUE open pads = 0 (0 disconnected + 0 in zero-copper nets: none)
+  PASS     6b router DRC @ 0.10               clean
+  PASS     7  antenna keep-out clear of copper 0 object(s) inside
+  PASS     8  vias >= 0.45/0.20 (JLC standard) all {('0.6', '0.3'): 65}
+  PASS     9  no track below the 0.127 track rule 0 segment(s), min 0.1270
+  PASS     10 power nets: IR drop <= 25 mV    worst 12.3 mV of 25 at documented peak current; 2/6 nets traced (connectivity itself is check 6's job)
+  PASS     11 silkscreen text clear of pads   0 label(s) overlap a pad (JLC clips them)
+  PASS     12 housing mcu_center == board U1  housing (-0.80, 1.00) vs board (-0.80, 1.00)
+  PASS     13 U1 antenna faces +Y (spacebar)  mean pad y = -3.483 (must be negative)
+  PASS     15 charger limits vs the cell      OV 3.912 V (wc 3.955) / OK 3.12-3.48 V, cell max 4.00
+  PASS     16 hand-solder mask dam >= 0.25 mm 35 hand-soldered pads, thinnest dam clears JLC
+  PASS     17 ground plane is connected       3 filled GND zone(s), 14 GND vias, 52 GND segs, check_connected: all nets connected
+  PASS     18 copper zones are filled         3 zone(s), all carry fill geometry
+  PASS     19 board thickness vs the housing  laminate 1.20 mm = housing pcb_t_ref (+0.02 mm mask -> 1.22 finished, inside fab tolerance). MUST be chosen on the order form; JLC defaults 4-layer to 1.6
+  PASS     20 no dangling track ends          916 track ends, all land on copper of their own net
+  PASS     21 every placed part has an LCSC code 29 placed designators, all sourced (20 distinct LCSC codes)
+  WARN     21b JLC assembly stock (snapshot)  as of 2026-08-28: C5118826 stock=0 need=1/board -- RE-CHECK AT ORDER TIME
+  WARN     14 unverified geometry remaining   J4/J11 pogo pads (fixed by the keyboard; measurement, not a datasheet)
+==========================================================================
+  0 BLOCKER(S), 2 WARNING(S)
+  VERDICT: orderable once the warnings are accepted
+==========================================================================
+
+### verify_handoff.py
+==========================================================================
+HANDOFF VERIFICATION — BOM / CPL re-derived independently
+==========================================================================
+  PASS  board outline is 19.30 x 19.30             measured 19.300 x 19.300 from Edge.Cuts
+  PASS  CPL is not empty                           29 rows
+  PASS  every CPL coordinate re-derives            29 placements, 0 mismatches
+  PASS  every CPL rotation matches the board       0 mismatches
+  PASS  every CPL layer matches the board          all Top
+  PASS  no part sits outside the outline           all within 0..19.30
+  PASS  origin transform maps the corners to 0,0 and W,H (0.000,0.000) and (19.300,19.300)
+  PASS  CPL sits inside the gerber outline         all 29 placements inside X 0.00..19.30  Y 0.00..19.30 read from Edge_Cuts.gbr
+  PASS  BOM and CPL cover the same parts           BOM 29, CPL 29, only-in-BOM=[] only-in-CPL=[]
+  PASS  no designator listed twice in the BOM      29 entries, 29 unique
+  PASS  every BOM line carries an LCSC code        20 lines, all sourced
+  PASS  CPL omits exactly the hand-worked parts    omitted=BT1, J11, J2, J3, J4, TP1, TP10, TP2, TP3, TP4, TP5, TP6, TP7, TP8, TP9, <no ref>
+  PASS  NPTH holes sit on the housing's screw bosses 2 hole(s) [(-8.1, 8.1), (8.1, -8.1)] vs housing [(-8.1, 8.1), (8.1, -8.1)]
+  INFO  parts whose rotation can be wrong          4 of 29: U1, U2, U3, U4 (all others are 2-pad symmetric)
+  PASS  no part (except U1) reaches the 2.25 mm cell seat tallest is L1 at 1.20 mm; cell seat is 2.25 mm -> 1.05 mm clear
+==========================================================================
+  0 FAILURE(S)
+==========================================================================
+
+### verify_sourcing.py
+ref       landX    landY  pads  LCSC        part bought
+C1        0.540    1.340     2  C2858031    Murata GRM155R61E475ME15D 4.7uF 25V X5R 0402   OK
+C10       0.540    1.340     2  C1525       Samsung CL05B104KO5NNNC 100nF 16V X7R 0402     OK
+C12       1.340    0.540     2  C15195      Samsung CL05B103KB5NNNC 10nF 50V X7R 0402      OK
+C13       0.540    1.340     2  C15195      Samsung CL05B103KB5NNNC 10nF 50V X7R 0402      OK
+C2        0.540    1.340     2  C2858031    Murata GRM155R61E475ME15D 4.7uF 25V X5R 0402   OK
+C3        0.540    1.340     2  C1525       Samsung CL05B104KO5NNNC 100nF 16V X7R 0402     OK
+C4        0.540    1.340     2  C22400107   Murata GRM1555C1H103JE01D 10nF 50V C0G 0402    OK
+C5        2.200    0.900     2  C70225      FH 0603X106K160NT 10uF 16V X5R 0603            OK
+C6        0.540    1.340     2  C52923      Samsung CL05A105KA5NQNC 1uF 25V X5R 0402       OK
+C7        2.200    0.900     2  C20416425   CCTC TCC0603X5R226M100CT 22uF 10V X5R 0603     OK
+C8        0.540    1.340     2  C52923      Samsung CL05A105KA5NQNC 1uF 25V X5R 0402       OK
+C9        0.540    1.340     2  C52923      Samsung CL05A105KA5NQNC 1uF 25V X5R 0402       OK
+L1        3.256    2.200     2  C2849435    DMBJ PNLS252012-220M 22uH, 1008, 1.02R, 500mA  OK
+R1        0.540    1.340     2  C11702      UNI-ROYAL 0402WGF1001TCE 1k 1% 0402            OK
+R2        0.540    1.340     2  C11702      UNI-ROYAL 0402WGF1001TCE 1k 1% 0402            OK
+R3        0.540    1.340     2  C11702      UNI-ROYAL 0402WGF1001TCE 1k 1% 0402            OK
+R4        0.540    1.340     2  C3013173    FOJAN FRC0402F4704TS 4.7M 1% 0402              OK
+R5        0.540    1.340     2  C26083      UNI-ROYAL 0402WGF1004TCE 1M 1% 0402            OK
+R6        0.540    1.340     2  C25741      UNI-ROYAL 0402WGF1003TCE 100k 1% 0402          OK
+R7        0.540    1.340     2  C11702      UNI-ROYAL 0402WGF1001TCE 1k 1% 0402            OK
+ROK1      0.540    1.340     2  C137964     YAGEO RC0402FR-074M53L 4.53M 1% 0402           OK
+ROK2      1.340    0.540     2  C477783     YAGEO RC0402FR-077M15L 7.15M 1% 0402           OK
+ROK3      0.540    1.340     2  C5713265    FOJAN FRC0402F1334TS 1.33M 1% 0402             OK
+ROV1      0.540    1.340     2  C172106     Walsin WR04W6044FTL 6.04M 1% 0402              OK
+ROV2      0.540    1.340     2  C137942     YAGEO RC0402FR-076M98L 6.98M 1% 0402           OK
+U1       10.000   11.400    18  C5118826    Raytac MDBT50Q-1MV2, SMD-61P                   (IC/module - land traced by hand, see PART-LIBRARY.md)
+U2        3.900    3.900    21  C882746     TI BQ25505RGRR, VQFN-20-EP 3.5x3.5             (IC/module - land traced by hand, see PART-LIBRARY.md)
+U3        1.008    0.820     5  C46459900   TI TPS7A2033DQNR, X2SON-4 1x1                  (IC/module - land traced by hand, see PART-LIBRARY.md)
+U4        1.008    0.820     5  C46459900   TI TPS7A2033DQNR, X2SON-4 1x1                  (IC/module - land traced by hand, see PART-LIBRARY.md)
+
+2-terminal lands checked : 25
+package mismatches       : 0
+
+### verify_gerbers.py
+==========================================================================
+GERBER VERIFICATION — plotted output vs the board
+==========================================================================
+  PASS  all 11 fabrication layers plotted            F_Cu, In1_Cu, In2_Cu, B_Cu, F_Mask, B_Mask, F_Silkscreen, B_Silkscreen, F_Paste, B_Paste, Edge_Cuts
+  PASS  no layer is empty that the board says should have copper 0 back-side footprints, so B_Paste legitimately empty; F_Cu=3631; In1_Cu=158; In2_Cu=2462; B_Cu=3298; F_Mask=109; B_Mask=27; F_Silkscreen=13; B_Silkscreen=200; F_Paste=99; Edge_Cuts=8
+  PASS  every layer is mm / 4.6 / positive / unmirrored 11/11 correct
+  PASS  Edge.Cuts outline is the 19.30 mm board      19.300 x 19.300 mm across 12 profile points (stroke width accounts for <=0.05)
+  PASS  all four copper layers carry substantial geometry F=3631 In1=158 In2=2462 B=3298 draws
+  PASS  drill file(s) present                        pcb-v3-handoff-NPTH.drl, pcb-v3-handoff-PTH.drl
+  PASS  drill hole count matches the board           gerbers 67 vs board 67  (65 vias + 0 PTH pads + 2 NPTH)
+  PASS  NPTH holes match the board                   drill NPTH 2 vs board 2
+  PASS  every drill diameter matches the board       gerbers {0.3: 65, 1.3: 2} vs board {0.3: 65, 1.3: 2}
+  PASS  job file declares 4 layers                   4
+  PASS  job file declares the 1.22 mm finished thickness 1.22 mm = 1.20 laminate + 0.02 mask. ORDER 1.2 mm.
+  PASS  job file lists all 11 layers                 11
+==========================================================================
+  0 FAILURE(S)
+==========================================================================

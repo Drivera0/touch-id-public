@@ -1,0 +1,57 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 710 736" width="100%">
+<style>text{font-family:"IBM Plex Mono",ui-monospace,monospace;fill:#1a1f27}.t{font-family:Archivo,Helvetica,Arial,sans-serif}</style>
+<rect width="710" height="736" fill="#f7f9fb"/>
+<path d="M 147.00 95.00 H 563.00 A 52.00 52.00 0 0 1 615.00 147.00 V 537.00 A 52.00 52.00 0 0 1 563.00 589.00 H 147.00 A 52.00 52.00 0 0 1 95.00 537.00 V 147.00 A 52.00 52.00 0 0 1 147.00 95.00 Z" fill="#ffffff" stroke="#1a6b52" stroke-width="3"/>
+<path d="M 156.10 91.10 H 553.90 A 52.00 52.00 0 0 1 605.90 143.10 V 540.90 A 52.00 52.00 0 0 1 553.90 592.90 H 156.10 A 52.00 52.00 0 0 1 104.10 540.90 V 143.10 A 52.00 52.00 0 0 1 156.10 91.10 Z" fill="none" stroke="#97332f" stroke-width="1.6" stroke-dasharray="7 5"/>
+<path d="M 147.00 102.80 H 563.00 A 44.20 44.20 0 0 1 607.20 147.00 V 537.00 A 44.20 44.20 0 0 1 563.00 581.20 H 147.00 A 44.20 44.20 0 0 1 102.80 537.00 V 147.00 A 44.20 44.20 0 0 1 147.00 102.80 Z" fill="none" stroke="#b98a47" stroke-width="1" stroke-dasharray="2 4"/>
+<circle cx="167.80" cy="154.28" r="28.60" fill="#c9a227" stroke="#8a6224" stroke-width="1"/>
+<text x="167.80" y="157.28" font-size="9" text-anchor="middle" fill="#3b2f14">J4.1</text>
+<circle cx="232.80" cy="154.28" r="28.60" fill="#c9a227" stroke="#8a6224" stroke-width="1"/>
+<text x="232.80" y="157.28" font-size="9" text-anchor="middle" fill="#3b2f14">J4.2</text>
+<circle cx="167.80" cy="219.28" r="28.60" fill="#c9a227" stroke="#8a6224" stroke-width="1"/>
+<text x="167.80" y="222.28" font-size="9" text-anchor="middle" fill="#3b2f14">J4.3</text>
+<circle cx="232.80" cy="219.28" r="28.60" fill="#c9a227" stroke="#8a6224" stroke-width="1"/>
+<text x="232.80" y="222.28" font-size="9" text-anchor="middle" fill="#3b2f14">J4.4</text>
+<circle cx="167.80" cy="284.28" r="28.60" fill="#c9a227" stroke="#8a6224" stroke-width="1"/>
+<text x="167.80" y="287.28" font-size="9" text-anchor="middle" fill="#3b2f14">J4.5</text>
+<circle cx="232.80" cy="284.28" r="28.60" fill="#c9a227" stroke="#8a6224" stroke-width="1"/>
+<text x="232.80" y="287.28" font-size="9" text-anchor="middle" fill="#3b2f14">J4.6</text>
+<circle cx="444.70" cy="154.80" r="28.60" fill="#c9a227" stroke="#8a6224" stroke-width="1"/>
+<text x="444.70" y="157.80" font-size="9" text-anchor="middle" fill="#3b2f14">J11.1</text>
+<circle cx="509.70" cy="154.80" r="28.60" fill="#c9a227" stroke="#8a6224" stroke-width="1"/>
+<text x="509.70" y="157.80" font-size="9" text-anchor="middle" fill="#3b2f14">J11.2</text>
+<circle cx="444.70" cy="219.80" r="28.60" fill="#c9a227" stroke="#8a6224" stroke-width="1"/>
+<text x="444.70" y="222.80" font-size="9" text-anchor="middle" fill="#3b2f14">J11.3</text>
+<circle cx="509.70" cy="219.80" r="28.60" fill="#c9a227" stroke="#8a6224" stroke-width="1"/>
+<text x="509.70" y="222.80" font-size="9" text-anchor="middle" fill="#3b2f14">J11.4</text>
+<circle cx="144.40" cy="552.60" r="16.90" fill="#e7ecf1" stroke="#68727f" stroke-width="1.4"/>
+<circle cx="565.60" cy="131.40" r="16.90" fill="#e7ecf1" stroke="#68727f" stroke-width="1.4"/>
+<circle cx="500.60" cy="104.10" r="5" fill="none" stroke="#d1342b" stroke-width="2"/>
+<circle cx="282.20" cy="106.70" r="5" fill="none" stroke="#d1342b" stroke-width="2"/>
+<circle cx="186.00" cy="106.70" r="5" fill="none" stroke="#d1342b" stroke-width="2"/>
+<circle cx="426.50" cy="104.10" r="5" fill="none" stroke="#d1342b" stroke-width="2"/>
+<circle cx="410.90" cy="104.10" r="5" fill="none" stroke="#d1342b" stroke-width="2"/>
+<circle cx="392.70" cy="106.70" r="5" fill="none" stroke="#d1342b" stroke-width="2"/>
+<line x1="95.00" y1="53.00" x2="615.00" y2="53.00" stroke="#1a6b52" stroke-width="1.4"/>
+<line x1="95.00" y1="48.00" x2="95.00" y2="58.00" stroke="#1a6b52" stroke-width="1.4"/>
+<line x1="615.00" y1="48.00" x2="615.00" y2="58.00" stroke="#1a6b52" stroke-width="1.4"/>
+<text class="t" x="355.00" y="44.00" font-size="15" font-weight="700" text-anchor="middle" fill="#1a6b52">20.000 mm  (X, horizontal)</text>
+<line x1="53.00" y1="95.00" x2="53.00" y2="589.00" stroke="#1a6b52" stroke-width="1.4"/>
+<line x1="48.00" y1="95.00" x2="58.00" y2="95.00" stroke="#1a6b52" stroke-width="1.4"/>
+<line x1="48.00" y1="589.00" x2="58.00" y2="589.00" stroke="#1a6b52" stroke-width="1.4"/>
+<text class="t" x="45.00" y="342.00" font-size="15" font-weight="700" text-anchor="middle" fill="#1a6b52" transform="rotate(-90 45.00 342.00)">19.000 mm  (Y)</text>
+<line x1="104.10" y1="641.00" x2="605.90" y2="641.00" stroke="#97332f" stroke-width="1.4"/>
+<line x1="104.10" y1="636.00" x2="104.10" y2="646.00" stroke="#97332f" stroke-width="1.4"/>
+<line x1="605.90" y1="636.00" x2="605.90" y2="646.00" stroke="#97332f" stroke-width="1.4"/>
+<text class="t" x="355.00" y="632.00" font-size="15" font-weight="700" text-anchor="middle" fill="#97332f">was 19.300</text>
+<text class="t" x="355.00" y="611.00" font-size="14" font-weight="600" text-anchor="middle" fill="#3b4553">SPACEBAR EDGE  (+Y)</text>
+<text class="t" x="355.00" y="31.00" font-size="12" text-anchor="middle" fill="#68727f">bottom view - same orientation as the pogo survey page</text>
+<rect x="95.00" y="658.00" width="11" height="11" fill="none" stroke="#1a6b52" stroke-width="2"/>
+<text x="113.00" y="667.00" font-size="11.5" fill="#3b4553">new outline 20.00 x 19.00</text>
+<rect x="95.00" y="675.00" width="11" height="11" fill="none" stroke="#97332f" stroke-width="2"/>
+<text x="113.00" y="684.00" font-size="11.5" fill="#3b4553">old outline 19.30 x 19.30 (dashed)</text>
+<rect x="95.00" y="692.00" width="11" height="11" fill="none" stroke="#b98a47" stroke-width="2"/>
+<text x="113.00" y="701.00" font-size="11.5" fill="#3b4553">0.30 mm copper edge clearance</text>
+<rect x="95.00" y="709.00" width="11" height="11" fill="none" stroke="#d1342b" stroke-width="2"/>
+<text x="113.00" y="718.00" font-size="11.5" fill="#3b4553">copper now outside it (12 items)</text>
+</svg>

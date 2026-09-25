@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>TouchID PCB — 3D viewer</title>
+<style>
+  body { margin:0; background:#14141a; color:#d8dbe2; font-family: Segoe UI, Helvetica, sans-serif; overflow:hidden; }
+  #hud { position:fixed; top:10px; left:12px; z-index:5; font-size:13px; line-height:1.5; }
+  #hud b { color:#fff; }
+  .leg span { display:inline-block; width:10px; height:10px; border-radius:2px; margin-right:4px; }
+  #btns { position:fixed; top:10px; right:12px; z-index:5; }
+  button { background:#2a2a33; color:#d8dbe2; border:1px solid #4a4a55; border-radius:6px; padding:6px 10px; margin-left:6px; cursor:pointer; font-size:12px; }
+  button.on { background:#3d5afe33; border-color:#7a8cff; }
+  #tip { position:fixed; bottom:10px; left:12px; font-size:12px; color:#8a8f9c; z-index:5;}
+</style>
+</head>
+<body>
+<div id="hud">
+  <b>TouchID module — PCB assembly</b><br>
+  drag = rotate &nbsp; wheel = zoom &nbsp; right-drag = pan<br>
+  <div class="leg">
+    <span style="background:#e0553a"></span>VBAT&nbsp;
+    <span style="background:#8892a8"></span>GND&nbsp;
+    <span style="background:#3fa66a"></span>3V3&nbsp;
+    <span style="background:#4a90d9"></span>TX&nbsp;
+    <span style="background:#9a6ad9"></span>RX&nbsp;
+    <span style="background:#d9a04a"></span>INT
+  </div>
+</div>
+<div id="btns">
+  <button id="bh" class="on">housing</button>
+  <button id="bs" class="on">sensor</button>
+  <button id="bw" class="on">wiring</button>
+  <button id="bf">view bottom</button>
+</div>
+<div id="tip">wiring channels are the PLANNED connections (routing not final) — bright = top side, dim = bottom side. Units: mm, module housing frame.</div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+const scene = new THREE.Scene();
+scene.background = new THREE.Color(0x14141a);
+const cam = new THREE.PerspectiveCamera(40, innerWidth/innerHeight, 0.1, 500);
+cam.position.set(0, 26, 30);
+const ren = new THREE.WebGLRenderer({antialias:true});
+ren.setSize(innerWidth, innerHeight);
+document.body.appendChild(ren.domElement);
+scene.add(new THREE.AmbientLight(0xffffff, 0.55));
+const dl = new THREE.DirectionalLight(0xffffff, 0.8); dl.position.set(20,40,25); scene.add(dl);
+const dl2 = new THREE.DirectionalLight(0x8899ff, 0.3); dl2.position.set(-20,-30,-15); scene.add(dl2);
+
+const root = new THREE.Group(); scene.add(root);
+// module coords (x, y_mod, z_mod) -> scene (x, z_mod, -y_mod)  [y up = module z]
+function V(x, y, z){ return new THREE.Vector3(x, z, -y); }
+function mat(c, opts={}){ return new THREE.MeshStandardMaterial(Object.assign({color:c, roughness:0.55, metalness:0.25}, opts)); }
+function box(w, l, h, x, y, z, m){ // w=x-size, l=module-y size, h=z size; x,y,z = center in module coords
+  const g = new THREE.Mesh(new THREE.BoxGeometry(w, h, l), m);
+  g.position.copy(V(x, y, z)); root.add(g); return g;
+}
+function cyl(r, h, x, y, z, m, seg=32){
+  const g = new THREE.Mesh(new THREE.CylinderGeometry(r, r, h, seg), m);
+  g.position.copy(V(x, y, z)); root.add(g); return g;
+}
+function label(txt, x, y, z, scale=4, color='#cfd2da'){
+  const cv = document.createElement('canvas'); cv.width=256; cv.height=64;
+  const c = cv.getContext('2d'); c.font='28px Segoe UI'; c.fillStyle=color; c.textAlign='center';
+  c.fillText(txt, 128, 40);
+  const sp = new THREE.Sprite(new THREE.SpriteMaterial({map:new THREE.CanvasTexture(cv), transparent:true}));
+  sp.scale.set(scale, scale/4, 1); sp.position.copy(V(x,y,z)); root.add(sp); return sp;
+}
+
+// ---------------- PCB ----------------
+box(19.5, 19.5, 1.2, 0, 0, -0.6, mat(0x101014, {roughness:0.4}));
+// pogo pads (bottom face, gold) — housing frame coords
+const gold = mat(0xd4a017, {metalness:0.8, roughness:0.3});
+const padsJ4 = [[-4.33,7.84,'J4-2'],[-6.87,7.84,'J4-1'],[-4.33,5.30,'J4-4'],[-6.87,5.30,'J4-3'],[-4.33,2.76,'J4-6'],[-6.87,2.76,'J4-5']];
+const padsJ11= [[6.67,8.07,'J11-2'],[4.13,8.07,'J11-1'],[6.67,5.53,'J11-4'],[4.13,5.53,'J11-3']];
+for (const [x,y,n] of padsJ4.concat(padsJ11)){ cyl(1.1, 0.12, x, y, -1.28, gold); }
+// programming pads (bottom)
+for (const [x,y] of [[-3,-4.8],[-1,-4.8],[1,-4.8],[3,-4.8]]) cyl(0.9,0.12,x,y,-1.28, mat(0xb0b6c4,{metalness:.7}));
+label('programming pads', 0, -7.2, -1.9, 7);
+label('pogo pads  →  keyboard pins', 0, 10.6, -2.2, 10);
+// screw + post holes (visual rings)
+for (const [x,y,r] of [[8.3,0,1.1],[-8.3,0,1.1],[-1,8.46,1.07],[7.5,-8.46,1.07]])
+  cyl(r, 1.4, x, y, -0.6, mat(0x2c2c34,{roughness:.8}), 24);
+
+// ---------------- components (top side) ----------------
+// U1 ESP32-C3-MINI-1 — shield + antenna zone at +y (top wall side)
+box(13.2, 12.0, 2.2, 0, -2.3, 1.2, mat(0xb9bec6,{metalness:.85, roughness:.35}));
+box(13.2, 4.6, 0.8, 0, 6.0, 0.5, mat(0x1a1a20,{roughness:.6}));   // antenna PCB zone
+label('U1  ESP32-C3-MINI-1', 0, -2.3, 3.6, 12);
+label('antenna → keep at top wall', 0, 6.2, 2.2, 10, '#9fc4ff');
+// U2 LDO (right strip)
+box(1.6, 2.9, 1.1, 7.5, 4.8, 0.55, mat(0x23252c));
+label('U2 LDO 3V3', 7.5, 4.8, 2.2, 7);
+// caps
+box(1.25, 2.0, 1.2, 7.5, 2.2, 0.6, mat(0x8a6f4d));
+box(1.25, 2.0, 1.2, 7.5, -2.2, 0.6, mat(0x8a6f4d));
+box(1.6, 3.2, 1.6, 7.5, -5.4, 0.8, mat(0x704f2f));
+label('C3 100µF', 7.5, -5.4, 2.6, 6);
+// J2 sensor wire pads (left strip, top side)
+const j2y = [5.4,3.9,2.6,-2.6,-3.9,-5.4];
+const j2n = ['3V3','GND','TX','RX','INT','VT'];
+for (let i=0;i<6;i++){ cyl(0.9,0.12,-7.5,j2y[i],0.06,gold); label(j2n[i], -8.9, j2y[i], 0.9, 4); }
+label('J2 sensor wires', -7.5, 7.2, 1.6, 8);
+
+// ---------------- sensor (ghost) ----------------
+const sensGroup = new THREE.Group(); root.add(sensGroup);
+const sens = new THREE.Mesh(new THREE.CylinderGeometry(6.95,6.95,2.7,48),
+  mat(0x22242b,{transparent:true, opacity:0.9, roughness:.3}));
+sens.position.copy(V(0,0,5.05)); sensGroup.add(sens);
+const sl = label('ZW111 sensor (rests under the housing lip)', 0, 0, 7.6, 14);
+sensGroup.add(sl); sensGroup.remove(sl); sensGroup.add(sl);
+// sensor pigtail wires down to J2
+const wireM = new THREE.LineBasicMaterial({color:0xeeeeee});
+for (let i=0;i<6;i++){
+  const pts = [V(-5,1.5-i*0.5,4.0), V(-7.5,j2y[i],1.2), V(-7.5,j2y[i],0.15)];
+  const l = new THREE.Line(new THREE.BufferGeometry().setFromPoints(pts), wireM);
+  sensGroup.add(l);
+}
+
+// ---------------- housing (ghost) ----------------
+const houseGroup = new THREE.Group(); root.add(houseGroup);
+function ghost(w,l,h,x,y,z,op){
+  const m = new THREE.Mesh(new THREE.BoxGeometry(w,h,l),
+    mat(0xa8c4e0,{transparent:true, opacity:op, roughness:.7, depthWrite:false}));
+  m.position.copy(V(x,y,z)); houseGroup.add(m);
+}
+ghost(19.6,19.6,3.0, 0,0,1.5, 0.16);        // lip tier
+ghost(18.5,18.5,4.24, 0,0,5.12, 0.16);      // top tier
+const win = new THREE.Mesh(new THREE.RingGeometry(6.2,9.2,48),
+  mat(0xa8c4e0,{transparent:true,opacity:0.3, side:THREE.DoubleSide}));
+win.rotation.x = -Math.PI/2; win.position.copy(V(0,0,7.25)); houseGroup.add(win);
+
+// ---------------- wiring channels ----------------
+const wireGroup = new THREE.Group(); root.add(wireGroup);
+function channel(pts, color, bottom=false){
+  const m = new THREE.MeshBasicMaterial({color, transparent:bottom, opacity:bottom?0.45:1});
+  for (let i=0;i<pts.length-1;i++){
+    const a = V(...pts[i]), b = V(...pts[i+1]);
+    const d = new THREE.Vector3().subVectors(b,a);
+    const len = d.length();
+    const g = new THREE.Mesh(new THREE.BoxGeometry(0.35, 0.12, len), m);
+    g.position.copy(a).add(d.multiplyScalar(0.5));
+    g.lookAt(b); wireGroup.add(g);
+  }
+}
+const zb = -1.32, zt = 0.08;  // bottom / top channel heights
+// VBAT (red): J11-1/2/3 (bottom) -> via at (7.6,3.6) -> up -> LDO VIN + C3
+const RED='#e0553a';
+channel([[4.13,8.07,zb],[7.6,8.07,zb],[7.6,3.6,zb]], RED, true);
+channel([[6.67,8.07,zb],[7.6,8.07,zb]], RED, true);
+channel([[4.13,5.53,zb],[7.6,5.53,zb]], RED, true);
+channel([[7.6,3.6,zb],[7.6,3.6,zt]], RED);           // via
+channel([[7.6,3.6,zt],[8.4,3.6,zt],[8.4,5.6,zt],[8.4,-5.0,zt]], RED); // LDO VIN + C1/C3 rail
+// GND (gray): J4-5 (bottom) -> via -> star to U1/caps/J2-2
+const GRY='#8892a8';
+channel([[-6.87,2.76,zb],[-6.87,0.5,zb]], GRY, true);
+channel([[-6.87,0.5,zb],[-6.87,0.5,zt]], GRY);
+channel([[-6.87,0.5,zt],[-6.6,0.2,zt],[6.6,0.2,zt]], GRY);
+channel([[-6.87,0.5,zt],[-7.5,3.9,zt]], GRY);          // J2-GND
+// 3V3 (green): LDO out rail -> U1 3V3/EN, C2, J2-1, J2-6
+const GRN='#3fa66a';
+channel([[6.6,4.8,zt],[6.6,7.6,zt],[-6.6,7.6,zt]], GRN);
+channel([[-6.6,7.6,zt],[-7.5,5.4,zt]], GRN);            // J2 3V3
+channel([[-6.6,7.6,zt],[-7.5,-5.4,zt]], GRN);           // J2 VT (schematic-style)
+// UART + INT
+channel([[-7.5,2.6,zt],[-6.4,1.5,zt]], '#4a90d9');      // TX -> U1 RX
+channel([[-7.5,-2.6,zt],[-6.4,-0.5,zt]], '#9a6ad9');    // RX -> U1 TX
+channel([[-7.5,-3.9,zt],[-6.4,-1.5,zt]], '#d9a04a');    // INT -> IO3
+
+// ---------------- interaction ----------------
+let rx=-0.45, ry=0.6, dist=36, panx=0, pany=0;
+function apply(){
+  root.rotation.x = rx; root.rotation.y = ry;
+  cam.position.set(panx, pany, dist); cam.lookAt(panx, pany, 0);
+}
+apply();
+let drag=false, pan=false, lx=0, ly=0;
+addEventListener('mousedown', e=>{ drag=e.button===0; pan=e.button===2; lx=e.clientX; ly=e.clientY; });
+addEventListener('mouseup', ()=>{ drag=pan=false; });
+addEventListener('contextmenu', e=>e.preventDefault());
+addEventListener('mousemove', e=>{
+  const dx=e.clientX-lx, dy=e.clientY-ly; lx=e.clientX; ly=e.clientY;
+  if (drag){ ry+=dx*0.008; rx+=dy*0.008; apply(); }
+  if (pan){ panx-=dx*0.04; pany+=dy*0.04; apply(); }
+});
+addEventListener('wheel', e=>{ dist=Math.max(8,Math.min(120,dist+e.deltaY*0.03)); apply(); });
+addEventListener('resize', ()=>{ cam.aspect=innerWidth/innerHeight; cam.updateProjectionMatrix(); ren.setSize(innerWidth,innerHeight); });
+
+function toggle(btn, grp){ btn.onclick=()=>{ grp.visible=!grp.visible; btn.classList.toggle('on'); }; }
+toggle(document.getElementById('bh'), houseGroup);
+toggle(document.getElementById('bs'), sensGroup);
+toggle(document.getElementById('bw'), wireGroup);
+document.getElementById('bf').onclick = ()=>{ rx = (rx < 0) ? 2.6 : -0.45; apply(); };
+
+(function anim(){ requestAnimationFrame(anim); ren.render(scene, cam); })();
+</script>
+</body>
+</html>

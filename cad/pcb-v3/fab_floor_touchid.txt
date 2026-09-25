@@ -1,0 +1,83 @@
+# TouchID fab floor. Pins the router to ONE hard rung and DISABLES the
+# automatic standard->advanced escalation (see py_router/fab_tiers.py).
+#
+# 0.127, not the 0.20 originally chosen. 0.20 was MY rule, and it is stricter
+# than the fab: JLCPCB standard 4-layer is 0.0889 track / 0.10 clearance.
+# It was also unachievable with these parts --
+#   U3/U4 (TPS7A2033, X2SON-4): pads 0.34-0.40 mm apart
+#   U2    (BQ25505,  VQFN-20) : pads 0.26 mm apart
+# A 0.20 track needs 0.60 mm to pass between pads; a 0.127 track needs 0.381.
+# Measured effect on open connections: 0.20 -> 13, 0.15 -> 6, 0.127 -> 5.
+#
+# TRACK and CLEARANCE are separate rungs and were wrongly set to one number.
+# JLCPCB standard 4-layer is 0.0889 track / 0.10 clearance -- clearance is the
+# LOOSER of the two, so tying them together threw away 0.027 mm per side for
+# nothing. That margin is decisive in the one corridor that matters: U2's east
+# pads have only 0.21 mm to the housing lip.
+#
+#   track 0.127 = 1.43x JLC's 0.0889 minimum
+#   clear 0.10  = 1.00x JLC's 0.10 minimum   (their standard rung exactly)
+#
+# Vias stay at the netclass 0.6/0.3, NOT the 0.25/0.15 advanced rung.
+
+track_width  = 0.127
+clearance    = 0.10
+# 0.45/0.20, not the 0.60/0.30 that used to sit here. That pair was the only
+# number in this file with no comment explaining it, which is usually the tell:
+# it was a carried-over KiCad default, not a decision.
+#
+# 0.45/0.20 IS JLCPCB's standard, no-extra-cost tier (py_router/fab_tiers.py,
+# citing JLC 2026-06: "standard via 0.20 drill / 0.45 dia"; the tighter
+# 0.25/0.15 is the "more costly" rung). preflight check 8 independently uses
+# 0.45/0.20 as its JLC-standard threshold. So this is the fab's own floor, not
+# us pushing them.
+#
+# The objection to a smaller hole is plating an aspect-ratio-deep barrel. This
+# board is 1.20 mm thick: 1.20 / 0.20 = 6:1, against the 8:1+ fabs run
+# routinely. Not close to anything.
+#
+# What it buys: GND taps 15 -> 22. Seven more pads with their own via down to
+# the In2.Cu plane instead of hoping the pour reaches them -- and since the PCM
+# went on, EVERY milliamp of board return current flows through U5, so solid
+# ground paths are worth more here than unused margin. The board is also at
+# capacity (26 0402 slots for 25 parts); space is the scarce thing, not
+# robustness.
+#
+# Kept in mind and rejected: this board flexes where the pogo pins push up, and
+# thin barrels crack under flex. But vias are already banned from the pogo zone
+# outright, so the small ones cannot sit where the flexing is.
+#
+# 2026-08-29: via_diameter 0.45 -> 0.40, DRILL UNCHANGED AT 0.20.
+#
+# Three GND pads could not be connected at 0.45 because the space left around
+# their parts is smaller than a 0.45 via: R9.2's ground island is 0.215 mm from
+# edge to centre and U5.4's is 0.207 mm, against the 0.225 a 0.45 via needs --
+# short by 10 and 18 microns -- and C7.2's nine reachable via sites were none
+# of them over connected ground copper. At 0.40 all three resolve: the islands
+# fit, and C7.2 gets 20412 sites over connected copper.
+#
+# The DRILL DELIBERATELY STAYS AT 0.20, which is JLC's "preferred minimum" hole
+# and keeps mechanical drilling and the 6:1 aspect ratio on a 1.20 mm board.
+# Going to a 0.15 hole buys almost nothing here (24693 sites vs 20412) and
+# moves toward the laser-drilled/HDI process, which is a different product.
+#
+# JLC rules this satisfies (jlcpcb.com/capabilities/pcb-capabilities):
+#   * min multilayer via: 0.15 mm hole / 0.25 mm diameter -- we are well above
+#   * via diameter must be >= hole + 0.10 mm: 0.40 >= 0.30, comfortable
+#   * "0.2mm or 0.25mm hole size with via diameter less than 0.45mm WILL COST
+#     MORE. Please select corresponding via size option when placing order."
+#
+# ==> THE ORDER FORM MUST SELECT THE SMALL-VIA OPTION. A board drawn at 0.40
+#     and ordered on the default rung is a board built to the wrong rules.
+#
+# via_hole_to_track is the rule that was MISSED and nearly caused a bad
+# decision. It constrains the DRILL, not the copper, so it is invisible to
+# every copper-clearance checker. At 0.45/0.20 the copper rule dominates
+# (0.225+0.10 = 0.325 > 0.10+0.20 = 0.30) and it never bit. Below 0.45 the hole
+# rule takes over, which is why shrinking the via buys far less room than it
+# appears to: U2.18/U2.19 gain ZERO via sites at ANY via JLC can make.
+via_diameter = 0.40
+via_drill    = 0.20
+hole_to_hole = 0.20
+board_edge   = 0.30
+via_hole_to_track = 0.20

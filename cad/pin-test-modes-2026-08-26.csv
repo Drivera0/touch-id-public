@@ -1,0 +1,21 @@
+mode,pin,gnd_beep,tied_to,v_wired,v_wireless,v_sleep1_lightoff,v_sleep2_deep,v_off,v_loaded,notes,source_ohms,verdict
+switch module,J4-1,no,none,3.292,3.293,,,0,0.006,,54783.3,signal / pull-up
+switch module,J4-2,no,none,-0.019,0.070,,,0,0,,inf,open / no current
+switch module,J4-3,no,none,3.292,3.293,,,0,0.006,,54783.3,signal / pull-up
+switch module,J4-4,no,none,3.292,3.293,,,0,0.006,in v loaded causes chrome to zoom in and mute the sounds on pc,54783.3,signal / pull-up
+switch module,J4-5,yes,none,0,0,,,0,0,,inf,open / no current
+switch module,J4-6,no,none,0.001,0,,,0,0,"in wired the 0.001 feels like a binary signal since i touch it its 0.001 so maybe its to signal which module its set up as, but i could be wrong",inf,open / no current
+switch module,J11-1,no,none,3.765,2.9-3.5,,,0.511,1.026,", in wireless modes it bounces from 2.9 to 3.5 then bounces back down again repeating. in v loaded causes the rgb lights un the vicinity to change",182.7,current-limited
+switch module,J11-2,no,none,3.3,2.5-3.4,,,0.472,0.654,in wired it loops through 3.3-2.6 and loops again.in wireless modes it bounces from 2.5 to 3.4 then bounces back down again repeating. in v loaded fluctuates between 0.600-0.599 and causes the rgb lights in the vicinity to change                                                                                                                                                                                                                                                                                                                                                 ,282.3,current-limited
+switch module,J11-3,no,none,2.842,2.3-3.3,,,0.462,0.625,in wired it loops through 2.9-1.4 and repeats again.in wireless modes it bounces from 2.3 to 3.3 then bounces back down again repeating. in v loaded it fluctuates and changes the rgb lights in the vicinity,268.0,current-limited
+switch module,J11-4,no,none,0.341,0.316,,,0,0.298,,6.0,usable rail
+knob module,J4-1,no,none,3.292,3.292,3.298,,0,0.006,,54766.7,signal / pull-up
+knob module,J4-2,no,none,0.029,0.061,-0.013,,0,0,,inf,open / no current
+knob module,J4-3,no,none,3.292,3.292,3.298,,0,0.006,,54766.7,signal / pull-up
+knob module,J4-4,no,none,3.292,3.292,3.294,,0,0.005,caused the volume to become muted and for the page in chrome to zoom in,65740.0,signal / pull-up
+knob module,J4-5,yes,none,0.000,0.000,,,0.000,0.000,,inf,open / no current
+knob module,J4-6,no,none,0.001,0.001,0.001,,0.000,0.000,,inf,open / no current
+knob module,J11-1,no,none,3.720,3.502,3.530,,0.083,1.065,"fluctuates from 3.720-3.700 in wired modes goes from 3.720 down to 3.700 and repeats like a loop, in v loaded the rgb lights change in the lights of vicinity not all",228.8,current-limited
+knob module,J11-2,no,none,3.2,2.501,3.530,,0.098,0.642,"fluctuates from 3.0-2.5 in wireless modes goes from 3.0 down to 2.5 and repeasts like a loop,fluctuates from 3.2-2.6 in wired modes goes from 3.2 down to 2.6 and repeats like a loop,in v loaded the rgb lights change in the lights of vicinity not all",289.6,current-limited
+knob module,J11-3,no,none,2.9,2.522,3.530,,0.117,0.606,"fluctuates from 2.9-1.4 in wired modes goes from 2.9 down to 1.4 and repeats like a loop,in v loaded the rgb lights change in the lights of vicinity not all",316.2,current-limited
+knob module,J11-4,no,none,0.337,0.318,0.000,,0.001,0.307,fluctuates from 2.7-1.2 in wireless modes goes from 2.7 down to 1.2 and repeasts like a loop,3.6,usable rail

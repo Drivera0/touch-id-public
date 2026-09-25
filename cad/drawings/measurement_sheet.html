@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>TouchID Module — Measurement Sheet (rev 2, enclosure)</title>
+<style>
+  body { font-family: -apple-system, Segoe UI, Helvetica, Arial, sans-serif; margin: 24px auto; max-width: 1150px; color: #1a1a2e; }
+  h1 { font-size: 22px; } h2 { font-size: 16px; margin-top: 28px; border-bottom: 2px solid #c0392b; padding-bottom: 4px;}
+  p.note { color: #555; font-size: 13px; }
+  table { border-collapse: collapse; width: 100%; font-size: 14px; }
+  th, td { border: 1px solid #ccc; padding: 6px 10px; text-align: left; }
+  th { background: #f4f4f8; }
+  td.est { color: #888; font-variant-numeric: tabular-nums; }
+  td.done { color: #2e7d32; font-weight: 600; }
+  tr.crit td { background: #fdecec; }
+  tr.blocked td { background: #fff6e0; }
+  input[type=number] { width: 90px; font-size: 15px; padding: 4px; border: 1px solid #aaa; border-radius: 4px; }
+  input.filled { background: #eaf7ea; border-color: #2e7d32; }
+  .hint { color: #777; font-size: 12px; }
+  button { margin: 16px 8px 0 0; padding: 8px 16px; font-size: 14px; border-radius: 6px; border: 1px solid #c0392b; background: #c0392b; color: #fff; cursor: pointer; }
+  button.secondary { background: #fff; color: #c0392b; }
+  pre { background: #f4f4f8; border: 1px solid #ddd; padding: 12px; font-size: 12.5px; overflow-x: auto; border-radius: 6px;}
+  .views { text-align: center; margin: 12px 0; }
+  .views img, .views object { max-width: 100%; }
+  .banner { background:#fff6e0; border:1px solid #e0b400; border-radius:8px; padding:10px 14px; margin:14px 0; font-size:13.5px; }
+  @media print { button, pre, #out-label, .banner { display: none; } input { border: none; border-bottom: 1px solid #333; } }
+</style>
+</head>
+<body>
+<h1>TouchID Module — caliper measurement sheet <span style="font-size:15px;color:#888">rev 2 · enclosure</span></h1>
+<p class="note">Reference part: the <b>knob module</b> (housing + PCB) and the slot. Green rows are already caliper-confirmed — re-check only if something looks off. Fill the rest, press <b>Generate parameters</b>, and paste the block over the parameter section of <code>cad/scripts/touchid_module.py</code>.</p>
+
+<div class="banner">
+<b>Two open questions this sheet must settle:</b><br>
+<b>1 · Is the module square?</b> The CAD lip is <b>19.72 × 19.72</b>, but the PCB caliper pass gave <b>19.60 × 17.60</b> — not square. If the PCB fills the lip footprint, both can't be right. See rows <b>1a / 1b</b>.<br>
+<b>2 · Screw-head clearance.</b> The PCB is the module's <i>bottom</i> face and its pogo pads press on the keyboard's spring pins. The M2 screws go <i>up</i> into the housing, so their heads land on that same outside face. <b>This PCB batch was ordered with "Countersink Hole: No"</b>, so v1 has plain Ø2.2 holes — nothing recesses the heads. Row <b>27</b> decides the fix.
+</div>
+
+<div class="views">
+  <object data="touchid_module_drawing.svg" type="image/svg+xml" width="1080"></object>
+</div>
+
+<h2>Housing envelope</h2>
+<table>
+<tr><th>#</th><th>Dimension</th><th>Current value</th><th>Measured (mm)</th><th>How to measure</th></tr>
+<tr><td>1</td><td>Body width (body_w)</td><td class="done">18.64 ✓</td><td><input type="number" step="0.01" id="body_w"></td><td class="hint">Across the flats of the knob housing, not the ear</td></tr>
+<tr><td>2</td><td>Body length (body_l)</td><td class="done">18.64 ✓</td><td><input type="number" step="0.01" id="body_l"></td><td class="hint">Perpendicular direction</td></tr>
+<tr class="crit"><td>1a</td><td>Back lip width (lip_w)</td><td class="est">19.72</td><td><input type="number" step="0.01" id="lip_w"></td><td class="hint"><b>Should equal PCB X = 19.60</b></td></tr>
+<tr class="crit"><td>1b</td><td>Back lip length (lip_l)</td><td class="est">19.72</td><td><input type="number" step="0.01" id="lip_l"></td><td class="hint"><b>Suspect — PCB Y measured 17.60.</b> Is the module actually rectangular?</td></tr>
+<tr><td>3</td><td>Height, back → flush plane (body_h)</td><td class="done">8.44 ✓</td><td><input type="number" step="0.01" id="body_h"></td><td class="hint">Includes the 1.2 PCB; housing alone = 7.24</td></tr>
+<tr><td>3a</td><td>Lip tier height incl. PCB</td><td class="done">4.20 ✓</td><td><input type="number" step="0.01" id="lip_h_meas"></td><td class="hint">Plastic lip alone = 3.00</td></tr>
+<tr><td>4</td><td>Corner radius (corner_r)</td><td class="est">2.0</td><td><input type="number" step="0.01" id="corner_r"></td><td class="hint">Estimate from renders — never measured</td></tr>
+<tr><td>4a</td><td>Side wall thickness (wall_t)</td><td class="est">1.4</td><td><input type="number" step="0.01" id="wall_t"></td><td class="hint">Sets the 16.8 cavity that the ESP32 (16.6) squeezes into</td></tr>
+<tr><td>4b</td><td>Top plate thickness (top_t)</td><td class="est">1.6</td><td><input type="number" step="0.01" id="top_t"></td><td class="hint">Face thickness above the sensor seat</td></tr>
+</table>
+
+<h2>Mounting ear + slot boss</h2>
+<table>
+<tr><th>#</th><th>Dimension</th><th>Current value</th><th>Measured (mm)</th><th>How to measure</th></tr>
+<tr><td>6</td><td>Ear hole diameter (ear_hole_d)</td><td class="est">2.3</td><td><input type="number" step="0.01" id="ear_hole_d"></td><td class="hint">Hole in the knob module's ear</td></tr>
+<tr><td>7</td><td>Ear tab radius (ear_r)</td><td class="done">2.59 ✓ (arm 5.18)</td><td><input type="number" step="0.01" id="ear_r"></td><td class="hint">Ear outer diameter ÷ 2</td></tr>
+<tr><td>8</td><td>Ear hole centre → module centre (diagonal)</td><td class="done">16.46 ✓</td><td><input type="number" step="0.01" id="ear_diag_meas"></td><td class="hint">From the 30.4 corner-to-hole diagonal</td></tr>
+<tr><td>8a</td><td>Ear countersink Ø (ear_csk_d)</td><td class="est">4.4</td><td><input type="number" step="0.01" id="ear_csk_d"></td><td class="hint">90° csk on the ear screw</td></tr>
+<tr><td>9</td><td>Ear thickness (ear_t)</td><td class="done">3.0 ✓</td><td><input type="number" step="0.01" id="ear_t"></td><td class="hint">Ear tab thickness</td></tr>
+<tr><td>10</td><td>Boss height above slot floor</td><td class="est">—</td><td><input type="number" step="0.01" id="boss_h"></td><td class="hint">Depth gauge: slot floor → top of threaded boss. Decides ear z-position</td></tr>
+</table>
+
+<h2>Pogo contacts <span style="color:#2e7d32;font-size:13px">— measured 2026-08-19, board already fabbed to these</span></h2>
+<table>
+<tr><th>#</th><th>Dimension</th><th>Current value</th><th>Re-check (mm)</th><th>Note</th></tr>
+<tr><td>11</td><td>Pad pitch (pad_pitch)</td><td class="done">2.50 ✓</td><td><input type="number" step="0.01" id="pad_pitch"></td><td class="hint">Derived from spans F/G/K (4.70 / 7.22 / 4.70), not the raw 2.20 readings</td></tr>
+<tr><td>12</td><td>Pad diameter (pad_d)</td><td class="done">2.20 ✓</td><td><input type="number" step="0.01" id="pad_d"></td><td class="hint">0.3 gap between pads</td></tr>
+<tr><td>13</td><td>J4 nearest pad edge → board edge</td><td class="done">1.50 ✓</td><td><input type="number" step="0.01" id="j4_edge"></td><td class="hint">J4 = 6-pad group (2×3)</td></tr>
+<tr><td>14</td><td>J4 top pad edge → board edge</td><td class="done">0.48 ✓</td><td><input type="number" step="0.01" id="j4_top"></td><td class="hint"></td></tr>
+<tr><td>15</td><td>J11 nearest pad edge → board edge</td><td class="done">2.60 ✓</td><td><input type="number" step="0.01" id="j11_edge"></td><td class="hint">J11 = 4-pad group (2×2)</td></tr>
+<tr><td>16</td><td>Gap between the two pad groups</td><td class="done">5.80 ✓</td><td><input type="number" step="0.01" id="grp_gap"></td><td class="hint">L and N disagreed by 0.3 — split the difference in the layout</td></tr>
+</table>
+
+<h2>PCB mounting <span style="color:#2e7d32;font-size:13px">— fixed by the fabbed board</span></h2>
+<table>
+<tr><th>#</th><th>Dimension</th><th>Current value</th><th>Measured (mm)</th><th>Note</th></tr>
+<tr><td>17</td><td>PCB width × depth</td><td class="done">19.60 × 17.60 ✓</td><td><input type="number" step="0.01" id="pcb_w"> <input type="number" step="0.01" id="pcb_l"></td><td class="hint">±0.2 fab tolerance ordered</td></tr>
+<tr><td>18</td><td>PCB thickness (pcb_t)</td><td class="done">1.20 ✓</td><td><input type="number" step="0.01" id="pcb_t"></td><td class="hint">ordered 1.2</td></tr>
+<tr><td>19</td><td>Screw hole spacing (centre–centre)</td><td class="done">16.60 ✓</td><td><input type="number" step="0.01" id="screw_span"></td><td class="hint">Holes at (±8.30, 0)</td></tr>
+<tr><td>20</td><td>PCB hole Ø</td><td class="done">2.20 ✓</td><td><input type="number" step="0.01" id="pcb_hole_d"></td><td class="hint">Plated (PTH) — finished ≈2.15</td></tr>
+<tr><td>21</td><td>Boss outer Ø (boss_d)</td><td class="est">4.6</td><td><input type="number" step="0.01" id="boss_d"></td><td class="hint">Inner flats at |x| = 6.75 for ESP32 clearance</td></tr>
+<tr><td>22</td><td>Boss pilot Ø / insert Ø</td><td class="est">1.7</td><td><input type="number" step="0.01" id="pcb_screw_pilot_d"></td><td class="hint">1.7 for M2 self-tapper; open to insert OD if heat-setting</td></tr>
+<tr><td>23</td><td>Boss height (PCB face → cavity floor)</td><td class="est">—</td><td><input type="number" step="0.01" id="boss_stand"></td><td class="hint">Must clear the ESP32's 2.4 mm can plus the caps</td></tr>
+</table>
+
+<h2>Screws &amp; head clearance <span style="color:#c0392b;font-size:13px">— the open problem</span></h2>
+<table>
+<tr><th>#</th><th>Dimension</th><th>Current value</th><th>Measured (mm)</th><th>Note</th></tr>
+<tr><td>24</td><td>Screw thread</td><td class="est">M2</td><td><input type="number" step="0.01" id="screw_d"></td><td class="hint">Major Ø</td></tr>
+<tr><td>25</td><td>Screw head Ø</td><td class="est">3.8</td><td><input type="number" step="0.01" id="head_d"></td><td class="hint">Countersunk M2 ≈ 3.8–4.0; pan head ≈ 3.5</td></tr>
+<tr class="crit"><td>26</td><td>Head height above PCB face</td><td class="est">—</td><td><input type="number" step="0.01" id="head_h"></td><td class="hint">How far it stands proud of the pogo-pad face</td></tr>
+<tr class="crit"><td>27</td><td><b>Recess under PCB inside the slot</b></td><td class="est">—</td><td><input type="number" step="0.01" id="slot_recess"></td><td class="hint"><b>The decider.</b> Depth gauge from slot floor to the plane the PCB sits on. If ~0, heads must not protrude — see options below</td></tr>
+<tr><td>28</td><td>Ear screw head Ø</td><td class="est">4.4</td><td><input type="number" step="0.01" id="ear_head_d"></td><td class="hint">Sits in the ear's countersink</td></tr>
+</table>
+<p class="note"><b>If row 27 comes out ~0:</b> options are (a) counterbore the <i>housing</i> boss so the screw enters from inside the cavity downward, (b) low-profile / wafer-head M2, (c) glue or heat-stake the PCB instead of screwing, (d) countersink the PCB on the <i>next</i> fab run. v1 boards can't be countersunk retroactively.</p>
+
+<h2>Sensor &amp; retaining ledge <span style="color:#c0392b;font-size:13px">— blocked until a sensor is chosen</span></h2>
+<p class="note">The sensor drops in <b>from inside</b> and rests on a ledge, so finger pressure lands on the housing, not the cable or solder joints. Body Ø must be <b>&gt; window (12.4)</b> and <b>≤ seat (14.2)</b>. R502-B (~22) and ZW101 (~21) don't fit.</p>
+<table>
+<tr><th>#</th><th>Dimension</th><th>Current value</th><th>Measured (mm)</th><th>How to measure</th></tr>
+<tr class="blocked"><td>29</td><td>Sensor body Ø</td><td class="est">≤14.2</td><td><input type="number" step="0.01" id="sensor_od"></td><td class="hint">Seat = this + 0.2–0.3 clearance</td></tr>
+<tr class="blocked"><td>30</td><td>Active / lens Ø</td><td class="est">—</td><td><input type="number" step="0.01" id="sensor_lens_d"></td><td class="hint">Window must clear this</td></tr>
+<tr class="blocked"><td>31</td><td>Sensor total thickness</td><td class="est">—</td><td><input type="number" step="0.01" id="sensor_t"></td><td class="hint">Must fit under the top plate above the PCB</td></tr>
+<tr><td>32</td><td>Seat counterbore Ø (sensor_body_d)</td><td class="est">14.2</td><td><input type="number" step="0.01" id="sensor_body_d"></td><td class="hint">Auto-set from #29 if left blank</td></tr>
+<tr><td>33</td><td>Window Ø (sensor_window_d)</td><td class="est">12.4</td><td><input type="number" step="0.01" id="sensor_window_d"></td><td class="hint">Auto-set from #30 if left blank</td></tr>
+<tr class="crit"><td>34</td><td>Retaining ledge width (sensor_lip_t)</td><td class="est">0.90</td><td><input type="number" step="0.01" id="sensor_lip_t"></td><td class="hint">= (seat − window)/2. <b>≥0.6 so it can't be pushed through</b></td></tr>
+<tr><td>35</td><td>Sensor face vs top face (+ = proud)</td><td class="est">0.00</td><td><input type="number" step="0.01" id="sensor_proud"></td><td class="hint">Target flush to +0.5</td></tr>
+<tr><td>36</td><td>Cable width × thickness</td><td class="est">—</td><td><input type="number" step="0.01" id="cable_w"> <input type="number" step="0.01" id="cable_t"></td><td class="hint">Needs a route down the cavity to J2</td></tr>
+</table>
+
+<button onclick="gen()">Generate parameters</button>
+<button class="secondary" onclick="window.print()">Print sheet</button>
+<button class="secondary" onclick="copyOut()">Copy to clipboard</button>
+<p id="out-label" class="note">Blank fields keep the current value. Paste the block over the parameter section of <code>cad/scripts/touchid_module.py</code>.</p>
+<pre id="out">— fill in values and press Generate —</pre>
+
+<script>
+const est = {body_w:18.64, body_l:18.64, lip_w:19.72, lip_l:19.72, body_h:8.44, lip_h_meas:4.20,
+  corner_r:2.0, wall_t:1.4, top_t:1.6, pcb_t:1.2,
+  ear_hole_d:2.3, ear_r:2.59, ear_diag_meas:16.46, ear_csk_d:4.4, ear_t:3.0, boss_h:0,
+  pad_pitch:2.50, pad_d:2.20, j4_edge:1.50, j4_top:0.48, j11_edge:2.60, grp_gap:5.80,
+  pcb_w:19.60, pcb_l:17.60, screw_span:16.60, pcb_hole_d:2.20,
+  boss_d:4.6, pcb_screw_pilot_d:1.7, boss_stand:0,
+  screw_d:2.0, head_d:3.8, head_h:0, slot_recess:0, ear_head_d:4.4,
+  sensor_od:0, sensor_lens_d:0, sensor_t:0,
+  sensor_body_d:14.2, sensor_window_d:12.4, sensor_lip_t:0.90, sensor_proud:0,
+  cable_w:0, cable_t:0};
+function v(id){ const el=document.getElementById(id); return el && el.value!=="" ? parseFloat(el.value) : est[id]; }
+document.querySelectorAll('input').forEach(i=>i.addEventListener('input',()=>i.classList.toggle('filled', i.value!=="")));
+function gen(){
+  const m={}; Object.keys(est).forEach(k=>m[k]=v(k));
+  const fit=0.15;
+  // sensor seat derives from the real part if it was measured
+  let seat=m.sensor_body_d, win=m.sensor_window_d;
+  if(m.sensor_od>0) seat=+(m.sensor_od+0.25).toFixed(2);
+  if(m.sensor_lens_d>0) win=+(m.sensor_lens_d+0.30).toFixed(2);
+  const ledge=+(((seat-win)/2)).toFixed(2);
+  const warn=[];
+  if(ledge<0.6) warn.push(`#  WARNING ledge ${ledge} < 0.6 — sensor could push through`);
+  if(m.sensor_od>0 && m.sensor_od>14.2) warn.push(`#  WARNING sensor OD ${m.sensor_od} exceeds the 14.2 seat — housing needs rework`);
+  if(Math.abs(m.lip_l-m.pcb_l)>0.4) warn.push(`#  WARNING lip_l ${m.lip_l} vs PCB depth ${m.pcb_l} — module may not be square`);
+  if(m.slot_recess>0 && m.head_h>m.slot_recess) warn.push(`#  WARNING screw head ${m.head_h} > slot recess ${m.slot_recess} — module will sit off its contacts`);
+  const out =
+`# ---- measured parameters (${new Date().toISOString().slice(0,10)}) ----
+${warn.join('\n')}${warn.length?'\n':''}body_w = ${(m.body_w-fit).toFixed(2)}          # measured ${m.body_w} minus ${fit} fit clearance
+body_l = ${(m.body_l-fit).toFixed(2)}
+lip_w  = ${(m.lip_w-0.12).toFixed(2)}
+lip_l  = ${(m.lip_l-0.12).toFixed(2)}
+pcb_t_ref = ${m.pcb_t}
+lip_h  = ${(m.lip_h_meas-m.pcb_t).toFixed(2)}      # plastic lip only
+body_h = ${(m.body_h-m.pcb_t).toFixed(2)}      # housing back face -> flush top plane
+corner_r = ${m.corner_r}
+top_t  = ${m.top_t}
+wall_t = ${m.wall_t}
+
+sensor_window_d = ${win}
+sensor_body_d   = ${seat}
+sensor_lip_t    = ${ledge}      # retaining ledge
+
+ear_r      = ${m.ear_r}
+ear_diag   = ${(m.ear_diag_meas-m.ear_r).toFixed(2)}   # hole centre from module centre
+ear_t      = ${m.ear_t}
+ear_hole_d = ${m.ear_hole_d}
+ear_csk_d  = ${m.ear_csk_d}
+
+pcb_screw_pos     = [(${(m.screw_span/2).toFixed(2)}, 0.0), (${(-m.screw_span/2).toFixed(2)}, 0.0)]
+pcb_screw_pilot_d = ${m.pcb_screw_pilot_d}
+boss_d            = ${m.boss_d}
+
+# ---- pogo footprint (already fabbed, pad-side frame) ----
+# pitch ${m.pad_pitch}   pad dia ${m.pad_d}
+# PCB ${m.pcb_w} x ${m.pcb_l} x ${m.pcb_t}
+# screw-head height ${m.head_h}  vs slot recess ${m.slot_recess}`;
+  document.getElementById('out').textContent = out;
+}
+function copyOut(){ gen(); navigator.clipboard.writeText(document.getElementById('out').textContent); }
+</script>
+</body>
+</html>

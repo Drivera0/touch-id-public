@@ -1,0 +1,402 @@
+<meta charset="utf-8">
+<title>Pogo Pad Survey</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700&amp;family=IBM+Plex+Mono:wght@400;500;600&amp;family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&amp;display=swap">
+
+<style>
+:root{
+  --ground:#EEF1F5; --surface:#FFFFFF; --surface-2:#F6F8FA;
+  --ink:#131820; --ink-2:#3B4553; --muted:#68727F;
+  --rule:#D6DDE5; --rule-2:#E7ECF1;
+  --brass:#8A6224; --brass-soft:#F0E4D0;
+  --ok:#1C6B52; --ok-soft:#DCEDE6;
+  --assume:#8A5A08; --assume-soft:#F6E7CE;
+  --gap:#97332F; --gap-soft:#F7DFDD;
+  --pad:#B98A47; --steel:#6E7A88; --steel-soft:#DFE5EC;
+  --field:#FFFFFF; --field-line:#B9C3CE;
+  --shadow:0 1px 2px rgba(19,24,32,.06),0 8px 24px -12px rgba(19,24,32,.18);
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --ground:#0D1015; --surface:#151A21; --surface-2:#1B212A;
+    --ink:#E7ECF3; --ink-2:#B7C1CE; --muted:#8492A2;
+    --rule:#2A323D; --rule-2:#222932;
+    --brass:#D6A45E; --brass-soft:#2E2517;
+    --ok:#63C6A0; --ok-soft:#142A23;
+    --assume:#D9A44F; --assume-soft:#2C2314;
+    --gap:#E3817B; --gap-soft:#2E1918;
+    --pad:#C99A57; --steel:#93A0AF; --steel-soft:#232B34;
+    --field:#10151B; --field-line:#3A4552;
+    --shadow:0 1px 2px rgba(0,0,0,.4),0 10px 28px -14px rgba(0,0,0,.7);
+  }
+}
+:root[data-theme="dark"]{
+  --ground:#0D1015; --surface:#151A21; --surface-2:#1B212A;
+  --ink:#E7ECF3; --ink-2:#B7C1CE; --muted:#8492A2;
+  --rule:#2A323D; --rule-2:#222932;
+  --brass:#D6A45E; --brass-soft:#2E2517;
+  --ok:#63C6A0; --ok-soft:#142A23;
+  --assume:#D9A44F; --assume-soft:#2C2314;
+  --gap:#E3817B; --gap-soft:#2E1918;
+  --pad:#C99A57; --steel:#93A0AF; --steel-soft:#232B34;
+  --field:#10151B; --field-line:#3A4552;
+  --shadow:0 1px 2px rgba(0,0,0,.4),0 10px 28px -14px rgba(0,0,0,.7);
+}
+
+*{box-sizing:border-box}
+body{margin:0;background:var(--ground);color:var(--ink);
+  font-family:"Source Serif 4",Georgia,serif;font-size:16.5px;line-height:1.6;-webkit-font-smoothing:antialiased}
+.wrap{max-width:62rem;margin:0 auto;padding:2.5rem 1.5rem 5rem;display:flex;flex-direction:column;gap:2.25rem}
+
+h1,h2,h3,.lbl,th,button{font-family:Archivo,"Helvetica Neue",Arial,sans-serif}
+h1{font-size:2.35rem;line-height:1.1;margin:0;font-weight:700;letter-spacing:-.02em;text-wrap:balance}
+h2{font-size:1.28rem;margin:0;font-weight:600;letter-spacing:-.01em;text-wrap:balance}
+h3{font-size:.98rem;margin:0;font-weight:600}
+p{margin:0}
+.lbl{font-size:.7rem;font-weight:600;letter-spacing:.13em;text-transform:uppercase;color:var(--muted)}
+.mono,td.n,.k{font-family:"IBM Plex Mono",ui-monospace,Menlo,monospace;font-variant-numeric:tabular-nums}
+
+header{display:flex;flex-direction:column;gap:.9rem}
+header .sub{font-size:1.05rem;color:var(--ink-2);max-width:44rem}
+.meta{display:flex;flex-wrap:wrap;gap:.4rem .5rem;margin-top:.35rem}
+.chip{font-family:"IBM Plex Mono",monospace;font-size:.73rem;font-variant-numeric:tabular-nums;
+  padding:.24rem .55rem;border-radius:2px;border:1px solid var(--rule);background:var(--surface);color:var(--ink-2)}
+.chip b{font-weight:600;color:var(--ink)}
+
+section{display:flex;flex-direction:column;gap:1rem}
+.card{background:var(--surface);border:1px solid var(--rule);border-radius:3px;padding:1.35rem 1.4rem;box-shadow:var(--shadow)}
+.note{border-left:3px solid var(--brass);background:var(--brass-soft);padding:1rem 1.15rem;border-radius:0 3px 3px 0}
+.note p+p{margin-top:.6rem}
+
+.fig{background:var(--surface);border:1px solid var(--rule);border-radius:3px;padding:1.1rem;box-shadow:var(--shadow)}
+.fig-scroll{overflow-x:auto}
+svg{display:block;width:100%;min-width:32rem;height:auto}
+.legend{display:flex;flex-wrap:wrap;gap:.5rem 1.4rem;margin-top:.9rem;padding-top:.9rem;border-top:1px solid var(--rule-2)}
+.legend div{display:flex;align-items:center;gap:.45rem;font-size:.8rem;color:var(--ink-2)}
+.sw{width:.85rem;height:.85rem;border-radius:50%;flex:none}
+.sw.sq{border-radius:1px}
+
+.tbl-scroll{overflow-x:auto;border:1px solid var(--rule);border-radius:3px;background:var(--surface);box-shadow:var(--shadow)}
+table{border-collapse:collapse;width:100%;min-width:40rem}
+th{text-align:left;font-size:.68rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;
+  color:var(--muted);padding:.7rem .8rem;border-bottom:1px solid var(--rule);background:var(--surface-2);white-space:nowrap}
+td{padding:.5rem .8rem;border-bottom:1px solid var(--rule-2);font-size:.92rem}
+tbody tr:last-child td{border-bottom:none}
+td.n{text-align:right;white-space:nowrap}
+td.k{font-weight:500;white-space:nowrap}
+th.write,td.write{border-left:1px solid var(--rule);background:var(--surface-2);width:7.5rem}
+.grp td{background:var(--surface-2);font-family:Archivo,sans-serif;font-size:.72rem;font-weight:600;
+  letter-spacing:.1em;text-transform:uppercase;color:var(--muted);padding:.5rem .8rem}
+
+input[type=text]{width:100%;padding:.32rem .45rem;border:1px solid var(--field-line);border-radius:2px;
+  background:var(--field);color:var(--ink);
+  font-family:"IBM Plex Mono",monospace;font-size:.86rem;font-variant-numeric:tabular-nums;text-align:right}
+input[type=text]::placeholder{color:var(--muted);opacity:.55}
+input[type=text]:focus{outline:2px solid var(--brass);outline-offset:1px;border-color:var(--brass)}
+input.ok{border-color:var(--ok);background:var(--ok-soft)}
+input.bad{border-color:var(--gap);background:var(--gap-soft)}
+
+.tag{display:inline-block;font-family:"IBM Plex Mono",monospace;font-size:.68rem;padding:.12rem .4rem;border-radius:2px;white-space:nowrap}
+.t-ok{background:var(--ok-soft);color:var(--ok)}
+.t-as{background:var(--assume-soft);color:var(--assume)}
+.t-no{background:var(--gap-soft);color:var(--gap)}
+
+.bar{display:flex;flex-wrap:wrap;gap:.75rem;align-items:center;margin-top:1rem}
+button{font-size:.85rem;font-weight:600;padding:.55rem 1rem;border-radius:3px;border:1px solid var(--brass);
+  background:var(--brass);color:var(--surface);cursor:pointer}
+button.ghost{background:transparent;color:var(--brass)}
+button:hover{filter:brightness(1.08)}
+#out{width:100%;min-height:9rem;margin-top:.9rem;padding:.8rem;border:1px solid var(--rule);border-radius:3px;
+  background:var(--surface-2);color:var(--ink);font-family:"IBM Plex Mono",monospace;font-size:.8rem;line-height:1.5;display:none}
+#out.show{display:block}
+.hint{font-size:.85rem;color:var(--muted)}
+
+.q{display:flex;flex-direction:column;gap:.45rem;padding:1.1rem 0;border-bottom:1px solid var(--rule-2)}
+.q:last-child{border-bottom:none;padding-bottom:0}
+.q p{color:var(--ink-2);font-size:.95rem}
+
+footer{color:var(--muted);font-size:.85rem;border-top:1px solid var(--rule);padding-top:1.25rem}
+a{color:var(--brass)}
+:focus-visible{outline:2px solid var(--brass);outline-offset:2px}
+@media (max-width:640px){h1{font-size:1.9rem}.wrap{padding:1.75rem 1.1rem 3.5rem;gap:1.75rem}.card{padding:1.1rem}}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
+
+<div class="wrap">
+
+<header>
+  <span class="lbl">TouchID &middot; NuPhy Air75 V3 &middot; preflight WARN 14</span>
+  <h1>Pogo Pad Survey</h1>
+  <p class="sub">Ten contacts on the underside of the module meet sprung pins in the keyboard. Their positions came from a task brief, not from calipers &mdash; and unlike every other dimension on this board, no datasheet can settle them. The keyboard decides.</p>
+  <div class="meta">
+    <span class="chip"><b>10</b> pads</span>
+    <span class="chip"><b>J4</b> 6 &middot; <b>J11</b> 4</span>
+    <span class="chip">all <b>&#216;2.20</b></span>
+    <span class="chip">pitch <b>2.500</b></span>
+    <span class="chip">layer <b>B.Cu</b></span>
+    <span class="chip">screw <b>M2</b> &#216;2.0</span>
+  </div>
+</header>
+
+<div class="note">
+  <p><strong>Measure the button module, not the pins in the keyboard.</strong> The pins are recessed, springy and awkward to get a caliper near. The module sitting in that slot today has flat gold pads on its underside in exactly the positions our board must copy &mdash; and it fits in your hand.</p>
+  <p>Use the <strong>button</strong> module, not the knob: your own pin tests found the knob has no J11 contacts at all, so only the button module carries the full set of ten.</p>
+</div>
+
+<section>
+  <h2>Underside, spacebar edge toward you</h2>
+  <div class="fig">
+    <div class="fig-scroll">
+      <!-- Outline sliced from touchid_housing_v5_diagonal_short.stl at z = 1.0 (lip height).
+           48 points, coordinates unmodified. svgX = design X, svgY = design Y. -->
+      <svg viewBox="-14.6 -14.8 27.4 28.2" role="img"
+           aria-label="Scale drawing of the module underside: outline traced from the 3D model, J4 six pads top left, J11 four pads top right, M2 screw arm at the top left corner, spacebar edge at the bottom">
+        <defs>
+          <marker id="ar" markerWidth="6" markerHeight="6" refX="3" refY="3" orient="auto">
+            <path d="M0,1 L4,3 L0,5" fill="none" stroke="var(--muted)" stroke-width=".5"/>
+          </marker>
+        </defs>
+        <g stroke-linecap="round" stroke-linejoin="round">
+
+          <!-- TRUE housing silhouette, straight from the STL -->
+          <path d="M -11.18,-11.93 L -11.45,-11.73 L -11.73,-11.45 L -11.97,-11.11 L -12.13,-10.81 L -12.27,-10.41 L -12.33,-10.03 L -12.34,-9.65 L -12.30,-9.31 L -12.19,-8.90 L -12.03,-8.56 L -11.82,-8.23 L -11.60,-7.97 L -9.77,-6.15 L -9.76,8.00 L -9.64,8.48 L -9.41,8.91 L -9.08,9.28 L -8.68,9.55 L -8.22,9.72 L -7.77,9.77 L 8.00,9.76 L 8.48,9.64 L 8.91,9.41 L 9.28,9.08 L 9.53,8.71 L 9.68,8.35 L 9.76,7.97 L 9.77,7.77 L 9.76,-8.00 L 9.65,-8.44 L 9.49,-8.80 L 9.18,-9.18 L 8.88,-9.43 L 8.41,-9.66 L 7.97,-9.76 L 7.77,-9.77 L -6.15,-9.77 L -8.10,-11.71 L -8.40,-11.94 L -8.74,-12.12 L -9.10,-12.25 L -9.47,-12.33 L -9.86,-12.34 L -10.24,-12.30 L -10.61,-12.21 L -10.96,-12.06 L -11.18,-11.93 Z"
+                fill="var(--steel-soft)" stroke="var(--steel)" stroke-width=".16"/>
+
+          <!-- M2 through-hole, centre and diameter both from the same slice -->
+          <circle cx="-9.785" cy="-9.785" r="1.45" fill="none" stroke="var(--steel)" stroke-width=".1" stroke-dasharray=".3 .25"/>
+          <circle cx="-9.785" cy="-9.785" r="1.0" fill="var(--ground)" stroke="var(--steel)" stroke-width=".18"/>
+
+          <!-- PCB outline 19.30 sq -->
+          <rect x="-9.65" y="-9.65" width="19.3" height="19.3" rx="2" ry="2"
+                fill="var(--surface-2)" stroke="var(--rule)" stroke-width=".16"/>
+
+          <!-- J4: six pads, TOP LEFT -->
+          <g fill="var(--pad)" stroke="var(--surface)" stroke-width=".1">
+            <circle cx="-7.20" cy="-7.22" r="1.1"/><circle cx="-4.70" cy="-7.22" r="1.1"/>
+            <circle cx="-7.20" cy="-4.72" r="1.1"/><circle cx="-4.70" cy="-4.72" r="1.1"/>
+            <circle cx="-7.20" cy="-2.22" r="1.1"/><circle cx="-4.70" cy="-2.22" r="1.1"/>
+          </g>
+          <g font-family="IBM Plex Mono,monospace" font-size=".72" fill="var(--surface)" text-anchor="middle">
+            <text x="-7.20" y="-6.97">1</text><text x="-4.70" y="-6.97">2</text>
+            <text x="-7.20" y="-4.47">3</text><text x="-4.70" y="-4.47">4</text>
+            <text x="-7.20" y="-1.97">5</text><text x="-4.70" y="-1.97">6</text>
+          </g>
+
+          <!-- J11: four pads, TOP RIGHT -->
+          <g fill="var(--pad)" stroke="var(--surface)" stroke-width=".1">
+            <circle cx="3.45" cy="-7.20" r="1.1"/><circle cx="5.95" cy="-7.20" r="1.1"/>
+            <circle cx="3.45" cy="-4.70" r="1.1"/><circle cx="5.95" cy="-4.70" r="1.1"/>
+          </g>
+          <g font-family="IBM Plex Mono,monospace" font-size=".72" fill="var(--surface)" text-anchor="middle">
+            <text x="3.45" y="-6.95">1</text><text x="5.95" y="-6.95">2</text>
+            <text x="3.45" y="-4.45">3</text><text x="5.95" y="-4.45">4</text>
+          </g>
+
+          <g font-family="Archivo,sans-serif" font-size="1" font-weight="700" fill="var(--ink)" text-anchor="middle">
+            <text x="-5.95" y="-.55">J4</text>
+            <text x="4.70" y="-2.85">J11</text>
+          </g>
+          <g font-family="IBM Plex Mono,monospace" font-size=".58" fill="var(--muted)" text-anchor="middle">
+            <text x="-5.95" y=".3">6 contacts &middot; 1 used</text>
+            <text x="4.70" y="-1.95">4 contacts &middot; 4 used</text>
+          </g>
+
+          <!-- pitch between J4 columns -->
+          <g stroke="var(--muted)" stroke-width=".07" fill="none">
+            <line x1="-7.20" y1="-8.65" x2="-7.20" y2="-10.6"/>
+            <line x1="-4.70" y1="-8.65" x2="-4.70" y2="-10.6"/>
+            <line x1="-7.20" y1="-10.2" x2="-4.70" y2="-10.2" marker-start="url(#ar)" marker-end="url(#ar)"/>
+          </g>
+          <text x="-5.95" y="-10.9" text-anchor="middle" font-family="IBM Plex Mono,monospace"
+                font-size=".68" fill="var(--ink-2)">2.500</text>
+
+          <!-- block gap -->
+          <g stroke="var(--muted)" stroke-width=".07" fill="none">
+            <line x1="-4.70" y1="-7.22" x2="-4.70" y2="-13.1"/>
+            <line x1="3.45" y1="-7.20" x2="3.45" y2="-13.1"/>
+            <line x1="-4.70" y1="-12.7" x2="3.45" y2="-12.7" marker-start="url(#ar)" marker-end="url(#ar)"/>
+          </g>
+          <text x="-.62" y="-13.3" text-anchor="middle" font-family="IBM Plex Mono,monospace"
+                font-size=".68" fill="var(--ink-2)">8.150 centre to centre</text>
+
+          <!-- screw callout -->
+          <line x1="-9.785" y1="-9.785" x2="-13.1" y2="-11.4" stroke="var(--muted)" stroke-width=".07"/>
+          <text x="-13.2" y="-11.7" text-anchor="start" font-family="IBM Plex Mono,monospace"
+                font-size=".6" fill="var(--muted)">M2 &#216;2.00 &middot; 13.84 diag</text>
+
+          <!-- spacebar edge, bottom -->
+          <line x1="-6" y1="11.6" x2="6" y2="11.6" stroke="var(--rule)" stroke-width=".16"/>
+          <text x="0" y="12.7" text-anchor="middle" font-family="Archivo,sans-serif"
+                font-size=".85" font-weight="600" letter-spacing=".12" fill="var(--muted)">SPACEBAR EDGE</text>
+        </g>
+      </svg>
+    </div>
+    <div class="legend">
+      <div><span class="sw" style="background:var(--pad)"></span> &#216;2.20 contact pad</div>
+      <div><span class="sw sq" style="background:var(--steel-soft);border:1px solid var(--steel)"></span> housing silhouette, sliced from the STL</div>
+      <div><span class="sw sq" style="background:var(--surface-2);border:1px solid var(--rule)"></span> PCB outline 19.30 sq</div>
+      <div>millimetres &middot; to scale</div>
+    </div>
+  </div>
+  <p class="hint">The outline is not drawn by hand this time &mdash; it is the real cross-section of <span class="mono">touchid_housing_v5_diagonal_short.stl</span> taken at <span class="mono">z&nbsp;=&nbsp;1.0</span>, the lip height, with its coordinates used unaltered. The same slice puts the M2 hole at <span class="mono">(&minus;9.785,&nbsp;&minus;9.785)</span> and measures it <span class="mono">&#216;2.000</span>, which is what the housing script intends. In this pose left and right on the page match the design X values below directly.</p>
+</section>
+
+<section>
+  <h2>Every contact</h2>
+  <p style="color:var(--ink-2);font-size:.95rem">From <span class="mono">pcb-v4-routed-wip.kicad_pcb</span>. Type into the right-hand column &mdash; whatever you enter feeds the summary below.</p>
+  <div class="tbl-scroll">
+    <table>
+      <thead><tr><th>Pad</th><th>X</th><th>Y</th><th>&#216;</th><th>Net</th><th class="write">Yours</th></tr></thead>
+      <tbody>
+        <tr class="grp"><td colspan="6">J4 &mdash; six contacts &middot; top left</td></tr>
+        <tr><td class="k">J4.1</td><td class="n">&minus;7.200</td><td class="n">&minus;7.220</td><td class="n">2.20</td><td><span class="tag t-no">unused</span></td><td class="write"><input type="text" inputmode="decimal" data-k="J4.1" placeholder="&ndash;"></td></tr>
+        <tr><td class="k">J4.2</td><td class="n">&minus;4.700</td><td class="n">&minus;7.220</td><td class="n">2.20</td><td><span class="tag t-no">unused</span></td><td class="write"><input type="text" inputmode="decimal" data-k="J4.2" placeholder="&ndash;"></td></tr>
+        <tr><td class="k">J4.3</td><td class="n">&minus;7.200</td><td class="n">&minus;4.720</td><td class="n">2.20</td><td><span class="tag t-no">unused</span></td><td class="write"><input type="text" inputmode="decimal" data-k="J4.3" placeholder="&ndash;"></td></tr>
+        <tr><td class="k">J4.4</td><td class="n">&minus;4.700</td><td class="n">&minus;4.720</td><td class="n">2.20</td><td><span class="tag t-no">unused</span></td><td class="write"><input type="text" inputmode="decimal" data-k="J4.4" placeholder="&ndash;"></td></tr>
+        <tr><td class="k">J4.5</td><td class="n">&minus;7.200</td><td class="n">&minus;2.220</td><td class="n">2.20</td><td><span class="mono" style="font-size:.8rem">GND</span></td><td class="write"><input type="text" inputmode="decimal" data-k="J4.5" placeholder="&ndash;"></td></tr>
+        <tr><td class="k">J4.6</td><td class="n">&minus;4.700</td><td class="n">&minus;2.220</td><td class="n">2.20</td><td><span class="tag t-no">unused</span></td><td class="write"><input type="text" inputmode="decimal" data-k="J4.6" placeholder="&ndash;"></td></tr>
+        <tr class="grp"><td colspan="6">J11 &mdash; four contacts &middot; top right</td></tr>
+        <tr><td class="k">J11.1</td><td class="n">+3.450</td><td class="n">&minus;7.200</td><td class="n">2.20</td><td><span class="mono" style="font-size:.8rem">HARV_1</span></td><td class="write"><input type="text" inputmode="decimal" data-k="J11.1" placeholder="&ndash;"></td></tr>
+        <tr><td class="k">J11.2</td><td class="n">+5.950</td><td class="n">&minus;7.200</td><td class="n">2.20</td><td><span class="mono" style="font-size:.8rem">HARV_2</span></td><td class="write"><input type="text" inputmode="decimal" data-k="J11.2" placeholder="&ndash;"></td></tr>
+        <tr><td class="k">J11.3</td><td class="n">+3.450</td><td class="n">&minus;4.700</td><td class="n">2.20</td><td><span class="mono" style="font-size:.8rem">HARV_3</span></td><td class="write"><input type="text" inputmode="decimal" data-k="J11.3" placeholder="&ndash;"></td></tr>
+        <tr><td class="k">J11.4</td><td class="n">+5.950</td><td class="n">&minus;4.700</td><td class="n">2.20</td><td><span class="mono" style="font-size:.8rem">BL_RETURN</span></td><td class="write"><input type="text" inputmode="decimal" data-k="J11.4" placeholder="&ndash;"></td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<section>
+  <h2>Quicker than ten coordinates</h2>
+  <p style="color:var(--ink-2);font-size:.95rem">Absolute positions need a datum and a steady hand. These read straight off the module, and between them they catch almost any error. Fill in what you can &mdash; blanks are fine.</p>
+  <div class="tbl-scroll">
+    <table>
+      <thead><tr><th>Measure</th><th>Expect</th><th>Source</th><th class="write">Yours</th></tr></thead>
+      <tbody>
+        <tr><td>Pad centre to pad centre in a block, across</td><td class="n">2.500</td><td><span class="tag t-as">assumed</span></td><td class="write"><input type="text" inputmode="decimal" data-k="pitch X" placeholder="&ndash;"></td></tr>
+        <tr><td>Pad centre to pad centre in a block, down</td><td class="n">2.500</td><td><span class="tag t-as">assumed</span></td><td class="write"><input type="text" inputmode="decimal" data-k="pitch Y" placeholder="&ndash;"></td></tr>
+        <tr><td>Nearest J4 pad to nearest J11 pad</td><td class="n">8.150</td><td><span class="tag t-as">assumed</span></td><td class="write"><input type="text" inputmode="decimal" data-k="block gap" placeholder="&ndash;"></td></tr>
+        <tr><td>Pad diameter</td><td class="n">2.20</td><td><span class="tag t-as">assumed</span></td><td class="write"><input type="text" inputmode="decimal" data-k="pad dia" placeholder="&ndash;"></td></tr>
+        <tr><td>Pins present, J4 / J11</td><td class="n">6 / 4</td><td><span class="tag t-as">assumed</span></td><td class="write"><input type="text" data-k="pin count" placeholder="&ndash;"></td></tr>
+        <tr><td><strong>Burnish mark</strong> diameter, where a pin actually rides</td><td class="n">&ndash;</td><td><span class="tag t-no">never measured</span></td><td class="write"><input type="text" inputmode="decimal" data-k="burnish dia" placeholder="&ndash;"></td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<section>
+  <h2>The cutout and the screw arm</h2>
+  <p style="color:var(--ink-2);font-size:.95rem">Everything in the drawing is the <em>module</em>. The opening it drops into has never been measured &mdash; only the part currently filling it.</p>
+  <div class="tbl-scroll">
+    <table>
+      <thead><tr><th>Measure</th><th>Module</th><th>Source</th><th class="write">Cutout</th></tr></thead>
+      <tbody>
+        <tr><td>Lip across, the part that must drop through</td><td class="n">19.66</td><td><span class="tag t-ok">measured</span></td><td class="write"><input type="text" inputmode="decimal" data-k="cutout W" placeholder="&ndash;"></td></tr>
+        <tr><td>Lip down</td><td class="n">19.66</td><td><span class="tag t-ok">measured</span></td><td class="write"><input type="text" inputmode="decimal" data-k="cutout D" placeholder="&ndash;"></td></tr>
+        <tr><td>Printed housing lip, after print clearance</td><td class="n">19.54</td><td><span class="tag t-ok">from STL</span></td><td class="write">&ndash;</td></tr>
+        <tr><td>Screw hole centre from module centre, on the diagonal</td><td class="n">13.84</td><td><span class="tag t-ok">from STL</span></td><td class="write"><input type="text" inputmode="decimal" data-k="screw diag" placeholder="&ndash;"></td></tr>
+        <tr><td>Screw hole diameter</td><td class="n">2.000</td><td><span class="tag t-ok">from STL</span></td><td class="write"><input type="text" inputmode="decimal" data-k="screw dia" placeholder="&ndash;"></td></tr>
+        <tr><td>Arm width</td><td class="n">5.12</td><td><span class="tag t-ok">measured</span></td><td class="write"><input type="text" inputmode="decimal" data-k="arm W" placeholder="&ndash;"></td></tr>
+        <tr><td>Overall reach across the arm corner</td><td class="n">22.11</td><td><span class="tag t-ok">from STL</span></td><td class="write"><input type="text" inputmode="decimal" data-k="arm reach" placeholder="&ndash;"></td></tr>
+        <tr><td>Height of the boss the arm screws down onto</td><td class="n">&ndash;</td><td><span class="tag t-no">never measured</span></td><td class="write"><input type="text" inputmode="decimal" data-k="boss H" placeholder="&ndash;"></td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<section>
+  <h2>Send it back to me</h2>
+  <div class="card">
+    <p style="color:var(--ink-2);font-size:.95rem">Fill in whatever you measured, press the button, paste the result into the chat. Empty rows are left out.</p>
+    <div class="bar">
+      <button id="build" type="button">Build summary</button>
+      <button id="copy" class="ghost" type="button">Copy to clipboard</button>
+      <span class="hint" id="status"></span>
+    </div>
+    <textarea id="out" readonly spellcheck="false" aria-label="Measurement summary to copy"></textarea>
+  </div>
+</section>
+
+<section>
+  <h2>Three things worth resolving while it is in your hand</h2>
+  <div class="card">
+    <div class="q">
+      <h3>J4 and J11 are not on the same Y grid</h3>
+      <p>J4's rows sit at <span class="mono">&minus;7.220 / &minus;4.720 / &minus;2.220</span>; J11's at <span class="mono">&minus;7.200 / &minus;4.700</span>. A consistent <span class="mono">0.020</span> offset between two blocks meeting the same rigid keyboard.</p>
+      <p>Small enough not to matter, and small enough to be a typo carried forward. Those are different situations and nobody knows which this is.</p>
+    </div>
+    <div class="q">
+      <h3>Five of J4's six contacts go nowhere</h3>
+      <p>Only <span class="mono">J4.5</span> has a net, and it is ground. The other five are copper wired to nothing &mdash; the knob module's encoder and switch lines.</p>
+      <p>If the keyboard drives anything useful on them, five landing pads sitting unconnected is a wasted opportunity. If it drives something at a different voltage, it is worse than wasted.</p>
+    </div>
+    <div class="q">
+      <h3>How far can a pin wander before it walks off?</h3>
+      <p>&#216;2.20 is what the board draws. What matters is the contact patch &mdash; the shiny <strong>burnish mark</strong> the spring leaves after months of seating.</p>
+      <p>That mark is the honest number: it shows where the pin actually lands on <em>this</em> keyboard. The gap between the mark and the pad edge is the entire position-error budget for everything else on this page.</p>
+    </div>
+  </div>
+</section>
+
+<footer>
+  Pad and net data from <span class="mono">pcb-v4-routed-wip.kicad_pcb</span>. Outline, screw hole and arm reach sliced from <span class="mono">touchid_housing_v5_diagonal_short.stl</span> at <span class="mono">z&nbsp;=&nbsp;1.0</span>. Board frame: origin at board centre, <span class="mono">+Y</span> toward the spacebar. Anything tagged <span class="tag t-as">assumed</span> traces to a task brief rather than an instrument, which is why this page exists. 29 Aug 2026.
+</footer>
+
+</div>
+
+<script>
+(function(){
+  var MINUS = "\u2212";   // escaped: keeps this file pure ASCII
+  var fields = Array.prototype.slice.call(document.querySelectorAll("input[data-k]"));
+  var expect = {};
+  fields.forEach(function(f){
+    var row = f.closest("tr");
+    var e = row.querySelector("td.n");
+    expect[f.dataset.k] = e ? e.textContent.trim() : "";
+    f.addEventListener("input", function(){
+      var v = f.value.trim().replace(",", ".");
+      f.classList.remove("ok","bad");
+      if(!v) return;
+      var a = parseFloat(v);
+      var b = parseFloat((expect[f.dataset.k]||"").split(MINUS).join("-"));
+      if(isNaN(a) || isNaN(b)) return;
+      f.classList.add(Math.abs(a-b) <= 0.05 ? "ok" : "bad");
+    });
+  });
+
+  function pad(s,n){ s = String(s); while(s.length < n) s += " "; return s; }
+
+  function summary(){
+    var lines = ["TouchID pogo survey " + MINUS + " measured values", ""];
+    var any = false;
+    fields.forEach(function(f){
+      var v = f.value.trim();
+      if(!v) return;
+      any = true;
+      var exp = (expect[f.dataset.k]||"?").split(MINUS).join("-");
+      var a = parseFloat(v.replace(",",".")), b = parseFloat(exp);
+      var flag = "";
+      if(!isNaN(a) && !isNaN(b)){
+        flag = (Math.abs(a-b) <= 0.05) ? "  ok" : "  <-- DIFFERS by " + (a-b).toFixed(3);
+      }
+      lines.push("  " + pad(f.dataset.k,14) + " expected " + pad(exp,9) + " measured " + pad(v,9) + flag);
+    });
+    if(!any) lines.push("  (nothing entered yet)");
+    return lines.join("\n");
+  }
+
+  var out = document.getElementById("out");
+  var status = document.getElementById("status");
+  document.getElementById("build").addEventListener("click", function(){
+    out.value = summary(); out.classList.add("show"); status.textContent = "";
+  });
+  document.getElementById("copy").addEventListener("click", function(){
+    out.value = summary(); out.classList.add("show");
+    try{
+      navigator.clipboard.writeText(out.value).then(
+        function(){ status.textContent = "Copied."; },
+        function(){ out.select(); status.textContent = "Select the text above and copy."; });
+    }catch(e){ out.select(); status.textContent = "Select the text above and copy."; }
+  });
+})();
+</script>

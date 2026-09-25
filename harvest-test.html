@@ -1,0 +1,1119 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>TouchID harvest test — can the LED rail power the module?</title>
+<style>
+:root{
+  --bg:#faf9f7; --card:#ffffff; --ink:#1f1e1c; --ink2:#5f5e5a; --ink3:#8a8880;
+  --line:#e3e0d8; --line2:#c9c5ba;
+  --accent:#1d9e75; --accent-bg:#e1f5ee;
+  --warn:#ba7517; --warn-bg:#faeeda;
+  --bad:#a32d2d; --bad-bg:#fcebeb;
+  --info:#185fa5; --info-bg:#e6f1fb;
+  --wire:#378add; --wirered:#e24b4a;
+  --mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme:dark){
+  :root{
+    --bg:#1a1917; --card:#232220; --ink:#f0eee9; --ink2:#a8a49b; --ink3:#7d7a72;
+    --line:#34322e; --line2:#4a4741;
+    --accent:#5dcaa5; --accent-bg:#0f3b30;
+    --warn:#efb058; --warn-bg:#3d2a0d;
+    --bad:#f09595; --bad-bg:#3d1616;
+    --info:#85b7eb; --info-bg:#0d2c47;
+    --wire:#85b7eb; --wirered:#f09595;
+  }
+}
+*{box-sizing:border-box}
+body{margin:0;padding:32px 24px 80px;background:var(--bg);color:var(--ink);
+  font:16px/1.6 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;}
+.wrap{max-width:1180px;margin:0 auto}
+h1{font-size:26px;font-weight:600;margin:0 0 4px}
+h2{font-size:19px;font-weight:600;margin:40px 0 6px}
+h3{font-size:15px;font-weight:600;margin:22px 0 6px}
+.sub{color:var(--ink2);margin:0 0 28px;font-size:14px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:18px 20px;margin:14px 0}
+.scroll{overflow-x:auto;-webkit-overflow-scrolling:touch}
+table{border-collapse:collapse;width:100%;font-size:13px}
+th,td{border-bottom:1px solid var(--line);padding:6px 7px;text-align:left;vertical-align:middle}
+th{font-weight:600;color:var(--ink2);font-size:11px;text-transform:uppercase;letter-spacing:.04em;
+   white-space:nowrap;border-bottom:1px solid var(--line2)}
+td.pin{font-family:var(--mono);font-weight:600;white-space:nowrap}
+td.pred{font-family:var(--mono);color:var(--ink3);white-space:nowrap;text-align:right}
+input,select,textarea{font:inherit;font-size:13px;color:var(--ink);background:var(--bg);
+  border:1px solid var(--line2);border-radius:6px;padding:5px 7px;width:100%}
+input:focus,select:focus,textarea:focus{outline:2px solid var(--info);outline-offset:-1px}
+input.v{font-family:var(--mono);text-align:right}
+td.calc{font-family:var(--mono);font-size:12px;color:var(--ink2);white-space:nowrap;text-align:right}
+.badge{display:inline-block;padding:2px 8px;border-radius:20px;font-size:11px;font-weight:600;white-space:nowrap}
+.b-ok{background:var(--accent-bg);color:var(--accent)}
+.b-warn{background:var(--warn-bg);color:var(--warn)}
+.b-info{background:var(--info-bg);color:var(--info)}
+.b-bad{background:var(--bad-bg);color:var(--bad)}
+.b-none{color:var(--ink3)}
+.btn{display:inline-block;background:var(--ink);color:var(--bg);border:none;border-radius:8px;
+  padding:9px 16px;font-size:14px;font-weight:500;cursor:pointer;margin:4px 6px 4px 0}
+.btn.alt{background:transparent;color:var(--ink);border:1px solid var(--line2)}
+.btn:hover{opacity:.85}
+.note{font-size:13px;color:var(--ink2)}
+.callout{border-left:3px solid var(--warn);background:var(--warn-bg);padding:12px 16px;border-radius:0 8px 8px 0;margin:14px 0;font-size:14px}
+.callout.info{border-color:var(--info);background:var(--info-bg)}
+.callout.bad{border-color:var(--bad);background:var(--bad-bg)}
+.callout.ok{border-color:var(--accent);background:var(--accent-bg)}
+.callout strong{font-weight:600}
+ol,ul{padding-left:22px;margin:8px 0}
+li{margin:5px 0}
+code{font-family:var(--mono);font-size:.9em;background:color-mix(in srgb,var(--line) 60%,transparent);padding:1px 5px;border-radius:4px}
+.pinmap{font-family:var(--mono);font-size:13px;line-height:1.9;color:var(--ink2)}
+.grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:16px}
+.legend{display:flex;flex-wrap:wrap;gap:8px 20px;font-size:12px;color:var(--ink2);margin-top:12px}
+.legend span{display:flex;align-items:center;gap:6px}
+.dot{width:10px;height:10px;border-radius:50%;display:inline-block;flex:none}
+.verdict{font-size:20px;font-weight:600;margin:6px 0 4px}
+hr{border:none;border-top:1px solid var(--line);margin:36px 0}
+svg{display:block;width:100%;height:auto;max-width:700px;margin:0 auto}
+.bb-body{fill:var(--card);stroke:var(--line2);stroke-width:1}
+.bb-hole{stroke:var(--line2);stroke-width:5;stroke-linecap:round;stroke-dasharray:1 20}
+.bb-chan{fill:color-mix(in srgb,var(--line) 45%,transparent)}
+.bb-lbl{font:600 10px var(--mono);fill:var(--ink3)}
+.bb-num{font:10px var(--mono);fill:var(--ink3)}
+.bb-wire{stroke:var(--wire);stroke-width:2.5;fill:none;stroke-linecap:round}
+.bb-lead{stroke:var(--ink2);stroke-width:1.6;fill:none}
+.bb-body-r{fill:var(--warn-bg);stroke:var(--warn);stroke-width:1.2}
+.bb-rtext{font:600 9px var(--mono);fill:var(--warn)}
+.bb-node{fill:var(--wire)}
+.bb-tag{font:600 11px var(--mono);fill:var(--ink2)}
+.bb-plus{font:600 11px var(--mono);fill:var(--bad)}
+.bb-minus{font:600 11px var(--mono);fill:var(--info)}
+.rc{display:flex;align-items:center;gap:14px;margin:10px 0}
+.rc svg{width:170px;height:42px;margin:0;max-width:none;flex:none}
+.rc-v{font-family:var(--mono);font-weight:600;font-size:13px;white-space:nowrap;min-width:64px}
+.rc-u{font-size:12px;color:var(--ink2)}
+input.locked,textarea.locked{background:color-mix(in srgb,var(--line) 35%,transparent);
+  color:var(--ink2);border-style:dashed;cursor:not-allowed}
+.meter{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:10px 18px;
+  background:var(--info-bg);border-left:3px solid var(--info);padding:12px 16px;
+  border-radius:0 8px 8px 0;margin:14px 0;font-size:13px}
+.meter .ml{display:block;font-size:10px;text-transform:uppercase;letter-spacing:.05em;
+  color:var(--ink2);font-weight:600;margin-bottom:2px}
+.meter .mv{font-weight:600}
+.lockbar{font-size:12px;color:var(--ink2);margin:6px 0 0}
+@media print{
+  body{padding:0;background:#fff}
+  .btn,.noprint{display:none!important}
+  .card{break-inside:avoid;border-color:#ccc}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<h1>TouchID harvest test</h1>
+<p class="sub">Can J11-1/2/3 supply real current with the backlight off? · <span id="today"></span></p>
+
+<div class="callout info">
+<strong>Session of 2026-08-27 is recorded below.</strong> Phase 0 and Phase 1 are filled in and <strong>locked</strong> (greyed, dashed border) so they cannot be edited by accident. Phases 2, 3 and 4 are empty and ready for input. If you need to correct a recorded value, press <em>Unlock recorded values</em> at the bottom.
+</div>
+
+<div class="callout bad noprint">
+<strong>New entries are not saved.</strong> Refreshing or closing the tab loses everything. Press <em>Export CSV</em> or <em>Copy all</em> before you walk away from the bench.
+</div>
+
+<div class="callout info">
+<strong>What this session decides.</strong> Session 3 measured a steady <code>3.530 V</code> on J11-1/2/3 with the backlight asleep — but that was an <strong>unloaded</strong> reading, and a 10 MΩ leak reads the same as a stiff supply on a multimeter. The load tests were run <strong>awake</strong>. So we have loaded numbers awake, unloaded numbers asleep, and no overlap. This fills the gap.
+<br><br>
+<strong>Pass</strong> → a self-contained module: pop it in, nothing modified, nothing to charge. <strong>Fail</strong> → open the keyboard and solder to its battery.
+</div>
+
+<div class="callout ok">
+<strong>Why harvesting can work at all.</strong> The keyboard turns the module LED off by <strong>opening the return</strong> (J11-4), not by dropping the anodes — confirmed by the no-continuity result. So with the backlight asleep, J11-1/2/3 sit at 3.530 V with no path through the LED. Current we draw returns through <strong>J4-5</strong>, the real chassis ground. It never enters the LED, so it lights nothing and dims nothing.
+</div>
+
+<div class="callout">
+<strong>Three specific risks.</strong>
+<ol style="margin:6px 0 0">
+<li><strong>Never bridge J11-1/2/3 to J11-4.</strong> That is a direct LED overdrive path. Everything here returns to <strong>J4-5</strong>.</li>
+<li><strong>Never tie J11-1/2/3 directly together.</strong> Three separate driver outputs. The 100 Ω isolation resistors exist so a backlight wake mid-test cannot make them fight.</li>
+<li><strong>Minimum 100 Ω, always.</strong> No direct shorts, not even briefly. The voltages are harmless to you — the risk is to the keyboard.</li>
+</ol>
+</div>
+
+<h2>Quick reference</h2>
+<div class="grid2">
+  <div class="card">
+    <h3 style="margin-top:0">Pin numbering</h3>
+    <p class="note" style="margin:0 0 8px">Looking straight down into the empty slot, keyboard in typing position.</p>
+    <div class="pinmap">
+      REAR (toward screen)<br>
+      &nbsp;J4&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;J11<br>
+      &nbsp;1&nbsp;&nbsp;2&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;1&nbsp;&nbsp;2<br>
+      &nbsp;3&nbsp;&nbsp;4&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;3&nbsp;&nbsp;4<br>
+      &nbsp;5&nbsp;&nbsp;6<br>
+      FRONT (toward spacebar)
+    </div>
+    <p class="note" style="margin:10px 0 0"><strong>J4-5</strong> = ground, bottom-left of the 6-pin block. <strong>J11-1/2/3</strong> = the harvest source. <strong>J11-4</strong> = the switched LED return.</p>
+  </div>
+  <div class="card">
+    <h3 style="margin-top:0">Resistors you need</h3>
+    <div id="rescodes"></div>
+    <p class="note" style="margin:10px 0 0"><strong>Read the bands from the end where they are bunched up</strong> — the gold tolerance band goes on the right. Always confirm in <code>Ω</code> mode anyway: 100 Ω and 10 kΩ differ by one band colour and are easy to swap.</p>
+  </div>
+</div>
+
+<h2>Know your breadboard first</h2>
+
+<div class="callout bad">
+<strong>There are four rails, not two.</strong> The <code>+</code>/<code>−</code> pair on the left and the pair on the right are <strong>completely separate</strong> — not joined inside the board. If the load resistor went to the left <code>−</code> rail and the J4-5 jumper went to the right <code>−</code> rail, nothing would be connected and every reading would be meaningless. <strong>All three diagrams below use the LEFT pair. Stay on it.</strong>
+</div>
+
+<div class="card">
+<h3 style="margin-top:0">What is actually joined to what</h3>
+<ul class="note" style="margin:0">
+<li><strong>Each rail strip is one connection down its whole length.</strong> The groups of five printed on the rails are <em>cosmetic</em> — spacing marks to help you count. Electrically it is one long bus.</li>
+<li><strong>But check for a mid-rail break.</strong> Many boards split each rail in half. Look at the printed red or blue line beside the rail: a <strong>gap in the middle</strong> means two separate halves, and you must either bridge them with a jumper or keep everything on one half.</li>
+<li><strong>In the main area the groups of five are real.</strong> Holes <code>a</code>–<code>e</code> of one row are one connection; <code>f</code>–<code>j</code> of that same row are a <em>different</em> one. The centre channel is a genuine electrical gap.</li>
+<li><strong>Neighbouring rows are never joined.</strong> Row 4 and row 5 are independent — which is exactly what lets a resistor bridge between them.</li>
+</ul>
+</div>
+
+<div class="callout info">
+<strong>Sixty seconds that will save you an hour.</strong> Keyboard <strong>off and unplugged</strong>, meter on <strong>continuity (beep)</strong>, nothing else connected:
+<ol style="margin:6px 0 0">
+<li>Two holes at opposite ends of the <em>same</em> rail → <strong>should beep.</strong> No beep means the rail is split in the middle.</li>
+<li>Left <code>−</code> rail to right <code>−</code> rail → <strong>should NOT beep.</strong></li>
+<li>Holes <code>a</code> and <code>e</code> of the same row → <strong>should beep.</strong></li>
+<li>Holes <code>e</code> and <code>f</code> of the same row → <strong>should NOT beep.</strong> That is the centre channel doing its job.</li>
+<li>Hole <code>a</code> of row 4 and hole <code>a</code> of row 5 → <strong>should NOT beep.</strong></li>
+</ol>
+</div>
+
+<h2>Multimeter settings, phase by phase</h2>
+
+<div class="callout bad">
+<strong>Never turn the dial to <code>A</code> or <code>mA</code> in this session.</strong> In current mode the meter is almost a piece of wire. Putting it across a live rail is a short circuit — through your meter, and through the keyboard's LED driver. Every measurement here is <strong>DC volts</strong>.
+<br><br>
+That is also <em>why</em> the whole procedure works by measuring voltage across a known resistor and computing the current as <code>I = V ÷ R</code>. You never have to break the circuit to insert the meter, and you can never accidentally short anything.
+</div>
+
+<div class="card scroll">
+<table>
+<thead><tr><th>When</th><th>Dial</th><th>Range</th><th>Black probe</th><th>Red probe</th></tr></thead>
+<tbody>
+<tr><td class="pin">Before every phase</td><td><strong>Ω</strong> resistance</td><td>auto, or 2 kΩ</td><td colspan="2">Across the resistor, <strong>out of the board</strong>. Confirms you grabbed the right one.</td></tr>
+<tr><td class="pin">Optional pre-check</td><td><strong>Continuity</strong> (beep)</td><td>—</td><td colspan="2">Across your own jumpers, <strong>keyboard off and unplugged</strong>. Confirms the breadboard is wired how you think.</td></tr>
+<tr><td class="pin">Phase 0</td><td><strong>DC volts</strong> <code>V⎓</code></td><td>lowest above 3.5 V</td><td>J4-5</td><td>each pin in turn</td></tr>
+<tr><td class="pin">Phase 1</td><td><strong>DC volts</strong></td><td>same</td><td><code>−</code> rail</td><td>node with the pin under test</td></tr>
+<tr><td class="pin">Phase 1 ground control</td><td><strong>DC volts</strong></td><td>same</td><td><strong>USB-C shell</strong></td><td>unchanged</td></tr>
+<tr><td class="pin">Phase 2</td><td><strong>DC volts</strong></td><td>same</td><td><code>−</code> rail</td><td>the harvest node</td></tr>
+<tr><td class="pin">Phase 3</td><td><strong>DC volts</strong></td><td>same</td><td>J4-5</td><td>J11-4</td></tr>
+<tr><td class="pin">Phase 4</td><td><strong>DC volts</strong></td><td>same</td><td colspan="2">Unchanged from Phase 2 — just leave it sitting there for ten minutes.</td></tr>
+</tbody>
+</table>
+<p class="note" style="margin-top:12px"><strong>On range:</strong> if your meter is autoranging, leave it alone — it picks for you. If it has fixed ranges, choose the smallest one <em>above</em> 3.5 V, usually marked <code>4V</code>, <code>6V</code> or <code>20V</code>. A 4 V range resolves 1 mV; a 200 V range resolves 100 mV and would hide the entire effect you are looking for.</p>
+<p class="note"><strong>Why the unloaded reading is trustworthy:</strong> in volts mode the meter has about 10 MΩ of internal resistance, so it draws roughly 0.35 microamps. That is close enough to nothing that contact quality cannot affect the number — which is exactly why an unloaded 3.530 V proves a voltage exists but says nothing about whether current is available behind it.</p>
+</div>
+
+<div class="card">
+<h3 style="margin-top:0">Reference values</h3>
+<p class="note" style="margin:0 0 10px">Unloaded voltage used for all source-resistance calculations. Change it if Phase 0 gives you something different.</p>
+<div style="max-width:220px"><input class="v" id="vref" type="number" step="0.001" value="3.530"></div>
+</div>
+
+<hr>
+
+<div class="callout ok">
+<strong>Do the 10 kΩ screen first — it can end the session in five minutes.</strong> A 10 kΩ load draws only 0.35 mA, so it is the safest thing you can connect, but it separates a real supply from leakage decisively:
+<table style="font-size:12px;margin-top:10px">
+<tr><th>If the source is…</th><th>10 kΩ reads</th><th>What it means</th></tr>
+<tr><td class="pin">231 Ω (as measured awake)</td><td class="pin">3.450 V</td><td>barely moves — real supply</td></tr>
+<tr><td class="pin">1 kΩ</td><td class="pin">3.209 V</td><td>weaker, still very usable</td></tr>
+<tr><td class="pin">10 kΩ</td><td class="pin">1.765 V</td><td>marginal</td></tr>
+<tr><td class="pin">100 kΩ</td><td class="pin">0.321 V</td><td>leakage</td></tr>
+<tr><td class="pin">1 MΩ</td><td class="pin">0.035 V</td><td>collapses — nothing there</td></tr>
+</table>
+<strong>Above ~3.2 V and harvesting is viable</strong> — carry on to the lower loads for the exact number. <strong>Below ~1 V and it is dead</strong>, and you can stop without ever needing a 330 Ω.
+<br><br>
+What 10 kΩ <em>cannot</em> do is tell 2 Ω from 200 Ω — everything stiff reads ~3.5 V. That is why the lower loads still matter once the screen passes.
+</div>
+
+<div class="callout">
+<strong>No 330 Ω? Series three 100 Ω resistors.</strong> That gives 300 Ω, which is fine — predicted readings become J11-1 = 1.994 V, J11-2 = 1.412 V, J11-3 = 1.352 V, and the combined node = <strong>2.340 V</strong> instead of 2.414. Resistors in series simply add. Enter 300 in place of 330 when you read the verdict table.
+<div style="background:var(--card);border-radius:8px;padding:8px 4px;margin:14px 0 4px"><svg viewBox="0 0 700 470" role="img" aria-label="Making 300 ohms from three 100 ohm resistors in series using the left-hand rails. The pin enters row 4 hole e. Resistors chain down column a from row 4 to 7, column b from row 7 to 10, and column a from row 10 to 13. A short jumper takes row 13 to the minus rail.">
+  <rect class="bb-body" x="100" y="68" width="295" height="352" rx="8"/>
+  <text class="bb-lbl" x="125" y="82" text-anchor="middle">a</text>
+  <line class="bb-hole" x1="125" y1="92" x2="125" y2="386"/>
+  <text class="bb-lbl" x="150" y="82" text-anchor="middle">b</text>
+  <line class="bb-hole" x1="150" y1="92" x2="150" y2="386"/>
+  <text class="bb-lbl" x="175" y="82" text-anchor="middle">c</text>
+  <line class="bb-hole" x1="175" y1="92" x2="175" y2="386"/>
+  <text class="bb-lbl" x="200" y="82" text-anchor="middle">d</text>
+  <line class="bb-hole" x1="200" y1="92" x2="200" y2="386"/>
+  <text class="bb-lbl" x="225" y="82" text-anchor="middle">e</text>
+  <line class="bb-hole" x1="225" y1="92" x2="225" y2="386"/>
+  <text class="bb-lbl" x="270" y="82" text-anchor="middle">f</text>
+  <line class="bb-hole" x1="270" y1="92" x2="270" y2="386"/>
+  <text class="bb-lbl" x="295" y="82" text-anchor="middle">g</text>
+  <line class="bb-hole" x1="295" y1="92" x2="295" y2="386"/>
+  <text class="bb-lbl" x="320" y="82" text-anchor="middle">h</text>
+  <line class="bb-hole" x1="320" y1="92" x2="320" y2="386"/>
+  <text class="bb-lbl" x="345" y="82" text-anchor="middle">i</text>
+  <line class="bb-hole" x1="345" y1="92" x2="345" y2="386"/>
+  <text class="bb-lbl" x="370" y="82" text-anchor="middle">j</text>
+  <line class="bb-hole" x1="370" y1="92" x2="370" y2="386"/>
+  <rect class="bb-chan" x="235" y="76" width="25" height="336" rx="4"/>
+  <text class="bb-plus" x="48" y="82" text-anchor="middle">+</text>
+  <line class="bb-hole" x1="48" y1="92" x2="48" y2="386"/>
+  <text class="bb-minus" x="76" y="82" text-anchor="middle">−</text>
+  <line class="bb-hole" x1="76" y1="92" x2="76" y2="386"/>
+  <text class="bb-num" x="108" y="96" text-anchor="end">1</text>
+  <text class="bb-num" x="108" y="159" text-anchor="end">4</text>
+  <text class="bb-num" x="108" y="222" text-anchor="end">7</text>
+  <text class="bb-num" x="108" y="285" text-anchor="end">10</text>
+  <text class="bb-num" x="108" y="348" text-anchor="end">13</text>
+  <line class="bb-lead" x1="125" y1="155" x2="125" y2="165"/><rect class="bb-body-r" x="117" y="165" width="16" height="22" rx="2"/><text class="bb-rtext" x="125" y="180" text-anchor="middle">100</text><line class="bb-lead" x1="125" y1="187" x2="125" y2="218"/><circle class="bb-node" cx="125" cy="155" r="3.5"/><circle class="bb-node" cx="125" cy="218" r="3.5"/>
+  <line class="bb-lead" x1="150" y1="218" x2="150" y2="228"/><rect class="bb-body-r" x="142" y="228" width="16" height="22" rx="2"/><text class="bb-rtext" x="150" y="243" text-anchor="middle">100</text><line class="bb-lead" x1="150" y1="250" x2="150" y2="281"/><circle class="bb-node" cx="150" cy="218" r="3.5"/><circle class="bb-node" cx="150" cy="281" r="3.5"/>
+  <line class="bb-lead" x1="125" y1="281" x2="125" y2="291"/><rect class="bb-body-r" x="117" y="291" width="16" height="22" rx="2"/><text class="bb-rtext" x="125" y="306" text-anchor="middle">100</text><line class="bb-lead" x1="125" y1="313" x2="125" y2="344"/><circle class="bb-node" cx="125" cy="281" r="3.5"/><circle class="bb-node" cx="125" cy="344" r="3.5"/>
+  <line class="bb-wire" x1="225" y1="155" x2="440" y2="155"/><circle class="bb-node" cx="225" cy="155" r="4.5"/><text class="bb-tag" x="446" y="159">pin under test</text>
+  <path class="bb-wire" d="M175 344 Q125 329 76 344"/><circle class="bb-node" cx="175" cy="344" r="4.5"/><circle class="bb-node" cx="76" cy="344" r="4.5"/>
+  <line class="bb-wire" x1="76" y1="92" x2="30" y2="92"/><circle class="bb-node" cx="76" cy="92" r="4.5"/><text class="bb-tag" x="30" y="83" text-anchor="middle">J4-5</text><text class="bb-tag" x="30" y="109" text-anchor="middle" style="font-weight:400">ground</text>
+  <circle cx="200" cy="155" r="5" fill="var(--wirered)"/>
+  <circle cx="76" cy="197" r="5" fill="var(--ink)"/>
+  <text class="bb-num" x="248" y="438" text-anchor="middle">each resistor bridges to the next numbered row</text>
+</svg></div>
+<span class="note">Each resistor bridges from its row to the next, so the current runs through all three end to end. Row 4 is the pin; row 13 hops across to the <code>−</code> rail.</span>
+<br><br>
+<strong>Wattage:</strong> ¼ W is fine everywhere with margin to spare. The worst case in this whole session is the 100 Ω load <em>if</em> the source turned out perfect, which would be 125 mW — half the rating. Every other combination is under 40 mW.
+</div>
+
+<h2>Phase 0 — confirm the lights-off state</h2>
+<div class="meter"><div><span class="ml">Dial</span><span class="mv">DC volts <code>V⎓</code></span></div><div><span class="ml">Range</span><span class="mv">lowest above 3.5 V</span></div><div><span class="ml">Black probe</span><span class="mv">USB-C shell <span style="font-weight:400">(= J4-5)</span></span></div><div><span class="ml">Red probe</span><span class="mv">each pin in turn:<br>J11-1, -2, -3, -4</span></div></div>
+
+<p class="note">There are two different ways the backlight goes dark and they may not be the same electrical state. Measure both, <strong>no load connected</strong>, everything referenced to J4-5.</p>
+<ul class="note">
+<li><strong>State A — sleep timeout.</strong> Leave the keyboard untouched until the backlight drops on its own.</li>
+<li><strong>State B — brightness zero.</strong> Set brightness to 0 manually while the keyboard is otherwise awake.</li>
+</ul>
+
+<div class="card">
+<h3 style="margin-top:0">Setting it up</h3>
+<p class="note" style="margin:0 0 8px"><strong>Nothing gets built for this phase.</strong> No breadboard, no resistors, no jumpers. Meter probes straight into the empty slot.</p>
+<ol class="note" style="margin:0">
+<li>Module <strong>removed</strong> from the slot, keyboard <strong>on</strong>. Record whether you are wired or wireless.</li>
+<li>Meter on <strong>DC volts</strong>, lowest range above 3.5 V.</li>
+<li><strong>Clip the black lead to the USB-C metal shell.</strong> Session 1 confirmed J4-5 beeps to it, so it is the same node — and clipping to a shell is far easier than balancing a probe on a pogo pin while you work. No current flows in this phase, so contact quality cannot affect the reading either way.</li>
+<li>Touch the red probe to <strong>J11-1</strong>, then <strong>J11-2</strong>, <strong>J11-3</strong>, <strong>J11-4</strong>. One pin at a time, tip vertical, gentle — the risk here is bridging two pins with the probe tip, not the voltage.</li>
+</ol>
+<p class="note" style="margin:10px 0 0"><strong>Getting into each state:</strong> for <em>State A</em>, leave the keyboard completely alone until the backlight drops on its own, then measure without touching any keys — typing will wake it and you will have to start the wait again. For <em>State B</em>, set brightness to 0 in the keyboard software and measure promptly, before the sleep timer drifts you into State A.</p>
+<p class="note"><strong>Expected:</strong> 3.530 V on J11-1/2/3, and 0.000 V on J11-4. Write down what you actually see, including zeros.</p>
+</div>
+
+<div class="callout bad">If you cannot reproduce ~3.530 V unloaded, <strong>stop</strong>. Something changed since session 3, and no loaded reading means anything until that is resolved.
+</div>
+
+<div class="card scroll">
+<table id="t0">
+<thead><tr><th>Pin</th><th>Expected</th><th style="width:150px">State A — sleep timeout</th><th style="width:150px">State B — brightness 0</th><th>Note</th></tr></thead>
+<tbody>
+<tr data-pin="J11-1"><td class="pin">J11-1</td><td class="pred">3.530</td><td><input class="v" data-k="a" type="number" step="0.001"></td><td><input class="v" data-k="b" type="number" step="0.001"></td><td><input data-k="n" type="text"></td></tr>
+<tr data-pin="J11-2"><td class="pin">J11-2</td><td class="pred">3.530</td><td><input class="v" data-k="a" type="number" step="0.001"></td><td><input class="v" data-k="b" type="number" step="0.001"></td><td><input data-k="n" type="text"></td></tr>
+<tr data-pin="J11-3"><td class="pin">J11-3</td><td class="pred">3.530</td><td><input class="v" data-k="a" type="number" step="0.001"></td><td><input class="v" data-k="b" type="number" step="0.001"></td><td><input data-k="n" type="text"></td></tr>
+<tr data-pin="J11-4"><td class="pin">J11-4</td><td class="pred">0.000</td><td><input class="v" data-k="a" type="number" step="0.001"></td><td><input class="v" data-k="b" type="number" step="0.001"></td><td><input data-k="n" type="text"></td></tr>
+</tbody>
+</table>
+</div>
+
+<hr>
+
+<h2>Phase 1 — per-pin load line, backlight OFF</h2>
+<div class="meter"><div><span class="ml">Dial</span><span class="mv">DC volts <code>V⎓</code></span></div><div><span class="ml">Range</span><span class="mv">lowest above 3.5 V</span></div><div><span class="ml">Black probe</span><span class="mv"><code>−</code> rail, <strong>left</strong> side</span></div><div><span class="ml">Red probe</span><span class="mv">row <code>4</code>, hole <code>c</code></span></div></div><p class="note" style="margin:10px 0 0"><strong>First, switch to <code>Ω</code></strong> and check each resistor out of the board — then switch back to DC volts and leave it there for the whole phase.</p>
+
+<h3>Breadboard setup 1 — single pin</h3>
+
+<div class="card">
+<svg viewBox="0 0 700 620" role="img" aria-label="Single-pin load test using the left-hand rails. The pin under test enters row 4 hole e and its wire runs out to the right. The load resistor runs down column a from row 4 to row 10. A short jumper takes row 10 across to the minus rail, which runs out to J4-5. Red probe row 4 hole c, black probe on the minus rail.">
+  <rect class="bb-body" x="100" y="68" width="295" height="520" rx="8"/>
+  <text class="bb-lbl" x="125" y="82" text-anchor="middle">a</text>
+  <line class="bb-hole" x1="125" y1="92" x2="125" y2="554"/>
+  <text class="bb-lbl" x="150" y="82" text-anchor="middle">b</text>
+  <line class="bb-hole" x1="150" y1="92" x2="150" y2="554"/>
+  <text class="bb-lbl" x="175" y="82" text-anchor="middle">c</text>
+  <line class="bb-hole" x1="175" y1="92" x2="175" y2="554"/>
+  <text class="bb-lbl" x="200" y="82" text-anchor="middle">d</text>
+  <line class="bb-hole" x1="200" y1="92" x2="200" y2="554"/>
+  <text class="bb-lbl" x="225" y="82" text-anchor="middle">e</text>
+  <line class="bb-hole" x1="225" y1="92" x2="225" y2="554"/>
+  <text class="bb-lbl" x="270" y="82" text-anchor="middle">f</text>
+  <line class="bb-hole" x1="270" y1="92" x2="270" y2="554"/>
+  <text class="bb-lbl" x="295" y="82" text-anchor="middle">g</text>
+  <line class="bb-hole" x1="295" y1="92" x2="295" y2="554"/>
+  <text class="bb-lbl" x="320" y="82" text-anchor="middle">h</text>
+  <line class="bb-hole" x1="320" y1="92" x2="320" y2="554"/>
+  <text class="bb-lbl" x="345" y="82" text-anchor="middle">i</text>
+  <line class="bb-hole" x1="345" y1="92" x2="345" y2="554"/>
+  <text class="bb-lbl" x="370" y="82" text-anchor="middle">j</text>
+  <line class="bb-hole" x1="370" y1="92" x2="370" y2="554"/>
+  <rect class="bb-chan" x="235" y="76" width="25" height="504" rx="4"/>
+  <text class="bb-plus" x="48" y="82" text-anchor="middle">+</text>
+  <line class="bb-hole" x1="48" y1="92" x2="48" y2="554"/>
+  <text class="bb-minus" x="76" y="82" text-anchor="middle">−</text>
+  <line class="bb-hole" x1="76" y1="92" x2="76" y2="554"/>
+  <text class="bb-num" x="108" y="96" text-anchor="end">1</text>
+  <text class="bb-num" x="108" y="159" text-anchor="end">4</text>
+  <text class="bb-num" x="108" y="285" text-anchor="end">10</text>
+  <text class="bb-num" x="108" y="390" text-anchor="end">15</text>
+  <text class="bb-num" x="108" y="495" text-anchor="end">20</text>
+  <line class="bb-lead" x1="125" y1="155" x2="125" y2="207"/><rect class="bb-body-r" x="117" y="207" width="16" height="22" rx="2"/><text class="bb-rtext" x="125" y="222" text-anchor="middle">RL</text><line class="bb-lead" x1="125" y1="229" x2="125" y2="281"/><circle class="bb-node" cx="125" cy="155" r="3.5"/><circle class="bb-node" cx="125" cy="281" r="3.5"/>
+  <line class="bb-wire" x1="225" y1="155" x2="440" y2="155"/><circle class="bb-node" cx="225" cy="155" r="4.5"/><text class="bb-tag" x="446" y="159">pin under test</text><text class="bb-tag" x="446" y="173" style="font-weight:400">J11-1, then -2, then -3</text>
+  <path class="bb-wire" d="M150 281 Q113 266 76 281"/><circle class="bb-node" cx="150" cy="281" r="4.5"/><circle class="bb-node" cx="76" cy="281" r="4.5"/>
+  <line class="bb-wire" x1="76" y1="218" x2="30" y2="218"/><circle class="bb-node" cx="76" cy="218" r="4.5"/><text class="bb-tag" x="30" y="209" text-anchor="middle">J4-5</text><text class="bb-tag" x="30" y="235" text-anchor="middle" style="font-weight:400">ground</text>
+  <circle cx="175" cy="155" r="5" fill="var(--wirered)"/>
+  <circle cx="76" cy="386" r="5" fill="var(--ink)"/>
+  <text class="bb-num" x="248" y="606" text-anchor="middle">columns f–j and the right-hand rails stay empty</text>
+</svg>
+<div class="legend">
+  <span><i class="dot" style="background:var(--wirered)"></i> red probe → row <code>4</code>, hole <code>c</code></span>
+  <span><i class="dot" style="background:var(--ink)"></i> black probe → <code>−</code> rail</span>
+  <span><i class="dot" style="background:var(--wire)"></i> jumper wire</span>
+  <span><i class="dot" style="background:var(--info)"></i> use the <strong>left</strong> rail pair throughout</span>
+  <span><i class="dot" style="background:var(--warn)"></i> RL = load, swap 10 kΩ / 1 kΩ / 330 Ω / 100 Ω</span>
+</div>
+<p class="note" style="margin-top:12px"><strong>Held this way — letters across the top, numbers down the side — a node runs sideways.</strong> The five holes <code>a</code> to <code>e</code> in <em>row 4</em> are all one connection, and <code>f</code> to <code>j</code> in row 4 are a separate one. That is how the incoming wire (hole <code>e</code>), the resistor (hole <code>a</code>) and the red probe (hole <code>c</code>) all join without touching each other.</p>
+<p class="note">The <code>−</code> rail is <strong>only</strong> ground because the J4-5 jumper makes it so — a breadboard has no inherent ground. Rows 4 and 10 are arbitrary; any two rows work as long as each component's legs land where the drawing says.</p>
+</div>
+
+<h3>Procedure</h3>
+<ol class="note">
+<li><strong>Ground first, always.</strong> Jumper the <code>−</code> rail to J4-5 before connecting anything to J11.</li>
+<li>Jumper <code>10e</code> to the pin under test.</li>
+<li><strong>Load out</strong> — record the unloaded voltage. No current flows, so contact quality cannot affect this number.</li>
+<li><strong>1 kΩ in</strong>, read within ~10 s. Then <strong>330 Ω</strong>. Then <strong>100 Ω</strong>.</li>
+<li>Re-seat your grip and repeat each reading 4–5 times. <strong>Keep the highest.</strong> Contact resistance can only pull a reading down, never up.</li>
+<li>Lift the J11 jumper first, then the ground jumper.</li>
+</ol>
+
+<div class="callout info">
+<strong>Why three load points instead of one.</strong> A genuine resistive source gives three readings that fall on a straight line. Leakage does not. One point can be faked by a bad contact — three cannot.
+</div>
+
+<div class="callout">
+<strong>Ground-path control — run once per session.</strong> <span class="badge b-bad">not yet done</span> With the 330 Ω load running on J11-1, move the meter's <strong>black probe from the <code>−</code> rail to the USB-C shell</strong> — dial stays on DC volts, red probe does not move. If the reading jumps toward 3.5 V, your J4-5 contact was the resistance and the run is invalid — redo with ground clipped to the USB shell. If it stays near the loaded value, the drop is real and on the keyboard side.
+</div>
+
+<div class="card scroll">
+<table id="t1">
+<thead><tr><th>Pin</th><th>Load</th><th>Predicted</th><th style="width:130px">Measured V</th><th>Current</th><th>Source R</th><th>Match</th><th style="width:180px">Notes</th></tr></thead>
+<tbody></tbody>
+</table>
+<div class="legend">
+  <span><span class="badge b-ok">on model</span> within 15% of predicted</span>
+  <span><span class="badge b-warn">weaker</span> below predicted — source sags when asleep</span>
+  <span><span class="badge b-info">stronger</span> above predicted — better than expected</span>
+</div>
+</div>
+
+<hr>
+
+<h2>What Phase 1 showed — read before continuing</h2>
+
+<div class="callout bad">
+<strong>The source is about 11.7 kΩ, not 231 Ω. That is roughly 50× weaker than predicted, and it very likely kills harvesting.</strong>
+<br><br>
+All twelve readings fit one simple resistive source of <strong>11,730 Ω</strong> to within 15%, across a 100× range of load. That consistency is itself the finding — it is not noise, it is a real impedance.
+<table style="font-size:12px;margin-top:10px">
+<tr><th>Load</th><th>Predicted if 231 Ω</th><th>You measured</th><th>Implied source</th></tr>
+<tr><td class="pin">10 kΩ</td><td>3.61 V</td><td class="pin">1.744 V</td><td>11,187 Ω</td></tr>
+<tr><td class="pin">1 kΩ</td><td>3.00 V</td><td class="pin">0.292 V</td><td>11,654 Ω</td></tr>
+<tr><td class="pin">330 Ω</td><td>2.17 V</td><td class="pin">0.093 V</td><td>12,781 Ω</td></tr>
+<tr><td class="pin">100 Ω</td><td>1.12 V</td><td class="pin">0.031 V</td><td>11,819 Ω</td></tr>
+</table>
+<strong>Available power: about 0.87 mW</strong> from all three pins at their best operating point, against a need of 5.5 mWh/day. That is 8 hours of harvesting a day just to break even at 1.27×. Not a design — a coin flip.
+<br><br>
+<strong>What it means physically:</strong> when the backlight sleeps the driver's high side switches <em>off</em>, and the 3.695 V you see is just a weak pull-up or leakage inside the driver — not a live rail.
+<br><br>
+<strong>But this was measured in WIRELESS mode</strong>, and that may be the whole story — see the matrix below before concluding anything.
+</div>
+
+<div class="callout">
+<strong>One thing could still overturn this, and it takes thirty seconds.</strong> The ground-path control test has never been run. If the J4-5 contact carries about 11.5 kΩ of resistance, it would produce <em>exactly</em> these numbers — the meter cannot tell a weak source from a bad ground.
+<br><br>
+<strong>Do this first tomorrow:</strong> rebuild Phase 1 on J11-1 with the 330 Ω, then move the <strong>black probe only</strong> to the USB-C shell. Dial stays on DC volts, red probe does not move.
+<ul style="margin:6px 0 0">
+<li>Reading stays near <strong>0.093 V</strong> → the source really is weak. Harvesting is dead, and tomorrow's priority changes.</li>
+<li>Reading jumps to around <strong>3.3 V</strong> → your ground contact was the resistance, Phase 1 is invalid, and you re-run it with the ground jumper <strong>clipped to the USB-C shell</strong> instead of J4-5.</li>
+</ul>
+<em>Honest read:</em> a hand-held contact drifts with pressure and would scatter the numbers. Yours held to 15% across a 100× load range, which argues the source is genuinely weak. But the test is free, so run it before believing anything.
+</div>
+
+<h2>Phase 1b — the four-cell matrix</h2>
+
+<div class="callout ok">
+<strong>You measured wireless + asleep. That is one of four cells, and it may be the worst one.</strong>
+<br><br>
+A wireless keyboard runs on its own battery and power-saves aggressively. With the backlight off <em>and</em> no cable attached, the most likely thing the firmware does is <strong>shut the LED driver down entirely</strong> — leaving only the leakage path you measured. Plugged in, with mains power available, it has no reason to bother.
+<br><br>
+Session 3's 231 Ω came from an <strong>awake</strong> measurement whose wired/wireless state was never recorded. So the two numbers that disagree by 50× differ in <em>two</em> variables at once, and nobody has separated them.
+</div>
+
+<div class="card scroll">
+<h3 style="margin-top:0">Fill in the other three cells</h3>
+<p class="note" style="margin:0 0 10px">Same setup as Phase 1 — J11-1, <strong>330 Ω</strong>, black probe on the <code>−</code> rail, red on row 4 hole <code>c</code>. Only the keyboard's state changes. Record the unloaded voltage for each state too, since the battery and USB rails sit at different voltages.</p>
+<table id="t5">
+<thead><tr><th>Keyboard state</th><th style="width:130px">Unloaded V</th><th style="width:130px">V at 330 Ω</th><th>Current</th><th>Source R</th><th>Verdict</th></tr></thead>
+<tbody>
+<tr data-state="wireless-asleep"><td class="pin">Wireless · asleep</td><td><input class="v" data-k="vo" type="number" step="0.001"></td><td><input class="v" data-k="v" type="number" step="0.001"></td><td class="calc" data-k="i">—</td><td class="calc" data-k="r">—</td><td data-k="badge"><span class="badge b-none">—</span></td></tr>
+<tr data-state="wireless-awake"><td class="pin">Wireless · backlight on</td><td><input class="v" data-k="vo" type="number" step="0.001"></td><td><input class="v" data-k="v" type="number" step="0.001"></td><td class="calc" data-k="i">—</td><td class="calc" data-k="r">—</td><td data-k="badge"><span class="badge b-none">—</span></td></tr>
+<tr data-state="wired-asleep"><td class="pin">Wired · asleep</td><td><input class="v" data-k="vo" type="number" step="0.001"></td><td><input class="v" data-k="v" type="number" step="0.001"></td><td class="calc" data-k="i">—</td><td class="calc" data-k="r">—</td><td data-k="badge"><span class="badge b-none">—</span></td></tr>
+<tr data-state="wired-awake"><td class="pin">Wired · backlight on</td><td><input class="v" data-k="vo" type="number" step="0.001"></td><td><input class="v" data-k="v" type="number" step="0.001"></td><td class="calc" data-k="i">—</td><td class="calc" data-k="r">—</td><td data-k="badge"><span class="badge b-none">—</span></td></tr>
+</tbody>
+</table>
+<div class="legend">
+  <span><span class="badge b-ok">strong</span> under 500 Ω — harvesting works in this state</span>
+  <span><span class="badge b-warn">usable</span> 500 Ω – 2 kΩ</span>
+  <span><span class="badge b-bad">dead</span> over 2 kΩ</span>
+</div>
+<p class="note" style="margin-top:12px"><strong>Watch the keyboard's own LEDs during the two backlight-on rows</strong> and write down whether anything dims. At 330 Ω you are drawing far less than the 10.7 mA that visibly dimmed them in session 3, so this doubles as the "is a gentle draw invisible?" test.</p>
+</div>
+
+<div class="callout info">
+<strong>What each outcome means</strong>
+<ul style="margin:6px 0 0">
+<li><strong>Wired · asleep comes back strong</strong> → the keyboard powers down its LED driver only on battery. Harvesting works whenever the cable is in. Not the self-contained module you wanted, but it would keep an on-board cell topped up for free with no keyboard modification.</li>
+<li><strong>Both awake rows strong, both asleep rows dead</strong> → harvest while you type, coast the rest of the time. The backlight is on exactly when you are at the keyboard, so this is a perfectly good fit — as long as no dimming is visible.</li>
+<li><strong>All four weak</strong> → harvesting is genuinely dead and the keyboard-battery tap is the answer. At that point the next test is tracing J4-2 and J4-6.</li>
+</ul>
+</div>
+
+<div class="callout info">
+<strong>Suggested order for tomorrow</strong>, given the above:
+<ol style="margin:6px 0 0">
+<li><strong>Ground control test</strong> — thirty seconds, could invalidate everything below it.</li>
+<li><strong>Phase 3, the J11-4 flag</strong> — still worth knowing whatever happens, and it is the cheapest phase to build.</li>
+<li><strong>Phase 2</strong> — expect about 0.29 V at 330 Ω if Phase 1 stands. Worth confirming, but it will not rescue the plan on its own.</li>
+<li><strong>Phase 1b, the four-cell matrix</strong> — this is now the most valuable fifteen minutes of the session. One resistor, four keyboard states, and it separates the two variables that are currently tangled together.</li>
+</ol>
+</div>
+
+<h2>Phase 2 — the combined harvest node</h2>
+<div class="meter"><div><span class="ml">Dial</span><span class="mv">DC volts <code>V⎓</code></span></div><div><span class="ml">Range</span><span class="mv">lowest above 3.5 V</span></div><div><span class="ml">Black probe</span><span class="mv"><code>−</code> rail, <strong>left</strong> side</span></div><div><span class="ml">Red probe</span><span class="mv">row <code>14</code>, hole <code>e</code></span></div></div><p class="note" style="margin:10px 0 0"><strong>First, switch to <code>Ω</code></strong> and check each resistor out of the board — then switch back to DC volts and leave it there for the whole phase.</p>
+
+<div class="callout ok"><strong>This is the phase that answers the question.</strong> Each pin gets its own 100 Ω isolation resistor; the three meet at a common node; one load resistor runs from that node to J4-5. Backlight <strong>off only</strong> — do not run this phase awake.</div>
+
+<h3>Breadboard setup 2 — combined node</h3>
+
+<div class="card">
+<svg viewBox="0 0 700 620" role="img" aria-label="Combined harvest node using the left-hand rails. J11-1 enters row 2 hole e, J11-2 row 6, J11-3 row 10, each wire running out to the right. Three 100 ohm isolation resistors run down columns a, b and c to row 14, the common node. The load resistor runs down column d from row 14 to row 20, and a short jumper takes row 20 to the minus rail and out to J4-5.">
+  <rect class="bb-body" x="100" y="68" width="295" height="520" rx="8"/>
+  <text class="bb-lbl" x="125" y="82" text-anchor="middle">a</text>
+  <line class="bb-hole" x1="125" y1="92" x2="125" y2="554"/>
+  <text class="bb-lbl" x="150" y="82" text-anchor="middle">b</text>
+  <line class="bb-hole" x1="150" y1="92" x2="150" y2="554"/>
+  <text class="bb-lbl" x="175" y="82" text-anchor="middle">c</text>
+  <line class="bb-hole" x1="175" y1="92" x2="175" y2="554"/>
+  <text class="bb-lbl" x="200" y="82" text-anchor="middle">d</text>
+  <line class="bb-hole" x1="200" y1="92" x2="200" y2="554"/>
+  <text class="bb-lbl" x="225" y="82" text-anchor="middle">e</text>
+  <line class="bb-hole" x1="225" y1="92" x2="225" y2="554"/>
+  <text class="bb-lbl" x="270" y="82" text-anchor="middle">f</text>
+  <line class="bb-hole" x1="270" y1="92" x2="270" y2="554"/>
+  <text class="bb-lbl" x="295" y="82" text-anchor="middle">g</text>
+  <line class="bb-hole" x1="295" y1="92" x2="295" y2="554"/>
+  <text class="bb-lbl" x="320" y="82" text-anchor="middle">h</text>
+  <line class="bb-hole" x1="320" y1="92" x2="320" y2="554"/>
+  <text class="bb-lbl" x="345" y="82" text-anchor="middle">i</text>
+  <line class="bb-hole" x1="345" y1="92" x2="345" y2="554"/>
+  <text class="bb-lbl" x="370" y="82" text-anchor="middle">j</text>
+  <line class="bb-hole" x1="370" y1="92" x2="370" y2="554"/>
+  <rect class="bb-chan" x="235" y="76" width="25" height="504" rx="4"/>
+  <text class="bb-plus" x="48" y="82" text-anchor="middle">+</text>
+  <line class="bb-hole" x1="48" y1="92" x2="48" y2="554"/>
+  <text class="bb-minus" x="76" y="82" text-anchor="middle">−</text>
+  <line class="bb-hole" x1="76" y1="92" x2="76" y2="554"/>
+  <text class="bb-num" x="108" y="96" text-anchor="end">1</text>
+  <text class="bb-num" x="108" y="117" text-anchor="end">2</text>
+  <text class="bb-num" x="108" y="201" text-anchor="end">6</text>
+  <text class="bb-num" x="108" y="285" text-anchor="end">10</text>
+  <text class="bb-num" x="108" y="369" text-anchor="end">14</text>
+  <text class="bb-num" x="108" y="495" text-anchor="end">20</text>
+  <line class="bb-lead" x1="125" y1="113" x2="125" y2="139"/><rect class="bb-body-r" x="117" y="139" width="16" height="22" rx="2"/><text class="bb-rtext" x="125" y="154" text-anchor="middle">R1</text><line class="bb-lead" x1="125" y1="161" x2="125" y2="365"/><circle class="bb-node" cx="125" cy="113" r="3.5"/><circle class="bb-node" cx="125" cy="365" r="3.5"/>
+  <line class="bb-lead" x1="150" y1="197" x2="150" y2="223"/><rect class="bb-body-r" x="142" y="223" width="16" height="22" rx="2"/><text class="bb-rtext" x="150" y="238" text-anchor="middle">R2</text><line class="bb-lead" x1="150" y1="245" x2="150" y2="365"/><circle class="bb-node" cx="150" cy="197" r="3.5"/><circle class="bb-node" cx="150" cy="365" r="3.5"/>
+  <line class="bb-lead" x1="175" y1="281" x2="175" y2="307"/><rect class="bb-body-r" x="167" y="307" width="16" height="22" rx="2"/><text class="bb-rtext" x="175" y="322" text-anchor="middle">R3</text><line class="bb-lead" x1="175" y1="329" x2="175" y2="365"/><circle class="bb-node" cx="175" cy="281" r="3.5"/><circle class="bb-node" cx="175" cy="365" r="3.5"/>
+  <line class="bb-lead" x1="200" y1="365" x2="200" y2="417"/><rect class="bb-body-r" x="192" y="417" width="16" height="22" rx="2"/><text class="bb-rtext" x="200" y="432" text-anchor="middle">RL</text><line class="bb-lead" x1="200" y1="439" x2="200" y2="491"/><circle class="bb-node" cx="200" cy="365" r="3.5"/><circle class="bb-node" cx="200" cy="491" r="3.5"/>
+  <line class="bb-wire" x1="225" y1="113" x2="440" y2="113"/><circle class="bb-node" cx="225" cy="113" r="4.5"/><text class="bb-tag" x="446" y="117">J11-1</text>
+  <line class="bb-wire" x1="225" y1="197" x2="440" y2="197"/><circle class="bb-node" cx="225" cy="197" r="4.5"/><text class="bb-tag" x="446" y="201">J11-2</text>
+  <line class="bb-wire" x1="225" y1="281" x2="440" y2="281"/><circle class="bb-node" cx="225" cy="281" r="4.5"/><text class="bb-tag" x="446" y="285">J11-3</text>
+  <path class="bb-wire" d="M125 491 Q100 476 76 491"/><circle class="bb-node" cx="125" cy="491" r="4.5"/><circle class="bb-node" cx="76" cy="491" r="4.5"/>
+  <line class="bb-wire" x1="76" y1="428" x2="30" y2="428"/><circle class="bb-node" cx="76" cy="428" r="4.5"/><text class="bb-tag" x="30" y="419" text-anchor="middle">J4-5</text><text class="bb-tag" x="30" y="445" text-anchor="middle" style="font-weight:400">ground</text>
+  <circle cx="225" cy="365" r="5" fill="var(--wirered)"/>
+  <circle cx="76" cy="155" r="5" fill="var(--ink)"/>
+  <text class="bb-num" x="248" y="606" text-anchor="middle">columns f–j and the right-hand rails stay empty</text>
+</svg>
+<div class="legend">
+  <span><i class="dot" style="background:var(--warn)"></i> R1 R2 R3 = 100 Ω isolation</span>
+  <span><i class="dot" style="background:var(--warn)"></i> RL = load, swap 10 kΩ / 1 kΩ / 330 Ω / 100 Ω</span>
+  <span><i class="dot" style="background:var(--wirered)"></i> red probe → row <code>14</code>, hole <code>e</code></span>
+  <span><i class="dot" style="background:var(--ink)"></i> black probe → <code>−</code> rail</span>
+</div>
+<p class="note" style="margin-top:12px"><strong>Reading the layout.</strong> Each pin arrives in hole <code>e</code> of its own row — J11-1 at row 2, J11-2 at row 6, J11-3 at row 10 — so its wire runs out to the right across empty board. Its isolation resistor runs <em>down</em> its own lettered column to <strong>row 14</strong>, which becomes the common harvest node because all five of its holes are one connection.</p>
+<p class="note">Row 14 uses all five: <code>a b c</code> for the three resistors, <code>d</code> for the load resistor down to row 20, <code>e</code> for the red probe. From row 20 a short jumper hops left onto the <code>−</code> rail, which runs out to J4-5.</p>
+<p class="note"><strong>The isolation resistors are the safety feature.</strong> Without them, a backlight wake mid-test would tie three separately driven outputs together.</p>
+</div>
+
+<h3>Procedure</h3>
+<ol class="note">
+<li>Build the node with <strong>no load resistor installed</strong>. Record the unloaded node voltage — should still be ~3.530 V.</li>
+<li><strong>1 kΩ</strong> from node to <code>−</code> rail. Record. Then <strong>330 Ω</strong>. Then <strong>100 Ω</strong>.</li>
+<li>Repeat the whole set in the other lights-off state (A vs B).</li>
+</ol>
+
+<div class="card scroll">
+<table id="t2">
+<thead><tr><th>Load</th><th>Predicted V</th><th>Predicted I</th><th style="width:130px">Measured V — A</th><th style="width:130px">Measured V — B</th><th>Current (A)</th><th>Effective source R</th><th>Power</th></tr></thead>
+<tbody></tbody>
+</table>
+</div>
+
+<div class="card" id="verdictCard">
+  <h3 style="margin-top:0">Verdict — from the combined 330 Ω reading</h3>
+  <div class="verdict" id="verdictText">Waiting for the 330 Ω measurement…</div>
+  <p class="note" id="verdictNote" style="margin:0">Enter the combined 330 Ω value above and this fills in.</p>
+  <table style="margin-top:14px;font-size:12px">
+    <tr><th>Node voltage</th><th>Current</th><th>Verdict</th></tr>
+    <tr><td class="pin">≥ 2.0 V</td><td>≥ 6 mA</td><td><strong>Confirmed.</strong> Harvesting is the plan. Self-contained module is achievable.</td></tr>
+    <tr><td class="pin">1.0 – 2.0 V</td><td>3–6 mA</td><td><strong>Workable but tight.</strong> Still 5–10× the daily budget; storage sizing needs care.</td></tr>
+    <tr><td class="pin">0.3 – 1.0 V</td><td>1–3 mA</td><td><strong>Marginal.</strong> Possible in principle, fragile in practice. Keyboard tap is safer.</td></tr>
+    <tr><td class="pin">&lt; 0.3 V</td><td>&lt; 1 mA</td><td><strong>Dead.</strong> The 3.530 V is leakage. Fall back to tapping the keyboard battery.</td></tr>
+  </table>
+  <p class="note" style="margin:12px 0 0">For scale: the module needs about <strong>5.5 mWh/day</strong>. At the predicted 17.7 mW, two hours of harvesting a day is already six times the budget, and one fingerprint scan is replaced in about ten seconds.</p>
+</div>
+
+<hr>
+
+<h2>Phase 3 — J11-4 as a free "backlight awake" flag</h2>
+<div class="meter"><div><span class="ml">Dial</span><span class="mv">DC volts <code>V⎓</code></span></div><div><span class="ml">Range</span><span class="mv">lowest above 3.5 V</span></div><div><span class="ml">Black probe</span><span class="mv">USB-C shell</span></div><div><span class="ml">Red probe</span><span class="mv">row <code>10</code>, hole <code>c</code></span></div></div><p class="note" style="margin:10px 0 0"><strong>No ground wire on the breadboard for this phase</strong> — the current returns to ground inside the keyboard. The black probe only needs a reference.</p>
+
+<p class="note">If J11-4 is a switched sink, it can tell the module when to stop harvesting using <strong>one pin and one resistor</strong> instead of sampling PWM on three ADC channels. On a module living off a supercap, that saving is not cosmetic.</p>
+
+<p class="note">No external supply needed — borrow the 3.53 V already sitting on J11-1. Put <strong>100 kΩ</strong> from <strong>J11-1</strong> to <strong>J11-4</strong>, then measure J11-4 against ground in both states.</p>
+
+<div class="callout bad">
+<strong>Yes, this deliberately bridges J11-1 to J11-4 — the thing I told you never to do.</strong> The difference is the resistor. That warning is about <em>low</em> resistance: a bare wire or a 100 Ω would dump current straight through the LED. <strong>100 kΩ limits it to about 35 µA</strong> — roughly a thousandth of what it takes to light an LED visibly, and nothing any driver pin will notice. Do this with 100 kΩ and nothing smaller. If you see any glow at all, that itself is data — write it down.
+</div>
+
+<div class="card">
+<h3 style="margin-top:0">Setting it up</h3>
+<svg viewBox="0 0 700 470" role="img" aria-label="Phase 3 wiring. J11-1 enters row 4 hole e and J11-4 enters row 10 hole e, each wire running out to the right. A single 100 kilohm resistor runs down column a between row 4 and row 10. The red probe sits in row 10 hole c on the J11-4 side. No ground wire is used on the board; the black probe clips to the USB-C shell.">
+  <rect class="bb-body" x="100" y="68" width="295" height="352" rx="8"/>
+  <text class="bb-lbl" x="125" y="82" text-anchor="middle">a</text>
+  <line class="bb-hole" x1="125" y1="92" x2="125" y2="386"/>
+  <text class="bb-lbl" x="150" y="82" text-anchor="middle">b</text>
+  <line class="bb-hole" x1="150" y1="92" x2="150" y2="386"/>
+  <text class="bb-lbl" x="175" y="82" text-anchor="middle">c</text>
+  <line class="bb-hole" x1="175" y1="92" x2="175" y2="386"/>
+  <text class="bb-lbl" x="200" y="82" text-anchor="middle">d</text>
+  <line class="bb-hole" x1="200" y1="92" x2="200" y2="386"/>
+  <text class="bb-lbl" x="225" y="82" text-anchor="middle">e</text>
+  <line class="bb-hole" x1="225" y1="92" x2="225" y2="386"/>
+  <text class="bb-lbl" x="270" y="82" text-anchor="middle">f</text>
+  <line class="bb-hole" x1="270" y1="92" x2="270" y2="386"/>
+  <text class="bb-lbl" x="295" y="82" text-anchor="middle">g</text>
+  <line class="bb-hole" x1="295" y1="92" x2="295" y2="386"/>
+  <text class="bb-lbl" x="320" y="82" text-anchor="middle">h</text>
+  <line class="bb-hole" x1="320" y1="92" x2="320" y2="386"/>
+  <text class="bb-lbl" x="345" y="82" text-anchor="middle">i</text>
+  <line class="bb-hole" x1="345" y1="92" x2="345" y2="386"/>
+  <text class="bb-lbl" x="370" y="82" text-anchor="middle">j</text>
+  <line class="bb-hole" x1="370" y1="92" x2="370" y2="386"/>
+  <rect class="bb-chan" x="235" y="76" width="25" height="336" rx="4"/>
+  <text class="bb-plus" x="48" y="82" text-anchor="middle">+</text>
+  <line class="bb-hole" x1="48" y1="92" x2="48" y2="386"/>
+  <text class="bb-minus" x="76" y="82" text-anchor="middle">−</text>
+  <line class="bb-hole" x1="76" y1="92" x2="76" y2="386"/>
+  <text class="bb-num" x="108" y="96" text-anchor="end">1</text>
+  <text class="bb-num" x="108" y="159" text-anchor="end">4</text>
+  <text class="bb-num" x="108" y="285" text-anchor="end">10</text>
+  <text class="bb-num" x="108" y="348" text-anchor="end">13</text>
+  <line class="bb-lead" x1="125" y1="155" x2="125" y2="207"/><rect class="bb-body-r" x="114" y="207" width="22" height="22" rx="2"/><text class="bb-rtext" x="125" y="222" text-anchor="middle">100k</text><line class="bb-lead" x1="125" y1="229" x2="125" y2="281"/><circle class="bb-node" cx="125" cy="155" r="3.5"/><circle class="bb-node" cx="125" cy="281" r="3.5"/>
+  <line class="bb-wire" x1="225" y1="155" x2="440" y2="155"/><circle class="bb-node" cx="225" cy="155" r="4.5"/><text class="bb-tag" x="446" y="159">J11-1</text>
+  <line class="bb-wire" x1="225" y1="281" x2="440" y2="281"/><circle class="bb-node" cx="225" cy="281" r="4.5"/><text class="bb-tag" x="446" y="285">J11-4</text>
+  <circle cx="175" cy="281" r="5" fill="var(--wirered)"/>
+  <text class="bb-num" x="248" y="438" text-anchor="middle">no ground wire on the board — black probe goes to the USB-C shell</text>
+</svg>
+<div class="legend">
+  <span><i class="dot" style="background:var(--warn)"></i> one 100 kΩ — brown black yellow gold</span>
+  <span><i class="dot" style="background:var(--wirered)"></i> red probe → row <code>10</code>, hole <code>c</code></span>
+  <span><i class="dot" style="background:var(--ink)"></i> black probe → USB-C shell</span>
+</div>
+<p class="note" style="margin-top:12px"><strong>Only two jumpers and one resistor</strong>, and no ground wire on the breadboard — the current returns to ground inside the keyboard, so the board only needs to hold the resistor between the two pins. The black probe just needs a ground reference, and the USB-C shell is the easiest place to clip it.</p>
+<p class="note"><strong>Do not take two separate readings — take one and watch it.</strong> Probes do not wake the keyboard, only keypresses do. So wire it up while the backlight is awake, note the number, then leave everything untouched and watch the display as the backlight goes to sleep. You will see the transition happen live, which is far more convincing than two numbers written down minutes apart.</p>
+</div>
+
+<div class="card scroll">
+<table id="t3">
+<thead><tr><th>State</th><th>Expected if the flag works</th><th style="width:150px">Measured V</th><th style="width:220px">Notes</th></tr></thead>
+<tbody>
+<tr data-state="asleep"><td class="pin">Backlight asleep</td><td class="pred">well above 0.3, toward 3.5</td><td><input class="v" data-k="v" type="number" step="0.001"></td><td><input data-k="n" type="text"></td></tr>
+<tr data-state="awake"><td class="pin">Backlight awake</td><td class="pred">stays ~0.3</td><td><input class="v" data-k="v" type="number" step="0.001"></td><td><input data-k="n" type="text"></td></tr>
+</tbody>
+</table>
+<div class="verdict" id="flagText" style="font-size:15px;margin-top:14px">Waiting for both readings…</div>
+</div>
+
+<hr>
+
+<h2>Phase 4 — endurance and interference</h2>
+<div class="meter"><div><span class="ml">Dial</span><span class="mv">DC volts <code>V⎓</code></span></div><div><span class="ml">Range</span><span class="mv">lowest above 3.5 V</span></div><div><span class="ml">Black probe</span><span class="mv"><code>−</code> rail, <strong>left</strong> side</span></div><div><span class="ml">Red probe</span><span class="mv">row <code>14</code>, hole <code>e</code></span></div></div><p class="note" style="margin:10px 0 0">Identical to Phase 2 — do not move anything. Just leave it connected and read the display at 0, 1, 5 and 10 minutes.</p>
+
+<p class="note">Short tests hide slow current limits and miss the keyboard noticing. Rebuild the Phase 2 node with the <strong>330 Ω</strong> load, backlight asleep, and leave it connected for ten minutes.</p>
+
+<div class="card scroll">
+<table id="t4">
+<thead><tr><th>Elapsed</th><th style="width:150px">Node voltage</th><th>Drift from t=0</th><th style="width:260px">What the keyboard did</th></tr></thead>
+<tbody>
+<tr data-t="0"><td class="pin">0 min</td><td><input class="v" data-k="v" type="number" step="0.001"></td><td class="calc" data-k="d">—</td><td><input data-k="n" type="text"></td></tr>
+<tr data-t="1"><td class="pin">1 min</td><td><input class="v" data-k="v" type="number" step="0.001"></td><td class="calc" data-k="d">—</td><td><input data-k="n" type="text"></td></tr>
+<tr data-t="5"><td class="pin">5 min</td><td><input class="v" data-k="v" type="number" step="0.001"></td><td class="calc" data-k="d">—</td><td><input data-k="n" type="text"></td></tr>
+<tr data-t="10"><td class="pin">10 min</td><td><input class="v" data-k="v" type="number" step="0.001"></td><td class="calc" data-k="d">—</td><td><input data-k="n" type="text"></td></tr>
+</tbody>
+</table>
+<p class="note" style="margin-top:12px">Steady → real supply. Slow decay → something is current-limiting, or a capacitor is draining. Note the shape either way.</p>
+</div>
+
+<div class="card">
+<h3 style="margin-top:0">The wake test</h3>
+<p class="note">With the 330 Ω load <strong>still connected</strong>, wake the backlight by tapping a key. Watch the keyboard's own LEDs closely and describe exactly what happens.</p>
+<textarea id="waketest" rows="3" placeholder="e.g. nearby keys dimmed noticeably for a second then recovered / no visible change at all / whole backlight flickered"></textarea>
+<p class="note" style="margin:10px 0 0">This sets how aggressively the harvest gate must back off. "Visible dimming" and "no visible change" lead to different components on the board.</p>
+</div>
+
+<div class="card">
+<h3 style="margin-top:0">Session notes</h3>
+<textarea id="sessionnotes" rows="4" placeholder="Which lights-off state, wired or wireless, anything that surprised you, anything you had to improvise."></textarea>
+</div>
+
+<hr>
+
+<div class="noprint">
+<button class="btn" onclick="exportCSV()">Export CSV</button>
+<button class="btn alt" onclick="copyAll()">Copy all</button>
+<button class="btn alt" onclick="window.print()">Print</button>
+<button class="btn alt" id="lockbtn" onclick="toggleLock()">Unlock recorded values</button>
+<span class="note" id="copystatus" style="margin-left:10px"></span>
+</div>
+
+</div>
+
+<script>
+document.getElementById('today').textContent = new Date().toISOString().slice(0,10);
+
+var PINS = [
+  {pin:'J11-1', rs:231},
+  {pin:'J11-2', rs:450},
+  {pin:'J11-3', rs:483}
+];
+var LOADS = [10000, 1000, 330, 100];
+var VREF_DEFAULT = 3.530;
+var ISO = 100;
+
+function loadLabel(r){ return r >= 1000 ? (r/1000) + ' kΩ' : r + ' Ω'; }
+
+function buildT1(){
+  var tb = document.querySelector('#t1 tbody');
+  var html = '';
+  PINS.forEach(function(p){
+    LOADS.forEach(function(rl){
+      var pred = VREF_DEFAULT * rl / (rl + p.rs);
+      html += '<tr data-pin="' + p.pin + '" data-rl="' + rl + '" data-rs="' + p.rs + '" data-pred="' + pred.toFixed(3) + '">' +
+        '<td class="pin">' + p.pin + '</td>' +
+        '<td class="pin" style="font-weight:400">' + loadLabel(rl) + '</td>' +
+        '<td class="pred" data-k="predv">' + pred.toFixed(3) + ' V</td>' +
+        '<td><input class="v" data-k="v" type="number" step="0.001"></td>' +
+        '<td class="calc" data-k="i">—</td>' +
+        '<td class="calc" data-k="r">—</td>' +
+        '<td data-k="badge"><span class="badge b-none">—</span></td>' +
+        '<td><input data-k="n" type="text"></td>' +
+        '</tr>';
+    });
+  });
+  tb.innerHTML = html;
+}
+
+function combinedRp(){
+  var s = 0;
+  PINS.forEach(function(p){ s += 1 / (p.rs + ISO); });
+  return 1 / s;
+}
+
+function buildT2(){
+  var tb = document.querySelector('#t2 tbody');
+  var rp = combinedRp();
+  var html = '';
+  LOADS.forEach(function(rl){
+    var pred = VREF_DEFAULT * rl / (rl + rp);
+    var predI = pred / rl * 1000;
+    var head = (rl === 330) ? ' style="background:color-mix(in srgb,var(--accent-bg) 60%,transparent)"' : '';
+    html += '<tr data-rl="' + rl + '" data-pred="' + pred.toFixed(3) + '"' + head + '>' +
+      '<td class="pin">' + loadLabel(rl) + (rl === 330 ? ' ★' : '') + '</td>' +
+      '<td class="pred" data-k="predv">' + pred.toFixed(3) + ' V</td>' +
+      '<td class="pred" data-k="predi">' + predI.toFixed(2) + ' mA</td>' +
+      '<td><input class="v" data-k="va" type="number" step="0.001"></td>' +
+      '<td><input class="v" data-k="vb" type="number" step="0.001"></td>' +
+      '<td class="calc" data-k="i">—</td>' +
+      '<td class="calc" data-k="r">—</td>' +
+      '<td class="calc" data-k="p">—</td>' +
+      '</tr>';
+  });
+  tb.innerHTML = html;
+}
+
+function vref(){
+  var v = parseFloat(document.getElementById('vref').value);
+  return isFinite(v) && v > 0 ? v : VREF_DEFAULT;
+}
+
+function num(el){
+  if(!el) return NaN;
+  var v = parseFloat(el.value);
+  return isFinite(v) ? v : NaN;
+}
+
+function refreshPredictions(vr){
+  document.querySelectorAll('#t1 tbody tr').forEach(function(tr){
+    var rl = parseFloat(tr.dataset.rl), rs = parseFloat(tr.dataset.rs);
+    var p = vr * rl / (rl + rs);
+    tr.dataset.pred = p.toFixed(3);
+    var c = tr.querySelector('[data-k="predv"]'); if(c) c.textContent = p.toFixed(3) + ' V';
+  });
+  var rp = combinedRp();
+  document.querySelectorAll('#t2 tbody tr').forEach(function(tr){
+    var rl = parseFloat(tr.dataset.rl);
+    var p = vr * rl / (rl + rp);
+    tr.dataset.pred = p.toFixed(3);
+    var cv = tr.querySelector('[data-k="predv"]'); if(cv) cv.textContent = p.toFixed(3) + ' V';
+    var ci = tr.querySelector('[data-k="predi"]'); if(ci) ci.textContent = (p / rl * 1000).toFixed(2) + ' mA';
+  });
+}
+
+function recalc(){
+  var vr = vref();
+  refreshPredictions(vr);
+
+  document.querySelectorAll('#t1 tbody tr').forEach(function(tr){
+    var rl = parseFloat(tr.dataset.rl);
+    var pred = parseFloat(tr.dataset.pred);
+    var v = num(tr.querySelector('[data-k="v"]'));
+    var iC = tr.querySelector('[data-k="i"]');
+    var rC = tr.querySelector('[data-k="r"]');
+    var bC = tr.querySelector('[data-k="badge"]');
+    if(!isFinite(v)){
+      iC.textContent = '—'; rC.textContent = '—';
+      bC.innerHTML = '<span class="badge b-none">—</span>';
+      return;
+    }
+    var i = v / rl;
+    iC.textContent = (i * 1000).toFixed(2) + ' mA';
+    if(i > 0 && vr > v){
+      rC.textContent = ((vr - v) / i).toFixed(0) + ' Ω';
+    } else {
+      rC.textContent = 'n/a';
+    }
+    var ratio = pred > 0 ? v / pred : 0;
+    if(ratio >= 0.85 && ratio <= 1.15){
+      bC.innerHTML = '<span class="badge b-ok">on model</span>';
+    } else if(ratio < 0.85){
+      bC.innerHTML = '<span class="badge b-warn">weaker ' + Math.round(ratio * 100) + '%</span>';
+    } else {
+      bC.innerHTML = '<span class="badge b-info">stronger ' + Math.round(ratio * 100) + '%</span>';
+    }
+  });
+
+  var v330 = NaN;
+  document.querySelectorAll('#t2 tbody tr').forEach(function(tr){
+    var rl = parseFloat(tr.dataset.rl);
+    var v = num(tr.querySelector('[data-k="va"]'));
+    var iC = tr.querySelector('[data-k="i"]');
+    var rC = tr.querySelector('[data-k="r"]');
+    var pC = tr.querySelector('[data-k="p"]');
+    if(rl === 330) v330 = v;
+    if(!isFinite(v)){
+      iC.textContent = '—'; rC.textContent = '—'; pC.textContent = '—';
+      return;
+    }
+    var i = v / rl;
+    iC.textContent = (i * 1000).toFixed(2) + ' mA';
+    rC.textContent = (i > 0 && vr > v) ? ((vr - v) / i).toFixed(0) + ' Ω' : 'n/a';
+    pC.textContent = (v * i * 1000).toFixed(1) + ' mW';
+  });
+
+  updateVerdict(v330);
+  updateFlag();
+
+  document.querySelectorAll('#t5 tbody tr').forEach(function(tr){
+    var vo = num(tr.querySelector('[data-k="vo"]'));
+    var v  = num(tr.querySelector('[data-k="v"]'));
+    var iC = tr.querySelector('[data-k="i"]'), rC = tr.querySelector('[data-k="r"]'),
+        bC = tr.querySelector('[data-k="badge"]');
+    if(!isFinite(v)){ iC.textContent='—'; rC.textContent='—';
+      bC.innerHTML='<span class="badge b-none">—</span>'; return; }
+    var open = isFinite(vo) ? vo : vr;
+    var i = v / 330;
+    iC.textContent = (i*1000).toFixed(2) + ' mA';
+    var rs = (i > 0 && open > v) ? (open - v) / i : NaN;
+    rC.textContent = isFinite(rs) ? rs.toFixed(0) + ' Ω' : 'n/a';
+    if(!isFinite(rs)) bC.innerHTML='<span class="badge b-none">—</span>';
+    else if(rs < 500)  bC.innerHTML='<span class="badge b-ok">strong</span>';
+    else if(rs < 2000) bC.innerHTML='<span class="badge b-warn">usable</span>';
+    else               bC.innerHTML='<span class="badge b-bad">dead</span>';
+  });
+
+  var t0 = num(document.querySelector('#t4 tr[data-t="0"] [data-k="v"]'));
+  document.querySelectorAll('#t4 tbody tr').forEach(function(tr){
+    var v = num(tr.querySelector('[data-k="v"]'));
+    var d = tr.querySelector('[data-k="d"]');
+    if(!isFinite(v) || !isFinite(t0)){ d.textContent = '—'; return; }
+    var diff = v - t0;
+    d.textContent = (diff >= 0 ? '+' : '') + diff.toFixed(3) + ' V';
+    d.style.color = Math.abs(diff) > 0.15 ? 'var(--bad)' : 'var(--ink2)';
+  });
+}
+
+function updateVerdict(v){
+  var t = document.getElementById('verdictText');
+  var n = document.getElementById('verdictNote');
+  if(!isFinite(v)){
+    t.textContent = 'Waiting for the 330 Ω measurement…';
+    t.style.color = 'var(--ink3)';
+    n.textContent = 'Enter the combined 330 Ω value above and this fills in.';
+    return;
+  }
+  var mA = (v / 330 * 1000);
+  var mW = v * (v / 330) * 1000;
+  var stat = ' — ' + v.toFixed(3) + ' V, ' + mA.toFixed(2) + ' mA, ' + mW.toFixed(1) + ' mW.';
+  if(v >= 2.0){
+    t.textContent = 'Confirmed — harvesting works';
+    t.style.color = 'var(--accent)';
+    n.textContent = 'The self-contained module is achievable' + stat + ' Next decision is storage: supercap alone, or supercap plus a small soldered-in cell.';
+  } else if(v >= 1.0){
+    t.textContent = 'Workable, but tighter than predicted';
+    t.style.color = 'var(--warn)';
+    n.textContent = 'Still well above the 5.5 mWh/day budget' + stat + ' Storage sizing needs care, and the harvest gate has less headroom.';
+  } else if(v >= 0.3){
+    t.textContent = 'Marginal — the tap is safer';
+    t.style.color = 'var(--warn)';
+    n.textContent = 'Possible in principle, fragile in practice' + stat + ' Next test: trace J4-2 and J4-6 on the keyboard PCB.';
+  } else {
+    t.textContent = 'Dead — the 3.530 V is leakage';
+    t.style.color = 'var(--bad)';
+    n.textContent = 'There is no usable current behind that voltage' + stat + ' Fall back to tapping the keyboard battery; next test is tracing J4-2 and J4-6.';
+  }
+}
+
+function updateFlag(){
+  var a = num(document.querySelector('#t3 tr[data-state="asleep"] [data-k="v"]'));
+  var w = num(document.querySelector('#t3 tr[data-state="awake"] [data-k="v"]'));
+  var el = document.getElementById('flagText');
+  if(!isFinite(a) || !isFinite(w)){
+    el.textContent = 'Waiting for both readings…';
+    el.style.color = 'var(--ink3)';
+    return;
+  }
+  if(a > 1.0 && w < 0.6){
+    el.textContent = 'Flag confirmed — one pin, one resistor, and the module knows when to stop harvesting.';
+    el.style.color = 'var(--accent)';
+  } else if(Math.abs(a - w) < 0.15 && w < 0.6){
+    el.textContent = 'Sink appears always on. J11-4 is not a usable flag — gate on J11-1/2/3 PWM instead.';
+    el.style.color = 'var(--warn)';
+  } else if(a < 0.2 && w < 0.2){
+    el.textContent = 'Both near zero — something else is holding this pin down. Re-examine the topology.';
+    el.style.color = 'var(--bad)';
+  } else {
+    el.textContent = 'Ambiguous: ' + a.toFixed(3) + ' V asleep vs ' + w.toFixed(3) + ' V awake. Repeat with a fresh ground contact.';
+    el.style.color = 'var(--warn)';
+  }
+}
+
+function csvEsc(s){
+  s = (s == null ? '' : String(s));
+  return /[",\n]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s;
+}
+
+function buildCSV(){
+  var rows = [['phase','item','state','r_load_ohm','predicted_v','measured_v','current_ma','source_r_ohm','notes']];
+  var vr = vref();
+
+  document.querySelectorAll('#t0 tbody tr').forEach(function(tr){
+    var pin = tr.dataset.pin;
+    var n = tr.querySelector('[data-k="n"]').value;
+    ['a','b'].forEach(function(k){
+      var v = tr.querySelector('[data-k="' + k + '"]').value;
+      if(v !== '') rows.push(['0', pin, k === 'a' ? 'sleep-timeout' : 'brightness-0', 'open', '3.530', v, '', '', n]);
+    });
+  });
+
+  document.querySelectorAll('#t1 tbody tr').forEach(function(tr){
+    var v = tr.querySelector('[data-k="v"]').value;
+    if(v === '') return;
+    var rl = parseFloat(tr.dataset.rl);
+    var i = parseFloat(v) / rl;
+    var rs = (vr > parseFloat(v)) ? ((vr - parseFloat(v)) / i).toFixed(0) : '';
+    rows.push(['1', tr.dataset.pin, 'lights-off', rl, tr.dataset.pred, v, (i * 1000).toFixed(2), rs,
+      tr.querySelector('[data-k="n"]').value]);
+  });
+
+  document.querySelectorAll('#t2 tbody tr').forEach(function(tr){
+    var rl = parseFloat(tr.dataset.rl);
+    [['va','sleep-timeout'],['vb','brightness-0']].forEach(function(pair){
+      var v = tr.querySelector('[data-k="' + pair[0] + '"]').value;
+      if(v === '') return;
+      var i = parseFloat(v) / rl;
+      var rs = (vr > parseFloat(v)) ? ((vr - parseFloat(v)) / i).toFixed(0) : '';
+      rows.push(['2', 'combined-node', pair[1], rl, tr.dataset.pred, v, (i * 1000).toFixed(2), rs, '']);
+    });
+  });
+
+  document.querySelectorAll('#t3 tbody tr').forEach(function(tr){
+    var v = tr.querySelector('[data-k="v"]').value;
+    if(v === '') return;
+    rows.push(['3', 'J11-4-flag', tr.dataset.state, '100k-to-J11-1', '', v, '', '',
+      tr.querySelector('[data-k="n"]').value]);
+  });
+
+  document.querySelectorAll('#t4 tbody tr').forEach(function(tr){
+    var v = tr.querySelector('[data-k="v"]').value;
+    if(v === '') return;
+    rows.push(['4', 'endurance', tr.dataset.t + 'min', '330', '', v, '', '',
+      tr.querySelector('[data-k="n"]').value]);
+  });
+
+  document.querySelectorAll('#t5 tbody tr').forEach(function(tr){
+    var vo = tr.querySelector('[data-k="vo"]').value, v = tr.querySelector('[data-k="v"]').value;
+    if(v === '' && vo === '') return;
+    var rs = '';
+    if(v !== '' && vo !== '') rs = ((parseFloat(vo) - parseFloat(v)) / (parseFloat(v)/330)).toFixed(0);
+    rows.push(['1b', 'J11-1', tr.dataset.state, '330', '', v, v !== '' ? (parseFloat(v)/330*1000).toFixed(2) : '', rs, 'unloaded ' + vo]);
+  });
+
+  var wake = document.getElementById('waketest').value;
+  if(wake) rows.push(['4', 'wake-test', 'load-connected', '330', '', '', '', '', wake]);
+  var sn = document.getElementById('sessionnotes').value;
+  if(sn) rows.push(['-', 'session-notes', '', '', '', '', '', '', sn]);
+
+  return rows.map(function(r){ return r.map(csvEsc).join(','); }).join('\n');
+}
+
+function exportCSV(){
+  var blob = new Blob([buildCSV()], {type:'text/csv'});
+  var a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'harvest-test-' + new Date().toISOString().slice(0,10) + '.csv';
+  a.click();
+  URL.revokeObjectURL(a.href);
+}
+
+function copyAll(){
+  var s = document.getElementById('copystatus');
+  navigator.clipboard.writeText(buildCSV()).then(function(){
+    s.textContent = 'Copied.';
+    setTimeout(function(){ s.textContent = ''; }, 2500);
+  }).catch(function(){
+    s.textContent = 'Copy blocked — use Export CSV.';
+  });
+}
+
+var RESISTORS=[
+  {v:'10 kΩ', qty:1, b:['brown','black','orange'], use:'quick screen — do this one first'},
+  {v:'100 Ω', qty:3, b:['brown','black','brown'],  use:'isolation in Phase 2, and series-chained to make 300 Ω'},
+  {v:'330 Ω', qty:1, b:['orange','orange','brown'],use:'primary load — or use three 100 Ω in series'},
+  {v:'1 kΩ',  qty:1, b:['brown','black','red'],    use:'light load'},
+  {v:'100 kΩ',qty:1, b:['brown','black','yellow'], use:'J11-4 flag test in Phase 3'}
+];
+var BANDCOL={black:'#1c1c1c',brown:'#6d4022',red:'#c62828',orange:'#e8730c',yellow:'#f2c200',gold:'#c9a227'};
+
+function resistorSVG(bands){
+  var x=[46,64,82], s='<svg viewBox="0 0 170 42" role="img" aria-label="'+bands.join(', ')+', gold">';
+  s+='<line x1="0" y1="21" x2="30" y2="21" stroke="#9a9a9a" stroke-width="2.5"/>';
+  s+='<line x1="140" y1="21" x2="170" y2="21" stroke="#9a9a9a" stroke-width="2.5"/>';
+  s+='<rect x="30" y="7" width="110" height="28" rx="6" fill="#d9c9a8" stroke="#b09d7c" stroke-width="1"/>';
+  bands.forEach(function(c,i){
+    s+='<rect x="'+x[i]+'" y="7" width="9" height="28" fill="'+BANDCOL[c]+'"/>';
+  });
+  s+='<rect x="120" y="7" width="9" height="28" fill="'+BANDCOL.gold+'"/>';
+  return s+'</svg>';
+}
+
+function buildResistors(){
+  var el=document.getElementById('rescodes');
+  if(!el) return;
+  el.innerHTML=RESISTORS.map(function(r){
+    return '<div class="rc">'+resistorSVG(r.b)+
+      '<div><div class="rc-v">'+r.qty+' × '+r.v+'</div>'+
+      '<div class="rc-u">'+r.b.join(' · ')+' · gold — '+r.use+'</div></div></div>';
+  }).join('');
+}
+
+var PREFILL = {
+  when: '2026-08-27',
+  vref: '3.695',
+  t0: {'J11-1':{a:'3.695',b:'3.695'}, 'J11-2':{a:'3.695',b:'3.695'},
+       'J11-3':{a:'3.695',b:'3.695'}, 'J11-4':{a:'0.000',b:'0.000'}},
+  t5: {'wireless-asleep':{vo:'3.695', v:'0.093'}},
+  t1: {'J11-1':{'10000':'1.744','1000':'0.292','330':'0.093','100':'0.031'},
+       'J11-2':{'10000':'1.766','1000':'0.295','330':'0.094','100':'0.032'},
+       'J11-3':{'10000':'1.761','1000':'0.294','330':'0.093','100':'0.032'}}
+};
+
+function lockEl(el){
+  if(!el) return;
+  el.readOnly = true;
+  el.classList.add('locked');
+  el.title = 'Recorded ' + PREFILL.when + ' — press Unlock to change';
+}
+
+function applyPrefill(){
+  var vr = document.getElementById('vref');
+  vr.value = PREFILL.vref; lockEl(vr);
+  document.querySelectorAll('#t0 tbody tr').forEach(function(tr){
+    var p = PREFILL.t0[tr.dataset.pin]; if(!p) return;
+    ['a','b'].forEach(function(k){
+      var el = tr.querySelector('[data-k="' + k + '"]');
+      if(el && p[k] !== undefined){ el.value = p[k]; lockEl(el); }
+    });
+  });
+  document.querySelectorAll('#t5 tbody tr').forEach(function(tr){
+    var p = PREFILL.t5[tr.dataset.state]; if(!p) return;
+    ['vo','v'].forEach(function(k){
+      var el = tr.querySelector('[data-k="' + k + '"]');
+      if(el && p[k] !== undefined){ el.value = p[k]; lockEl(el); }
+    });
+  });
+  document.querySelectorAll('#t1 tbody tr').forEach(function(tr){
+    var p = PREFILL.t1[tr.dataset.pin]; if(!p) return;
+    var v = p[tr.dataset.rl]; if(v === undefined) return;
+    var el = tr.querySelector('[data-k="v"]');
+    if(el){ el.value = v; lockEl(el); }
+  });
+}
+
+function toggleLock(){
+  var locked = document.querySelectorAll('.locked');
+  var btn = document.getElementById('lockbtn');
+  if(locked.length){
+    locked.forEach(function(el){ el.readOnly = false; el.classList.remove('locked'); el.title=''; });
+    btn.textContent = 'Re-lock recorded values';
+  } else {
+    applyPrefill();
+    btn.textContent = 'Unlock recorded values';
+  }
+  recalc();
+}
+
+buildResistors();
+buildT1();
+buildT2();
+document.addEventListener('input', recalc);
+applyPrefill();
+recalc();
+</script>
+</body>
+</html>

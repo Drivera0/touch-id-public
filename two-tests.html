@@ -1,0 +1,338 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>TouchID — the two tests that matter</title>
+<style>
+:root{--bg:#faf9f7;--card:#fff;--ink:#1f1e1c;--ink2:#5f5e5a;--ink3:#8a8880;--line:#e3e0d8;--line2:#c9c5ba;
+ --accent:#1d9e75;--accent-bg:#e1f5ee;--warn:#ba7517;--warn-bg:#faeeda;--bad:#a32d2d;--bad-bg:#fcebeb;
+ --info:#185fa5;--info-bg:#e6f1fb;--wire:#378add;--wirered:#e24b4a;
+ --mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
+@media (prefers-color-scheme:dark){:root{--bg:#1a1917;--card:#232220;--ink:#f0eee9;--ink2:#a8a49b;--ink3:#7d7a72;
+ --line:#34322e;--line2:#4a4741;--accent:#5dcaa5;--accent-bg:#0f3b30;--warn:#efb058;--warn-bg:#3d2a0d;
+ --bad:#f09595;--bad-bg:#3d1616;--info:#85b7eb;--info-bg:#0d2c47;--wire:#85b7eb;--wirered:#f09595}}
+*{box-sizing:border-box}
+body{margin:0;padding:32px 24px 80px;background:var(--bg);color:var(--ink);
+ font:16px/1.6 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif}
+.wrap{max-width:1000px;margin:0 auto}
+h1{font-size:26px;font-weight:600;margin:0 0 4px}
+h2{font-size:20px;font-weight:600;margin:42px 0 6px}
+h3{font-size:15px;font-weight:600;margin:22px 0 6px}
+.sub{color:var(--ink2);margin:0 0 26px;font-size:14px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:18px 20px;margin:14px 0}
+.scroll{overflow-x:auto}
+table{border-collapse:collapse;width:100%;font-size:13px}
+th,td{border-bottom:1px solid var(--line);padding:7px;text-align:left;vertical-align:middle}
+th{font-weight:600;color:var(--ink2);font-size:11px;text-transform:uppercase;letter-spacing:.04em;
+ white-space:nowrap;border-bottom:1px solid var(--line2)}
+td.pin{font-family:var(--mono);font-weight:600;white-space:nowrap}
+input{font:inherit;font-size:13px;color:var(--ink);background:var(--bg);border:1px solid var(--line2);
+ border-radius:6px;padding:5px 7px;width:100%;font-family:var(--mono);text-align:right}
+input:focus{outline:2px solid var(--info);outline-offset:-1px}
+input.locked{background:color-mix(in srgb,var(--line) 35%,transparent);color:var(--ink2);
+ border-style:dashed;cursor:not-allowed}
+td.calc{font-family:var(--mono);font-size:12px;color:var(--ink2);text-align:right;white-space:nowrap}
+.badge{display:inline-block;padding:2px 9px;border-radius:20px;font-size:11px;font-weight:600;white-space:nowrap}
+.b-ok{background:var(--accent-bg);color:var(--accent)}
+.b-warn{background:var(--warn-bg);color:var(--warn)}
+.b-bad{background:var(--bad-bg);color:var(--bad)}
+.b-none{color:var(--ink3)}
+.btn{background:var(--ink);color:var(--bg);border:none;border-radius:8px;padding:9px 16px;
+ font-size:14px;font-weight:500;cursor:pointer;margin:4px 6px 4px 0}
+.btn.alt{background:transparent;color:var(--ink);border:1px solid var(--line2)}
+.btn:hover{opacity:.85}
+.note{font-size:13px;color:var(--ink2)}
+.callout{border-left:3px solid var(--warn);background:var(--warn-bg);padding:12px 16px;
+ border-radius:0 8px 8px 0;margin:14px 0;font-size:14px}
+.callout.info{border-color:var(--info);background:var(--info-bg)}
+.callout.bad{border-color:var(--bad);background:var(--bad-bg)}
+.callout.ok{border-color:var(--accent);background:var(--accent-bg)}
+.meter{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px 18px;
+ background:var(--info-bg);border-left:3px solid var(--info);padding:12px 16px;
+ border-radius:0 8px 8px 0;margin:14px 0;font-size:13px}
+.meter .ml{display:block;font-size:10px;text-transform:uppercase;letter-spacing:.05em;
+ color:var(--ink2);font-weight:600;margin-bottom:2px}
+.meter .mv{font-weight:600}
+.verdict{font-size:19px;font-weight:600;margin:6px 0 4px}
+ol,ul{padding-left:22px;margin:8px 0}li{margin:6px 0}
+code{font-family:var(--mono);font-size:.9em;background:color-mix(in srgb,var(--line) 60%,transparent);
+ padding:1px 5px;border-radius:4px}
+svg{display:block;width:100%;height:auto;max-width:700px;margin:0 auto}
+.bb-body{fill:var(--card);stroke:var(--line2);stroke-width:1}
+.bb-hole{stroke:var(--line2);stroke-width:5;stroke-linecap:round;stroke-dasharray:1 20}
+.bb-chan{fill:color-mix(in srgb,var(--line) 45%,transparent)}
+.bb-lbl{font:600 10px var(--mono);fill:var(--ink3)}
+.bb-num{font:10px var(--mono);fill:var(--ink3)}
+.bb-wire{stroke:var(--wire);stroke-width:2.5;fill:none;stroke-linecap:round}
+.bb-lead{stroke:var(--ink2);stroke-width:1.6;fill:none}
+.bb-body-r{fill:var(--warn-bg);stroke:var(--warn);stroke-width:1.2}
+.bb-rtext{font:600 9px var(--mono);fill:var(--warn)}
+.bb-node{fill:var(--wire)}
+.bb-tag{font:600 11px var(--mono);fill:var(--ink2)}
+.bb-plus{font:600 11px var(--mono);fill:var(--bad)}
+.bb-minus{font:600 11px var(--mono);fill:var(--info)}
+@media print{body{padding:0;background:#fff}.btn,.noprint{display:none!important}.card{break-inside:avoid}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<h1>The two tests that matter</h1>
+<p class="sub">Everything else is parked · <span id="today"></span></p>
+
+<div class="callout bad noprint">
+<strong>Nothing here is saved.</strong> Press <em>Export CSV</em> before closing the tab.
+</div>
+
+<div class="callout info">
+<strong>What these decide.</strong> Yesterday's Phase 1 said the LED rail has a source resistance of about <strong>11.7 kΩ</strong> — 50× weaker than hoped, and only about 0.87 mW available. Two things could still change that answer, and nothing else on the bench will.
+<ol style="margin:8px 0 0">
+<li><strong>Was the ground contact lying to you?</strong> An 11.5 kΩ contact at J4-5 would fake that result perfectly. Thirty seconds to rule out.</li>
+<li><strong>Was that just the worst of four states?</strong> You measured wireless with the backlight asleep. There are three more, and they could differ by 30×.</li>
+</ol>
+</div>
+
+<h2>One rig, both tests</h2>
+
+<div class="meter">
+<div><span class="ml">Dial</span><span class="mv">DC volts <code>V⎓</code></span></div>
+<div><span class="ml">Range</span><span class="mv">lowest above 3.5 V</span></div>
+<div><span class="ml">Black probe</span><span class="mv"><code>−</code> rail, <strong>left</strong> side</span></div>
+<div><span class="ml">Red probe</span><span class="mv">row <code>4</code>, hole <code>c</code></span></div>
+</div>
+
+<div class="card">
+<svg viewBox="0 0 700 620" role="img" aria-label="One breadboard rig for both tests, board upright with letters across the top and numbers down the side, using the left-hand rails. J11-1 enters row 4 hole e with its wire running out to the right. The load resistor runs down column a from row 4 to row 10. A short jumper takes row 10 across to the minus rail, which runs out to J4-5. Red probe in row 4 hole c, black probe on the minus rail.">
+  <rect class="bb-body" x="100" y="68" width="295" height="520" rx="8"/>
+  <text class="bb-lbl" x="125" y="82" text-anchor="middle">a</text>
+  <line class="bb-hole" x1="125" y1="92" x2="125" y2="554"/>
+  <text class="bb-lbl" x="150" y="82" text-anchor="middle">b</text>
+  <line class="bb-hole" x1="150" y1="92" x2="150" y2="554"/>
+  <text class="bb-lbl" x="175" y="82" text-anchor="middle">c</text>
+  <line class="bb-hole" x1="175" y1="92" x2="175" y2="554"/>
+  <text class="bb-lbl" x="200" y="82" text-anchor="middle">d</text>
+  <line class="bb-hole" x1="200" y1="92" x2="200" y2="554"/>
+  <text class="bb-lbl" x="225" y="82" text-anchor="middle">e</text>
+  <line class="bb-hole" x1="225" y1="92" x2="225" y2="554"/>
+  <text class="bb-lbl" x="270" y="82" text-anchor="middle">f</text>
+  <line class="bb-hole" x1="270" y1="92" x2="270" y2="554"/>
+  <text class="bb-lbl" x="295" y="82" text-anchor="middle">g</text>
+  <line class="bb-hole" x1="295" y1="92" x2="295" y2="554"/>
+  <text class="bb-lbl" x="320" y="82" text-anchor="middle">h</text>
+  <line class="bb-hole" x1="320" y1="92" x2="320" y2="554"/>
+  <text class="bb-lbl" x="345" y="82" text-anchor="middle">i</text>
+  <line class="bb-hole" x1="345" y1="92" x2="345" y2="554"/>
+  <text class="bb-lbl" x="370" y="82" text-anchor="middle">j</text>
+  <line class="bb-hole" x1="370" y1="92" x2="370" y2="554"/>
+  <rect class="bb-chan" x="235" y="76" width="25" height="504" rx="4"/>
+  <text class="bb-plus" x="48" y="82" text-anchor="middle">+</text>
+  <line class="bb-hole" x1="48" y1="92" x2="48" y2="554"/>
+  <text class="bb-minus" x="76" y="82" text-anchor="middle">−</text>
+  <line class="bb-hole" x1="76" y1="92" x2="76" y2="554"/>
+  <text class="bb-num" x="108" y="96" text-anchor="end">1</text>
+  <text class="bb-num" x="108" y="159" text-anchor="end">4</text>
+  <text class="bb-num" x="108" y="285" text-anchor="end">10</text>
+  <text class="bb-num" x="108" y="390" text-anchor="end">15</text>
+  <text class="bb-num" x="108" y="495" text-anchor="end">20</text>
+  <line class="bb-lead" x1="125" y1="155" x2="125" y2="207"/><rect class="bb-body-r" x="116" y="207" width="18" height="22" rx="2"/><text class="bb-rtext" x="125" y="222" text-anchor="middle">RL</text><line class="bb-lead" x1="125" y1="229" x2="125" y2="281"/><circle class="bb-node" cx="125" cy="155" r="3.5"/><circle class="bb-node" cx="125" cy="281" r="3.5"/>
+  <line class="bb-wire" x1="225" y1="155" x2="440" y2="155"/><circle class="bb-node" cx="225" cy="155" r="4.5"/><text class="bb-tag" x="446" y="159">J11-1</text>
+  <path class="bb-wire" d="M150 281 Q113 266 76 281"/><circle class="bb-node" cx="150" cy="281" r="4.5"/><circle class="bb-node" cx="76" cy="281" r="4.5"/>
+  <line class="bb-wire" x1="76" y1="218" x2="30" y2="218"/><circle class="bb-node" cx="76" cy="218" r="4.5"/><text class="bb-tag" x="30" y="209" text-anchor="middle">J4-5</text><text class="bb-tag" x="30" y="235" text-anchor="middle" style="font-weight:400">ground</text>
+  <circle cx="175" cy="155" r="5" fill="var(--wirered)"/>
+  <circle cx="76" cy="386" r="5" fill="var(--ink)"/>
+  <text class="bb-num" x="248" y="606" text-anchor="middle">columns f–j and the right-hand rails stay empty</text>
+</svg>
+<p class="note" style="margin-top:12px"><strong>Held upright — letters across the top, numbers down the side — a node runs sideways.</strong> The five holes <code>a</code>–<code>e</code> of row 4 are all one connection. J11-1's wire goes in at hole <code>e</code> so it runs out to the right across empty board; the resistor takes hole <code>a</code>; the red probe sits in hole <code>c</code>.</p>
+<p class="note">Use the <strong>left</strong> rail pair throughout. The left and right rails are separate — mixing them leaves the circuit open and every reading meaningless.</p>
+<p class="note"><strong>Ground first, always.</strong> Jumper row 10 to the <code>−</code> rail and the <code>−</code> rail to J4-5 before you connect anything to J11.</p>
+</div>
+
+<div class="card" style="max-width:280px">
+<h3 style="margin-top:0">Load resistor used</h3>
+<input id="rload" type="number" step="1" value="330">
+<p class="note" style="margin:8px 0 0">Enter <code>300</code> if you chained three 100 Ω in series.</p>
+</div>
+
+<h2>Test 1 — is your ground contact honest?</h2>
+
+<div class="callout">
+<strong>Thirty seconds, and it could invalidate everything from yesterday.</strong> Your meter cannot tell a weak source from a bad ground — both look identical. This separates them.
+</div>
+
+<div class="card">
+<h3 style="margin-top:0">Steps</h3>
+<ol class="note" style="margin:0">
+<li>Build the rig above on <strong>J11-1</strong>, backlight <strong>asleep</strong>, load resistor in.</li>
+<li>Read the voltage with the black probe on the <code>−</code> rail. Record it as <strong>A</strong>.</li>
+<li><strong>Move the black probe only</strong> to the USB-C shell. Dial does not change. Red probe does not move.</li>
+<li>Read again. Record as <strong>B</strong>.</li>
+</ol>
+</div>
+
+<div class="card scroll">
+<table>
+<thead><tr><th>Reading</th><th>Black probe on</th><th style="width:150px">Volts</th></tr></thead>
+<tbody>
+<tr><td class="pin">A</td><td><code>−</code> rail (via J4-5)</td><td><input id="gA" type="number" step="0.001"></td></tr>
+<tr><td class="pin">B</td><td>USB-C shell</td><td><input id="gB" type="number" step="0.001"></td></tr>
+</tbody>
+</table>
+<div class="verdict" id="gVerdict" style="color:var(--ink3)">Waiting for both readings…</div>
+<p class="note" id="gNote" style="margin:0">If B is much higher than A, the current was struggling through a bad J4-5 contact and the drop you measured was in your own wiring, not the keyboard.</p>
+</div>
+
+<h2>Test 2 — the four-cell matrix</h2>
+
+<div class="callout ok">
+<strong>Fifteen minutes, mostly waiting for the backlight to sleep twice.</strong> Same rig, same resistor — only the keyboard's state changes. Record the unloaded voltage for each state too, because the battery and the USB rail sit at different voltages and using the wrong one throws off the maths.
+</div>
+
+<div class="card scroll">
+<table id="mx">
+<thead><tr><th>Keyboard state</th><th style="width:120px">Unloaded V</th><th style="width:120px">Loaded V</th><th>Current</th><th>Source R</th><th>Verdict</th></tr></thead>
+<tbody>
+<tr data-s="wireless-asleep"><td class="pin">Wireless · asleep</td><td><input data-k="vo" type="number" step="0.001"></td><td><input data-k="v" type="number" step="0.001"></td><td class="calc" data-k="i">—</td><td class="calc" data-k="r">—</td><td data-k="b"><span class="badge b-none">—</span></td></tr>
+<tr data-s="wireless-awake"><td class="pin">Wireless · backlight on</td><td><input data-k="vo" type="number" step="0.001"></td><td><input data-k="v" type="number" step="0.001"></td><td class="calc" data-k="i">—</td><td class="calc" data-k="r">—</td><td data-k="b"><span class="badge b-none">—</span></td></tr>
+<tr data-s="wired-asleep"><td class="pin">Wired · asleep</td><td><input data-k="vo" type="number" step="0.001"></td><td><input data-k="v" type="number" step="0.001"></td><td class="calc" data-k="i">—</td><td class="calc" data-k="r">—</td><td data-k="b"><span class="badge b-none">—</span></td></tr>
+<tr data-s="wired-awake"><td class="pin">Wired · backlight on</td><td><input data-k="vo" type="number" step="0.001"></td><td><input data-k="v" type="number" step="0.001"></td><td class="calc" data-k="i">—</td><td class="calc" data-k="r">—</td><td data-k="b"><span class="badge b-none">—</span></td></tr>
+</tbody>
+</table>
+<div style="display:flex;flex-wrap:wrap;gap:8px 20px;font-size:12px;color:var(--ink2);margin-top:12px">
+<span><span class="badge b-ok">strong</span> under 500 Ω — harvesting works in this state</span>
+<span><span class="badge b-warn">usable</span> 500 Ω – 2 kΩ</span>
+<span><span class="badge b-bad">dead</span> over 2 kΩ</span>
+</div>
+<p class="note" style="margin-top:12px"><strong>Watch the keyboard's own LEDs during the two backlight-on rows.</strong> At 330 Ω you are drawing far less than the 10.7 mA that visibly dimmed them before, so these rows double as the "is a gentle draw invisible?" test. Write down anything you see.</p>
+</div>
+
+<div class="card">
+<h3 style="margin-top:0">What the matrix says</h3>
+<div class="verdict" id="mVerdict" style="color:var(--ink3)">Fill in at least one row…</div>
+<p class="note" id="mNote" style="margin:0">Each state is judged on its own — you only need <em>one</em> good cell for harvesting to be worth building.</p>
+</div>
+
+<div class="callout info">
+<strong>How to read the outcome</strong>
+<ul style="margin:6px 0 0">
+<li><strong>Wired · asleep is strong</strong> → the keyboard only powers down its LED driver on battery. Harvesting works whenever the cable is in — enough to keep the cell topped up for free, with no keyboard modification.</li>
+<li><strong>Both backlight-on rows strong</strong> → harvest while you type, coast the rest of the time. The backlight is on exactly when you are at the keyboard, so this fits well — provided no dimming is visible.</li>
+<li><strong>All four weak</strong> → harvesting gives a trickle, not a supply. The 77 mAh cell still carries the module about 66 days on its own; you would just remove it occasionally to charge, or reconsider the internal battery tap.</li>
+</ul>
+</div>
+
+<div class="card">
+<h3 style="margin-top:0">Notes</h3>
+<textarea id="notes" rows="4" style="width:100%;font:inherit;font-size:13px;color:var(--ink);background:var(--bg);border:1px solid var(--line2);border-radius:6px;padding:6px 8px" placeholder="Anything the keyboard did, anything you had to improvise, which lights-off method you used."></textarea>
+</div>
+
+<div class="noprint" style="margin-top:24px">
+<button class="btn" onclick="exportCSV()">Export CSV</button>
+<button class="btn alt" onclick="copyAll()">Copy all</button>
+<button class="btn alt" onclick="window.print()">Print</button>
+<button class="btn alt" id="lockbtn" onclick="toggleLock()">Unlock recorded values</button>
+<span class="note" id="stat" style="margin-left:10px"></span>
+</div>
+
+</div>
+<script>
+document.getElementById('today').textContent=new Date().toISOString().slice(0,10);
+var PRE={when:'2026-08-27','wireless-asleep':{vo:'3.695',v:'0.093'}};
+function lockEl(e){if(!e)return;e.readOnly=true;e.classList.add('locked');e.title='Recorded '+PRE.when;}
+function applyPrefill(){
+  document.querySelectorAll('#mx tbody tr').forEach(function(tr){
+    var p=PRE[tr.dataset.s];if(!p)return;
+    ['vo','v'].forEach(function(k){var e=tr.querySelector('[data-k="'+k+'"]');
+      if(e&&p[k]!==undefined){e.value=p[k];lockEl(e);}});
+  });
+}
+function toggleLock(){
+  var L=document.querySelectorAll('.locked'),b=document.getElementById('lockbtn');
+  if(L.length){L.forEach(function(e){e.readOnly=false;e.classList.remove('locked');e.title='';});
+    b.textContent='Re-lock recorded values';}
+  else{applyPrefill();b.textContent='Unlock recorded values';}
+  recalc();
+}
+function num(e){if(!e)return NaN;var v=parseFloat(e.value);return isFinite(v)?v:NaN;}
+function rload(){var v=parseFloat(document.getElementById('rload').value);return isFinite(v)&&v>0?v:330;}
+
+function recalc(){
+  var RL=rload();
+  var a=num(document.getElementById('gA')),b=num(document.getElementById('gB'));
+  var gv=document.getElementById('gVerdict'),gn=document.getElementById('gNote');
+  if(!isFinite(a)||!isFinite(b)){
+    gv.textContent='Waiting for both readings…';gv.style.color='var(--ink3)';
+  }else{
+    var d=b-a;
+    if(d>0.5){gv.textContent='Your ground contact was the problem';gv.style.color='var(--accent)';
+      gn.textContent='B is '+d.toFixed(3)+' V above A, so '+d.toFixed(3)+' V was being lost in the J4-5 contact, not in the keyboard. Yesterday\'s Phase 1 is invalid. Re-run it with the ground jumper CLIPPED to the USB-C shell instead of J4-5 — the source may be far stronger than it looked.';}
+    else if(Math.abs(d)<0.15){gv.textContent='Ground is honest — the source really is weak';gv.style.color='var(--bad)';
+      gn.textContent='Only '+d.toFixed(3)+' V difference, so the drop is real and on the keyboard side. Yesterday\'s 11.7 kΩ stands. Move on to the matrix — it is now the only thing that can change the answer.';}
+    else{gv.textContent='Ambiguous — '+d.toFixed(3)+' V difference';gv.style.color='var(--warn)';
+      gn.textContent='Too big to ignore, too small to be conclusive. Re-seat both connections and repeat before trusting either number.';}
+  }
+
+  var strong=[],usable=[],dead=[];
+  document.querySelectorAll('#mx tbody tr').forEach(function(tr){
+    var vo=num(tr.querySelector('[data-k="vo"]')),v=num(tr.querySelector('[data-k="v"]'));
+    var iC=tr.querySelector('[data-k="i"]'),rC=tr.querySelector('[data-k="r"]'),bC=tr.querySelector('[data-k="b"]');
+    if(!isFinite(v)||!isFinite(vo)){iC.textContent='—';rC.textContent='—';
+      bC.innerHTML='<span class="badge b-none">—</span>';return;}
+    var i=v/RL;iC.textContent=(i*1000).toFixed(2)+' mA';
+    var rs=(i>0&&vo>v)?(vo-v)/i:NaN;
+    rC.textContent=isFinite(rs)?rs.toFixed(0)+' Ω':'n/a';
+    var nm=tr.querySelector('.pin').textContent;
+    if(!isFinite(rs)){bC.innerHTML='<span class="badge b-none">—</span>';}
+    else if(rs<500){bC.innerHTML='<span class="badge b-ok">strong</span>';strong.push(nm);}
+    else if(rs<2000){bC.innerHTML='<span class="badge b-warn">usable</span>';usable.push(nm);}
+    else{bC.innerHTML='<span class="badge b-bad">dead</span>';dead.push(nm);}
+  });
+
+  var mv=document.getElementById('mVerdict'),mn=document.getElementById('mNote');
+  var done=strong.length+usable.length+dead.length;
+  if(!done){mv.textContent='Fill in at least one row…';mv.style.color='var(--ink3)';
+    mn.textContent='Each state is judged on its own — you only need one good cell for harvesting to be worth building.';}
+  else if(strong.length){mv.textContent='Harvesting works — in '+strong.length+' of '+done+' states';
+    mv.style.color='var(--accent)';
+    mn.textContent='Strong in: '+strong.join(', ')+'. Design the harvester to run in that state and idle in the others. This is the good outcome.';}
+  else if(usable.length){mv.textContent='Marginal — usable in '+usable.length+' of '+done+' states';
+    mv.style.color='var(--warn)';
+    mn.textContent='Usable in: '+usable.join(', ')+'. Worth building, but the cell is doing most of the work and the harvest just extends it.';}
+  else if(done===4){mv.textContent='Harvesting is dead in all four states';mv.style.color='var(--bad)';
+    mn.textContent='The LED pins cannot power this module in any keyboard state. The 77 mAh cell still carries it about 66 days alone — so the module works, you just charge it occasionally. Populate the harvester anyway if the parts are cheap; it will still stretch the interval.';}
+  else{mv.textContent='Weak so far — '+done+' of 4 states measured';mv.style.color='var(--warn)';
+    mn.textContent='Nothing usable yet. Finish the remaining rows before concluding.';}
+}
+
+function esc(s){s=(s==null?'':String(s));return /[",\n]/.test(s)?'"'+s.replace(/"/g,'""')+'"':s;}
+function buildCSV(){
+  var RL=rload(),rows=[['test','item','state','r_load','unloaded_v','measured_v','current_ma','source_r','notes']];
+  var a=document.getElementById('gA').value,b=document.getElementById('gB').value;
+  if(a!=='')rows.push(['1','ground-control','black-on-rail',RL,'',a,'','','']);
+  if(b!=='')rows.push(['1','ground-control','black-on-usb-shell',RL,'',b,'','','']);
+  document.querySelectorAll('#mx tbody tr').forEach(function(tr){
+    var vo=tr.querySelector('[data-k="vo"]').value,v=tr.querySelector('[data-k="v"]').value;
+    if(vo===''&&v==='')return;
+    var rs='';
+    if(vo!==''&&v!==''&&parseFloat(v)>0)rs=((parseFloat(vo)-parseFloat(v))/(parseFloat(v)/RL)).toFixed(0);
+    rows.push(['2','J11-1',tr.dataset.s,RL,vo,v,v!==''?(parseFloat(v)/RL*1000).toFixed(2):'',rs,'']);
+  });
+  var n=document.getElementById('notes').value;
+  if(n)rows.push(['-','session-notes','','','','','','',n]);
+  return rows.map(function(r){return r.map(esc).join(',');}).join('\n');
+}
+function exportCSV(){
+  var bl=new Blob([buildCSV()],{type:'text/csv'}),a=document.createElement('a');
+  a.href=URL.createObjectURL(bl);a.download='two-tests-'+new Date().toISOString().slice(0,10)+'.csv';
+  a.click();URL.revokeObjectURL(a.href);
+}
+function copyAll(){
+  var s=document.getElementById('stat');
+  navigator.clipboard.writeText(buildCSV()).then(function(){s.textContent='Copied.';
+    setTimeout(function(){s.textContent='';},2500);}).catch(function(){s.textContent='Copy blocked — use Export CSV.';});
+}
+document.addEventListener('input',recalc);
+applyPrefill();recalc();
+</script>
+</body>
+</html>

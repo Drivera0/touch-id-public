@@ -1,0 +1,167 @@
+*************************************************************
+FileName = touchid_module.GBR
+AutoAperture = True
+*************************************************************
+Generating : Edge.Cuts
+      File : touchid_module.GKO
+
+    Adding Layer      : Edge.Cuts
+
+
+Used DCodes :
+    D10
+    D24
+*************************************************************
+
+*************************************************************
+Generating : B.Paste
+      File : touchid_module.GBP
+
+    Adding Layer      : B.Paste
+
+    Adding Layer      : B.Cu
+
+    Adding Layer      : Multi-Layer
+
+
+Used DCodes :
+*************************************************************
+
+*************************************************************
+Generating : F.Paste
+      File : touchid_module.GTP
+
+    Adding Layer      : F.Paste
+
+    Adding Layer      : F.Cu
+
+    Adding Layer      : Multi-Layer
+
+
+Used DCodes :
+    D11
+    D12
+    D13
+    D14
+    D15
+    D16
+    D17
+    D18
+    D19
+    D20
+*************************************************************
+
+*************************************************************
+Generating : B.Mask
+      File : touchid_module.GBS
+
+    Adding Layer      : B.Mask
+
+    Adding Layer      : B.Cu
+
+    Adding Layer      : Multi-Layer
+
+
+Used DCodes :
+    D21
+    D22
+    D23
+*************************************************************
+
+*************************************************************
+Generating : F.Mask
+      File : touchid_module.GTS
+
+    Adding Layer      : F.Mask
+
+    Adding Layer      : F.Cu
+
+    Adding Layer      : Multi-Layer
+
+
+Used DCodes :
+    D11
+    D12
+    D13
+    D14
+    D15
+    D16
+    D17
+    D18
+    D19
+    D20
+    D21
+    D22
+*************************************************************
+
+*************************************************************
+Generating : B.SilkS
+      File : touchid_module.GBO
+
+    Adding Layer      : B.SilkS
+
+
+Used DCodes :
+*************************************************************
+
+*************************************************************
+Generating : F.SilkS
+      File : touchid_module.GTO
+
+    Adding Layer      : F.SilkS
+
+
+Used DCodes :
+    D10
+*************************************************************
+
+*************************************************************
+Generating : B.Cu
+      File : touchid_module.GBL
+
+    Adding Layer      : B.Cu
+
+    Adding Layer      : Multi-Layer
+
+
+Used DCodes :
+    D10
+    D21
+    D22
+    D23
+*************************************************************
+
+*************************************************************
+Generating : F.Cu
+      File : touchid_module.GTL
+
+    Adding Layer      : F.Cu
+
+    Adding Layer      : Multi-Layer
+
+
+Used DCodes :
+    D10
+    D11
+    D12
+    D13
+    D14
+    D15
+    D16
+    D17
+    D18
+    D19
+    D20
+    D21
+    D22
+*************************************************************
+
+*************************************************************
+Generating : Profile
+      File : touchid_module.GM
+
+
+Used DCodes :
+    D25
+*************************************************************
+

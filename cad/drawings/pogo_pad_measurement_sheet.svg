@@ -1,0 +1,156 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 820 1150" font-family="Segoe UI, Arial, sans-serif">
+  <defs>
+    <marker id="ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#c40000"/>
+    </marker>
+  </defs>
+  <rect width="820" height="1150" fill="white"/>
+
+  <!-- Title -->
+  <text x="20" y="30" font-size="19" font-weight="bold" fill="#111">Pogo-pad measurement sheet — TouchID module / NuPhy knob PCB</text>
+  <text x="20" y="50" font-size="12" fill="#333">PAD-SIDE VIEW — as seen looking at the gold pads of the knob module PCB. All values in mm.</text>
+  <text x="20" y="66" font-size="12" fill="#b00">Measure the KNOB MODULE's PCB (its gold pads mate with the same spring pins). Calipers on pad edges are easiest.</text>
+
+  <!-- ================= BOARD ================= -->
+  <!-- board outline 19.5 sq, R2 corners: px = 140 + (mm+9.75)*22 -->
+  <rect x="140" y="140" width="429" height="429" rx="44" fill="#f0f4f0" stroke="#222" stroke-width="2"/>
+
+  <!-- J11 group (2x2) upper-left -->
+  <circle cx="207.8" cy="177.0" r="24.2" fill="#e8c34a" stroke="#8a6d1d" stroke-width="1.5"/>
+  <circle cx="263.6" cy="177.0" r="24.2" fill="#e8c34a" stroke="#8a6d1d" stroke-width="1.5"/>
+  <circle cx="207.8" cy="232.8" r="24.2" fill="#e8c34a" stroke="#8a6d1d" stroke-width="1.5"/>
+  <circle cx="263.6" cy="232.8" r="24.2" fill="#e8c34a" stroke="#8a6d1d" stroke-width="1.5"/>
+  <text x="205" y="285" font-size="13" font-weight="bold" fill="#555">J11 group (4)</text>
+
+  <!-- J4 group (2x3) upper-right -->
+  <circle cx="505.6" cy="182.0" r="24.2" fill="#e8c34a" stroke="#8a6d1d" stroke-width="1.5"/>
+  <circle cx="449.8" cy="182.0" r="24.2" fill="#e8c34a" stroke="#8a6d1d" stroke-width="1.5"/>
+  <circle cx="505.6" cy="237.9" r="24.2" fill="#e8c34a" stroke="#8a6d1d" stroke-width="1.5"/>
+  <circle cx="449.8" cy="237.9" r="24.2" fill="#e8c34a" stroke="#8a6d1d" stroke-width="1.5"/>
+  <circle cx="505.6" cy="293.8" r="24.2" fill="#e8c34a" stroke="#8a6d1d" stroke-width="1.5"/>
+  <circle cx="449.8" cy="293.8" r="24.2" fill="#e8c34a" stroke="#8a6d1d" stroke-width="1.5"/>
+  <text x="437" y="345" font-size="13" font-weight="bold" fill="#555">J4 group (6)</text>
+
+  <!-- context: screw holes + TP pads + programming pads (no measurement needed) -->
+  <circle cx="171.9" cy="354.5" r="24.2" fill="white" stroke="#999" stroke-width="1.5" stroke-dasharray="4 3"/>
+  <circle cx="537.1" cy="354.5" r="24.2" fill="white" stroke="#999" stroke-width="1.5" stroke-dasharray="4 3"/>
+  <circle cx="310.5" cy="383.1" r="19.8" fill="#ddd" stroke="#aaa"/>
+  <circle cx="354.5" cy="383.1" r="19.8" fill="#ddd" stroke="#aaa"/>
+  <circle cx="398.5" cy="383.1" r="19.8" fill="#ddd" stroke="#aaa"/>
+  <rect x="205" y="430" width="300" height="105" fill="none" stroke="#bbb" stroke-dasharray="5 4"/>
+  <text x="240" y="490" font-size="11" fill="#999">programming pads — ignore</text>
+  <text x="150" y="395" font-size="10" fill="#999">screw</text>
+  <text x="516" y="395" font-size="10" fill="#999">screw</text>
+
+  <!-- ================= DIMENSIONS ================= -->
+  <g stroke="#c40000" stroke-width="1.4" fill="none">
+    <!-- D: J4 column pitch (center-center) -->
+    <line x1="449.8" y1="182" x2="449.8" y2="108"/>
+    <line x1="505.6" y1="182" x2="505.6" y2="108"/>
+    <line x1="449.8" y1="115" x2="505.6" y2="115" marker-start="url(#ar)" marker-end="url(#ar)"/>
+    <!-- F: J4 outer span (outside-to-outside, 2 columns) -->
+    <line x1="425.6" y1="182" x2="425.6" y2="80"/>
+    <line x1="529.8" y1="182" x2="529.8" y2="80"/>
+    <line x1="425.6" y1="87" x2="529.8" y2="87" marker-start="url(#ar)" marker-end="url(#ar)"/>
+    <!-- E: J4 row pitch, right side -->
+    <line x1="505.6" y1="182" x2="600" y2="182"/>
+    <line x1="505.6" y1="237.9" x2="600" y2="237.9"/>
+    <line x1="593" y1="182" x2="593" y2="237.9" marker-start="url(#ar)" marker-end="url(#ar)"/>
+    <!-- G: J4 outer vertical span (3 rows outside-to-outside) -->
+    <line x1="505.6" y1="157.8" x2="640" y2="157.8"/>
+    <line x1="505.6" y1="318" x2="640" y2="318"/>
+    <line x1="633" y1="157.8" x2="633" y2="318" marker-start="url(#ar)" marker-end="url(#ar)"/>
+    <!-- H: J4 pad edge to right board edge -->
+    <line x1="529.8" y1="270" x2="569" y2="270" marker-start="url(#ar)" marker-end="url(#ar)"/>
+    <line x1="549" y1="270" x2="675" y2="420"/>
+    <!-- I: J4 top pad edge to top board edge -->
+    <line x1="481" y1="157.8" x2="481" y2="140" marker-start="url(#ar)" marker-end="url(#ar)"/>
+    <line x1="481" y1="149" x2="700" y2="60"/>
+    <!-- J: J11 pitch -->
+    <line x1="207.8" y1="177" x2="207.8" y2="108"/>
+    <line x1="263.6" y1="177" x2="263.6" y2="108"/>
+    <line x1="207.8" y1="115" x2="263.6" y2="115" marker-start="url(#ar)" marker-end="url(#ar)"/>
+    <!-- K: J11 outer span -->
+    <line x1="183.6" y1="177" x2="183.6" y2="80"/>
+    <line x1="287.8" y1="177" x2="287.8" y2="80"/>
+    <line x1="183.6" y1="87" x2="287.8" y2="87" marker-start="url(#ar)" marker-end="url(#ar)"/>
+    <!-- L: J11 pad edge to left board edge -->
+    <line x1="140" y1="260" x2="183.6" y2="260" marker-start="url(#ar)" marker-end="url(#ar)"/>
+    <line x1="161" y1="260" x2="80" y2="330"/>
+    <!-- M: J11 top pad edge to top board edge -->
+    <line x1="230" y1="152.8" x2="230" y2="140" marker-start="url(#ar)" marker-end="url(#ar)"/>
+    <line x1="230" y1="146" x2="90" y2="60"/>
+    <!-- N: nearest edge-to-edge gap between the two groups -->
+    <line x1="287.8" y1="232.8" x2="287.8" y2="375"/>
+    <line x1="425.6" y1="237.9" x2="425.6" y2="375"/>
+    <line x1="287.8" y1="368" x2="425.6" y2="368" marker-start="url(#ar)" marker-end="url(#ar)"/>
+    <!-- C: pad diameter leader -->
+    <line x1="449.8" y1="262.1" x2="380" y2="310"/>
+    <!-- A: board width -->
+    <line x1="140" y1="569" x2="140" y2="612"/>
+    <line x1="569" y1="569" x2="569" y2="612"/>
+    <line x1="140" y1="605" x2="569" y2="605" marker-start="url(#ar)" marker-end="url(#ar)"/>
+    <!-- B: board height -->
+    <line x1="140" y1="140" x2="70" y2="140"/>
+    <line x1="140" y1="569" x2="70" y2="569"/>
+    <line x1="77" y1="140" x2="77" y2="569" marker-start="url(#ar)" marker-end="url(#ar)"/>
+  </g>
+
+  <!-- letter bubbles -->
+  <g font-size="13" font-weight="bold" text-anchor="middle">
+    <circle cx="477.7" cy="115" r="11" fill="white" stroke="#c40000"/><text x="477.7" y="119.5" fill="#c40000">D</text>
+    <circle cx="477.7" cy="66" r="11" fill="white" stroke="#c40000"/><text x="477.7" y="70.5" fill="#c40000">F</text>
+    <circle cx="612" cy="210" r="11" fill="white" stroke="#c40000"/><text x="612" y="214.5" fill="#c40000">E</text>
+    <circle cx="655" cy="238" r="11" fill="white" stroke="#c40000"/><text x="655" y="242.5" fill="#c40000">G</text>
+    <circle cx="688" cy="435" r="11" fill="white" stroke="#c40000"/><text x="688" y="439.5" fill="#c40000">H</text>
+    <circle cx="712" cy="55" r="11" fill="white" stroke="#c40000"/><text x="712" y="59.5" fill="#c40000">I</text>
+    <circle cx="235.7" cy="115" r="11" fill="white" stroke="#c40000"/><text x="235.7" y="119.5" fill="#c40000">J</text>
+    <circle cx="235.7" cy="66" r="11" fill="white" stroke="#c40000"/><text x="235.7" y="70.5" fill="#c40000">K</text>
+    <circle cx="70" cy="342" r="11" fill="white" stroke="#c40000"/><text x="70" y="346.5" fill="#c40000">L</text>
+    <circle cx="80" cy="55" r="11" fill="white" stroke="#c40000"/><text x="80" y="59.5" fill="#c40000">M</text>
+    <circle cx="356.7" cy="368" r="11" fill="white" stroke="#c40000"/><text x="356.7" y="372.5" fill="#c40000">N</text>
+    <circle cx="368" cy="320" r="11" fill="white" stroke="#c40000"/><text x="368" y="324.5" fill="#c40000">C</text>
+    <circle cx="354.5" cy="605" r="11" fill="white" stroke="#c40000"/><text x="354.5" y="609.5" fill="#c40000">A</text>
+    <circle cx="77" cy="354" r="11" fill="white" stroke="#c40000"/><text x="77" y="358.5" fill="#c40000">B</text>
+  </g>
+
+  <!-- ================= TABLE ================= -->
+  <text x="20" y="655" font-size="15" font-weight="bold" fill="#111">Write your caliper readings in the last column</text>
+  <g font-size="12.5" fill="#111">
+    <!-- header -->
+    <rect x="20" y="668" width="780" height="26" fill="#e8e8e8" stroke="#888"/>
+    <text x="30" y="686" font-weight="bold">Ref</text>
+    <text x="70" y="686" font-weight="bold">What to measure</text>
+    <text x="560" y="686" font-weight="bold">Assumed</text>
+    <text x="660" y="686" font-weight="bold">Measured</text>
+    <!-- rows -->
+    <g>
+      <rect x="20" y="694"  width="780" height="28" fill="white"   stroke="#bbb"/><text x="30" y="713">A</text><text x="70" y="713">PCB outline width</text><text x="560" y="713">19.50 (lip meas. 19.72)</text>
+      <rect x="20" y="722"  width="780" height="28" fill="#f7f7f7" stroke="#bbb"/><text x="30" y="741">B</text><text x="70" y="741">PCB outline height</text><text x="560" y="741">19.50</text>
+      <rect x="20" y="750"  width="780" height="28" fill="white"   stroke="#bbb"/><text x="30" y="769">C</text><text x="70" y="769">Gold pad diameter (any pad)</text><text x="560" y="769">2.20</text>
+      <rect x="20" y="778"  width="780" height="28" fill="#fdeaea" stroke="#bbb"/><text x="30" y="797">D</text><text x="70" y="797">J4 column pitch, center-to-center  ★ CRITICAL (2.54 vs 2.0?)</text><text x="560" y="797">2.54</text>
+      <rect x="20" y="806"  width="780" height="28" fill="#fdeaea" stroke="#bbb"/><text x="30" y="825">E</text><text x="70" y="825">J4 row pitch, center-to-center  ★ CRITICAL</text><text x="560" y="825">2.54</text>
+      <rect x="20" y="834"  width="780" height="28" fill="white"   stroke="#bbb"/><text x="30" y="853">F</text><text x="70" y="853">J4 outer span across 2 columns, outside-to-outside (= D + C)</text><text x="560" y="853">4.74</text>
+      <rect x="20" y="862"  width="780" height="28" fill="#f7f7f7" stroke="#bbb"/><text x="30" y="881">G</text><text x="70" y="881">J4 outer span across 3 rows, outside-to-outside (= 2·E + C)</text><text x="560" y="881">7.28</text>
+      <rect x="20" y="890"  width="780" height="28" fill="white"   stroke="#bbb"/><text x="30" y="909">H</text><text x="70" y="909">J4 nearest pad edge → nearest board edge</text><text x="560" y="909">1.78</text>
+      <rect x="20" y="918"  width="780" height="28" fill="#f7f7f7" stroke="#bbb"/><text x="30" y="937">I</text><text x="70" y="937">J4 top pad edge → top board edge</text><text x="560" y="937">0.81</text>
+      <rect x="20" y="946"  width="780" height="28" fill="white"   stroke="#bbb"/><text x="30" y="965">J</text><text x="70" y="965">J11 pitch, center-to-center (check both directions)</text><text x="560" y="965">2.54</text>
+      <rect x="20" y="974"  width="780" height="28" fill="#f7f7f7" stroke="#bbb"/><text x="30" y="993">K</text><text x="70" y="993">J11 outer span, outside-to-outside (= J + C)</text><text x="560" y="993">4.74</text>
+      <rect x="20" y="1002" width="780" height="28" fill="white"   stroke="#bbb"/><text x="30" y="1021">L</text><text x="70" y="1021">J11 nearest pad edge → nearest board edge</text><text x="560" y="1021">1.98</text>
+      <rect x="20" y="1030" width="780" height="28" fill="#f7f7f7" stroke="#bbb"/><text x="30" y="1049">M</text><text x="70" y="1049">J11 top pad edge → top board edge</text><text x="560" y="1049">0.58</text>
+      <rect x="20" y="1058" width="780" height="28" fill="white"   stroke="#bbb"/><text x="30" y="1077">N</text><text x="70" y="1077">Gap between the two groups, nearest pad edge → nearest pad edge</text><text x="560" y="1077">6.26</text>
+    </g>
+    <!-- measured blanks -->
+    <g stroke="#888">
+      <line x1="660" y1="716" x2="780" y2="716"/><line x1="660" y1="744" x2="780" y2="744"/>
+      <line x1="660" y1="772" x2="780" y2="772"/><line x1="660" y1="800" x2="780" y2="800"/>
+      <line x1="660" y1="828" x2="780" y2="828"/><line x1="660" y1="856" x2="780" y2="856"/>
+      <line x1="660" y1="884" x2="780" y2="884"/><line x1="660" y1="912" x2="780" y2="912"/>
+      <line x1="660" y1="940" x2="780" y2="940"/><line x1="660" y1="968" x2="780" y2="968"/>
+      <line x1="660" y1="996" x2="780" y2="996"/><line x1="660" y1="1024" x2="780" y2="1024"/>
+      <line x1="660" y1="1052" x2="780" y2="1052"/><line x1="660" y1="1080" x2="780" y2="1080"/>
+    </g>
+  </g>
+  <text x="20" y="1112" font-size="12" fill="#333">Tips: D ≈ F − C and E ≈ (G − C) / 2 — the outer spans (F, G, K) are the easiest to caliper accurately.</text>
+  <text x="20" y="1130" font-size="12" fill="#333">★ If D/E read ~2.0 instead of ~2.54, stop — the pad array needs respacing before ordering. Anything within ±0.2 mm of assumed is fine.</text>
+</svg>

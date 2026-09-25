@@ -1,0 +1,49 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 980 560" width="100%">
+<style>text{font-family:Archivo,Helvetica,Arial,sans-serif;fill:#1a1f27}.m{font-family:"IBM Plex Mono",ui-monospace,monospace}.h{font-size:15px;font-weight:700}.l{font-size:11.5px;fill:#3b4553}.n{font-size:11px;fill:#68727f}</style>
+<rect width="980" height="560" fill="#f7f9fb"/>
+<text class="h" x="40" y="42" fill="#1a1f27">1 - approach</text>
+<rect x="70" y="330" width="200" height="26" fill="#c7d2de" stroke="#6b7c8f"/>
+<text class="n" x="172" y="347">back rim</text>
+<rect x="70" y="180" width="18" height="150" fill="#c7d2de" stroke="#6b7c8f"/>
+<path d="M 70 180 L 88 180 L 88 90 L 70 90 Z" fill="#9fb0c2" stroke="#6b7c8f"/>
+<path d="M 88 90 L 110 102 L 110 114 L 88 114 Z" fill="#9fb0c2" stroke="#6b7c8f"/>
+<line x1="88" y1="90" x2="110" y2="102" stroke="#8a5a08" stroke-width="2.5"/>
+<rect x="96" y="30" width="150" height="18" fill="#1a6b52" opacity="0.9"/>
+<text class="n" x="138" y="43" fill="#ffffff">PCB 1.2</text>
+<path d="M 230 56 l 0 34 m -6 -10 l 6 10 l 6 -10" stroke="#97332f" stroke-width="2.4" fill="none"/>
+<text class="l" x="40" y="452">Tab is relaxed. Its tip has a sloped</text>
+<text class="l" x="40" y="468">lead-in ramp facing the incoming board.</text>
+<text class="h" x="360" y="42" fill="#1a1f27">2 - deflect</text>
+<rect x="390" y="330" width="200" height="26" fill="#c7d2de" stroke="#6b7c8f"/>
+<text class="n" x="492" y="347">back rim</text>
+<rect x="390" y="180" width="18" height="150" fill="#c7d2de" stroke="#6b7c8f"/>
+<path d="M 390 180 L 408 180 L 386 90 L 368 90 Z" fill="#9fb0c2" stroke="#6b7c8f"/>
+<path d="M 386 90 L 408 102 L 408 114 L 386 114 Z" fill="#9fb0c2" stroke="#6b7c8f"/>
+<line x1="386" y1="90" x2="408" y2="102" stroke="#8a5a08" stroke-width="2.5"/>
+<rect x="416" y="30" width="150" height="18" fill="#1a6b52" opacity="0.9"/>
+<text class="n" x="458" y="43" fill="#ffffff">PCB 1.2</text>
+<path d="M 550 56 l 0 34 m -6 -10 l 6 10 l 6 -10" stroke="#97332f" stroke-width="2.4" fill="none"/>
+<path d="M 380 96 l -26 0 m 8 -6 l -8 6 l 8 6" stroke="#97332f" stroke-width="2.4" fill="none"/>
+<text class="l" x="346" y="100" fill="#97332f">y</text>
+<text class="l" x="360" y="452">The board edge rides the ramp and</text>
+<text class="l" x="360" y="468">springs the tab outward by y. This is</text>
+<text class="l" x="360" y="484">the only moment it is stressed.</text>
+<text class="h" x="680" y="42" fill="#1a1f27">3 - latched</text>
+<rect x="710" y="330" width="200" height="26" fill="#c7d2de" stroke="#6b7c8f"/>
+<text class="n" x="812" y="347">back rim</text>
+<rect x="710" y="180" width="18" height="150" fill="#c7d2de" stroke="#6b7c8f"/>
+<path d="M 710 180 L 728 180 L 728 90 L 710 90 Z" fill="#9fb0c2" stroke="#6b7c8f"/>
+<path d="M 728 90 L 750 102 L 750 114 L 728 114 Z" fill="#9fb0c2" stroke="#6b7c8f"/>
+<line x1="728" y1="90" x2="750" y2="102" stroke="#8a5a08" stroke-width="2.5"/>
+<rect x="736" y="312" width="150" height="18" fill="#1a6b52" opacity="0.9"/>
+<text class="n" x="778" y="325" fill="#ffffff">PCB 1.2</text>
+<path d="M 760 308 l 0 -22 m -6 8 l 6 -8 l 6 8" stroke="#97332f" stroke-width="2.4" fill="none"/>
+<text class="l" x="768" y="300" fill="#97332f">held</text>
+<text class="l" x="680" y="452">Past the catch, the tab snaps back.</text>
+<text class="l" x="680" y="468">Its flat underside now traps the board</text>
+<text class="l" x="680" y="484">against the rim. Zero standing stress.</text>
+<text class="n" x="60" y="120">cantilever beam</text>
+<line x1="86" y1="126" x2="70" y2="150" stroke="#68727f"/>
+<text class="n" x="150" y="96">catch (flat, holds)</text>
+<line x1="150" y1="102" x2="106" y2="118" stroke="#68727f"/>
+</svg>

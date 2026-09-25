@@ -1,0 +1,379 @@
+"""
+make_bom_cpl.py — generate the JLCPCB assembly files from the routed board.
+
+JLCPCB places parts from TWO 2D files. It never sees a 3D model:
+
+    BOM  designator -> LCSC part number  (it knows the real part from ITS OWN
+                                          library, keyed by that number)
+    CPL  designator, X, Y, rotation, layer
+
+WHAT THIS SCRIPT WILL AND WILL NOT DO
+-------------------------------------
+The CPL is pure geometry and is generated in full, correctly transformed.
+
+The BOM is generated as a SKELETON with the LCSC column blank wherever we do
+not genuinely know the number. **It does not invent part numbers.** The few
+that are filled in are traced in PART-LIBRARY.md; everything else is yours to
+source, and the file says so per line.
+
+TWO TRAPS, BOTH OF WHICH HAVE RUINED REAL BOARDS
+------------------------------------------------
+1. ORIGIN. **The CPL must live in the SAME coordinate space as the gerbers**,
+   because that is the only thing the fab can align it against. Getting this
+   wrong does not corrupt one part, it moves EVERY part by the same offset.
+
+   This emits "lower-left corner" coordinates:
+       X = x + 9.65        Y = 9.65 - y
+   giving 0..19.30, which is the convention JLCPCB's own documentation
+   describes -- **and it is only correct because the gerbers are now plotted
+   from that same origin.** The board carries `(aux_axis_origin -9.65 9.65)`
+   (KiCad is Y-DOWN, so +9.65 is the bottom edge) and is plotted with
+   "use drill/place file origin" ON, so Edge_Cuts.gbr also runs 0..19.30.
+   The Excellon drill files follow the same origin.
+
+   It was briefly the other way round and JLCPCB's viewer caught it: gerbers
+   centred on (0,0) against a corner-based CPL drew every component floating
+   beside the board, offset by exactly the 9.65 mm half-width in both axes.
+   Either convention works; only agreement matters.
+
+   verify_handoff.py does not settle this by re-deriving a formula -- two
+   derivations of the same wrong ASSUMPTION still agree. It reads the outline
+   out of Edge_Cuts.gbr and requires every placement to fall inside it.
+
+2. ROTATION. The number written here is KiCad's footprint angle. **JLC's
+   expected orientation for a given package frequently differs**, which is the
+   classic way to get a whole reel placed 90 or 180 degrees out. This script
+   CANNOT verify that -- only JLC's own part preview can, per part. Every
+   rotation below must be eyeballed against that preview before you order.
+
+Excluded from the CPL, deliberately: TP* (bare probe pads), J2/J3/J4/J11 (pads,
+not parts -- pogo contacts and hand-wired pads), BT1 (cell wired from above),
+and the unreferenced NPTH mounting holes. Nothing there is machine-placed.
+"""
+import collections, csv, os, re, sys
+import sexp
+
+HERE = os.path.dirname(os.path.abspath(__file__))
+# The board used to be hard-coded here, and on 2026-08-31 that silently built
+# a BOM containing four parts (U5/R8/R9/C14) that had been DELETED from the
+# real board -- the same constant-shadows-the-input defect as handroute's old
+# track rules. Argument first, $BOARD second, old default last.
+import sys as _sys
+BOARD = (_sys.argv[1] if len(_sys.argv) > 1 else None) \
+        or os.environ.get("BOARD") \
+        or os.path.join(HERE, "pcb-v7-zero-opens.kicad_pcb")
+OUT = os.path.join(HERE, "..", "v6-handoff", "assembly")
+os.makedirs(OUT, exist_ok=True)
+# WAS `HALF = 9.65` FOR BOTH AXES, hard-coded, "board is 19.30 square".
+# The board is 20.00 x 19.00 now, so that put every part in the CPL 0.35 mm out
+# in X and 0.15 mm out in Y -- a silent, uniform placement error on all 33
+# parts, in a file no visual check ever looks at. Read the real outline instead
+# of trusting a comment.
+#
+# KiCad is Y-DOWN: the board spans kicad-y -9.50 (top) .. +9.50 (bottom), and
+# JLCPCB wants Y measured UP from the bottom-left corner. So
+#     X_jlc = x - min_x        Y_jlc = max_y - y
+def _outline_origin(path):
+    import re as _re
+    xs, ys = [], []
+    for m in _re.finditer(r"\(gr_(?:line|arc)[\s\S]{0,400}?\(layer \"Edge\.Cuts\"\)", 
+                          open(path, encoding="utf-8", errors="replace").read()):
+        for a, b in _re.findall(r"\((?:start|end|mid) ([-\d.]+) ([-\d.]+)\)", m.group(0)):
+            xs.append(float(a)); ys.append(float(b))
+    if not xs:
+        raise SystemExit("no Edge.Cuts geometry in %s -- refusing to guess an origin" % path)
+    return -min(xs), max(ys)
+
+HALF_X, HALF_Y = _outline_origin(BOARD)
+HALF = HALF_X                    # legacy name; prefer the axis
+
+# Not machine-placed. Everything here is a pad, a hole, or hand-wired.
+SKIP_PREFIX = ("TP", "J", "MH")
+SKIP_EXACT = {"BT1", "", "Un0", "Un1"}
+
+# ---------------------------------------------------------------- sourcing --
+# Every line below was read from JLCPCB's OWN assembly library on 2026-08-28
+# (POST /api/overseas-pcb-order/v1/shoppingCart/smtGood/selectSmtComponentList
+# /v2), not from LCSC's shop and not from a datasheet. That distinction matters:
+# LCSC SELLS parts JLCPCB cannot PLACE, and the two stock figures are different
+# numbers drawn from different warehouses. A part with LCSC stock and no JLC
+# assembly stock will silently come back as "cannot be assembled" after you pay.
+#
+# ref -> (LCSC code, JLC library type, JLC assembly stock at time of check,
+#         what it actually is)
+#
+# NOTHING here is invented. Values were matched against the JLC record's own
+# "describe" string, and every package was compared to the land on this board.
+SRC = {
+    "U1":   ("C5118826",  "extended",       0, "Raytac MDBT50Q-1MV2, SMD-61P"),
+    "U2":   ("C882746",   "extended",     829, "TI BQ25505RGRR, VQFN-20-EP 3.5x3.5"),
+    "U3":   ("C46459900", "extended",    4371, "TI TPS7A2033DQNR, X2SON-4 1x1"),
+    "U4":   ("C46459900", "extended",    4371, "TI TPS7A2033DQNR, X2SON-4 1x1"),
+    "L1":   ("C2849435",  "extended",    2288, "DMBJ PNLS252012-220M 22uH, 1008, 1.02R, 500mA"),
+
+    # C1/C2 WERE C2858031 (Murata GRM155R61E475ME15D, 4.7uF 25V X5R 0402).
+    # Changed 2026-08-28 because 4.7 uF NOMINAL does not deliver 4.7 uF EFFECTIVE.
+    # Murata's own characteristics data for the 16 V sibling GRM155R61C475ME15
+    # (same 4.7uF, same 0402, same X5R), section 5 DC Voltage Characteristics:
+    #     0 V ~4.7 uF | 5 V ~2.0 uF (-57%) | 10 V ~1.0 uF | 15 V ~0.5 uF
+    # At this board's ~3.9 V bias that is roughly 2.3-2.8 uF against the
+    # BQ25505's 4.7 uF requirement. Our 25 V part biases somewhat better than
+    # that 16 V curve, but not by the ~2x needed to close the gap.
+    #
+    # 0603 IS NOT AVAILABLE AS A FIX: growing either from the 0402 land
+    # (1.34 x 0.54) to 0603 (2.20 x 1.00) collides with 12 neighbouring
+    # pads/tracks at C1 and 62 at C2. The land is fixed, so the only lever is
+    # more nominal capacitance in the SAME 0402 -- which makes this a BOM
+    # change with ZERO board impact.
+    #
+    # Chose C77000 over the C6119763 that SOURCING.md originally suggested:
+    # C6119763 is HRE CGA0402X5R106M100GT, an unknown brand that publishes no
+    # DC-bias curve -- and "Murata because Murata publishes the curve" was the
+    # entire reason C1/C2 was a Murata part. C77000 keeps that, keeps the 10 V
+    # rating (biases better than the 6.3 V 0J parts), and has 543,698 in JLC's
+    # assembly library against HRE's 157,884.
+    # Rail is 3.912 V max, so 10 V is 2.5x derating.
+    "C1":   ("C77000",    "extended",  543698, "Murata GRM155R61A106ME44D 10uF 10V X5R 0402"),
+    "C2":   ("C77000",    "extended",  543698, "Murata GRM155R61A106ME44D 10uF 10V X5R 0402"),
+    # ---- the cell-protection block (PCM), added 2026-08-29 ----
+    # U5 is CONSIGNED from Digi-Key (2508-MC3651DF1AAMCT-ND, cut tape, in stock
+    # at qty 1), because JLC's own stock for C6989585 is 0 with a minimum of 5.
+    "U5":   ("C6989585",  "extended",       0, "Mitsumi MC3651DF1AAM 1S protection, PLP-4E -- CONSIGNED from Digi-Key"),
+    # R8/R9/C14 are 0201, not 0402. The board is at capacity: 26 slots for 25
+    # parts and U5's courtyard costs 4. These three carry the PCM's 3 uA
+    # quiescent and fault-sense current -- no heat, no voltage stress -- so
+    # they are the safest parts on the board to shrink. 0201 needs Standard
+    # PCBA (Economic stops at 0402), which this order already is, panelised to
+    # 71.3 mm with rails and fiducials. See PCM-ONBOARD.md.
+    "R8":   ("C274872",   "extended",  993538, "YAGEO RC0201FR-07330RL 330R 1% 0201"),
+    "R9":   ("C273271",   "extended",   12827, "YAGEO RC0201FR-072K7L 2.7k 1% 0201"),
+    # 25 V, NOT the cheaper 10 V part. DC bias already forced C1/C2 from 4.7uF
+    # to 10uF once; at 4.3 V a 10 V X5R gives most of its capacitance away.
+    "C14":  ("C76939",    "extended", 2377451, "Murata GRM033R61E104KE14D 100nF 25V X5R 0201"),
+    "C3":   ("C76939",    "extended", 2377451, "Murata GRM033R61E104KE14D 100nF 25V X5R 0201"),
+    "C10":  ("C76939",    "extended", 2377451, "Murata GRM033R61E104KE14D 100nF 25V X5R 0201"),
+    "C4":   ("C22400107", "extended",   72632, "Murata GRM1555C1H103JE01D 10nF 50V C0G 0402"),
+    # C5 was C18164635 (CCTC TCC0603X5R106K160CT). Identical spec, 1.1 M in
+    # stock, and JLCPCB's part search finds it instantly by code -- but its BOM
+    # matcher refused to auto-select it on EVERY upload, through a clean
+    # 4-column file and a fully-specified comment alike. The only categorical
+    # difference against parts that always match is `idleFlag`: null on the
+    # CCTC part, true on this one and on C7's. Swapped rather than accept a
+    # manual click on every future upload; same 10uF 16V X5R +-10% 0603.
+    # C5 was an 0603 (C70225, 16 V). Moved to the SAME 0402 part as C1/C2 because
+    # as an 0603 there was nowhere on the board its GND pad could sit outside a
+    # pogo no-via ring -- one legal position existed and it was inside the
+    # antenna keep-out. 10 V is ample against a 4.30 V cell, and with BT1 itself
+    # on VBAT the cell dominates the bulk impedance; C5 is there for switching
+    # transients, not for storage. Bonus: one fewer distinct LCSC code.
+    "C5":   ("C77000",    "extended",  543698, "Murata GRM155R61A106ME44D 10uF 10V X5R 0402"),
+    "C6":   ("C52923",    "BASIC",   11865003, "Samsung CL05A105KA5NQNC 1uF 25V X5R 0402"),
+    "C8":   ("C52923",    "BASIC",   11865003, "Samsung CL05A105KA5NQNC 1uF 25V X5R 0402"),
+    "C9":   ("C52923",    "BASIC",   11865003, "Samsung CL05A105KA5NQNC 1uF 25V X5R 0402"),
+    "C7":   ("C20416425", "extended", 1168621, "CCTC TCC0603X5R226M100CT 22uF 10V X5R 0603"),
+    "C12":  ("C85930",    "extended",  358122, "Murata GRM033R71E103KE14D 10nF 25V X7R 0201"),
+    "C13":  ("C85930",    "extended",  358122, "Murata GRM033R71E103KE14D 10nF 25V X7R 0201"),
+
+    # ---- the 1k group, moved to 0201 2026-08-29 ----
+    # R1/R2/R3 are the harvest series resistors at ~1.1 mA/pin -> 1.21 mW in a
+    # 1k, 2.4% of a 0201's 50 mW. R7 is on RESET and carries nothing. Same value
+    # and tolerance as before, so nothing electrical changes at all -- unlike
+    # the OK divider, 1k is abundant in 0201 and did not need re-deriving.
+    #
+    # COSTS ONE THING: 0402 1k was a BASIC part (free feeder), 0201 1k is
+    # Extended, so this adds a single feeder setup fee. All four share one part
+    # number, so it is one fee, not four. Worth it for the corner it unblocks.
+    "R1":   ("C270365",   "extended",  1407015, "UNI-ROYAL 0201WMF1001TEE 1k 1% 0201"),
+    "R2":   ("C270365",   "extended",  1407015, "UNI-ROYAL 0201WMF1001TEE 1k 1% 0201"),
+    "R3":   ("C270365",   "extended",  1407015, "UNI-ROYAL 0201WMF1001TEE 1k 1% 0201"),
+    "R7":   ("C270365",   "extended",  1407015, "UNI-ROYAL 0201WMF1001TEE 1k 1% 0201"),
+    "R4":   ("C778408",   "extended",   11047, "UNI-ROYAL 0201WMF4704TEE 4.7M 1% 0201"),
+    "R5":   ("C473482",   "extended",  166472, "UNI-ROYAL 0201WMF1004TEE 1M 1% 0201"),
+    "R6":   ("C270364",   "extended", 1263154, "UNI-ROYAL 0201WMF1003TEE 100k 1% 0201"),
+    # ---- OK divider, moved to 0201 2026-08-29 ----
+    # Stock checked at LCSC AND in JLCPCB's own assembly library, because they
+    # are different numbers and the assembly one is what binds. 4.53M and 7.15M
+    # in 0201 exist from six manufacturers between them and every single one is
+    # 0 in stock, pre-order only -- so the values were re-derived, not just the
+    # package. 4.3M/6.8M/1.33M hold VBAT_OK at 3.123/3.498 V (was 3.120/3.470).
+    # All three are "Standard Only" PCBA, which this order already is.
+    "ROK1": ("C423523",   "extended",    7293, "UNI-ROYAL 0201WMF4304TEE 4.3M 1% 0201"),
+    "ROK2": ("C423449",   "extended",   14404, "UNI-ROYAL 0201WMF6804TEE 6.8M 1% 0201"),
+    "ROK3": ("C423747",   "extended",    3250, "UNI-ROYAL 0201WMF1334TEE 1.33M 1% 0201"),
+    "ROV1": ("C172106",   "extended",    2040, "Walsin WR04W6044FTL 6.04M 1% 0402"),
+    "ROV2": ("C137942",   "extended",    2674, "YAGEO RC0402FR-076M98L 6.98M 1% 0402"),
+}
+LCSC = {r: v[0] for r, v in SRC.items()}
+
+# Per-line warnings that survive into the BOM so they cannot be forgotten.
+WARN = {
+    "U1": "CONSIGNED - customer ships MDBT50Q to JLC's warehouse, so JLC's own "
+           "stock of 0 does not block the order. Confirm receipt before build.",
+    "C1": "10uF NOMINAL, ~4-5 uF effective at 3.9 V bias. Was 4.7uF, which "
+           "measured only ~2.3-2.8 uF. Specify by C_eff, never by marked value.",
+    "C2": "10uF NOMINAL, ~4-5 uF effective at 3.9 V bias. Was 4.7uF, which "
+           "measured only ~2.3-2.8 uF. Specify by C_eff, never by marked value.",
+    "C7": "10 V rating is REQUIRED, not a preference. Do not substitute 6.3 V.",
+    "C4": "C0G on purpose - CREF leakage sets the BQ25505's reference droop.",
+    "ROV1": "Sets VBAT_OV. Only 2040 in stock, single source. Do not substitute blind.",
+    "ROV2": "Sets VBAT_OV. Only 2674 in stock, single source. Do not substitute blind.",
+    "ROK2": "Only 4637 in stock, single source.",
+    "ROK1": "Only 9229 in stock, single source.",
+}
+
+# Footprint-derivation references. These prove the LAND is right; they are NOT
+# a claim that this exact part is the one to fit for that value.
+LAND_REF = {
+    "0402": "land traced from C1525",
+    "0603": "land traced from C19666",
+}
+
+
+def main():
+    text = open(BOARD, encoding="utf-8", errors="replace").read()
+    root = sexp.parse(text)
+    k, kd, s, f = sexp.kids, sexp.kid, sexp.s, sexp.f
+    sys.path.insert(0, HERE)
+    from netlist_v3 import PARTS as NL
+    val = {p["ref"]: p["name"] for p in NL}
+
+    rows = []
+    for fp in k(root, "footprint"):
+        ref = "?"
+        for pr in k(fp, "property"):
+            if s(pr[1]) == "Reference":
+                ref = s(pr[2])
+        if ref in SKIP_EXACT or ref.startswith(SKIP_PREFIX):
+            continue
+        at = kd(fp, "at")
+        x, y = f(at[1]), f(at[2])
+        rot = f(at[3]) if len(at) > 3 else 0.0
+        lay = kd(fp, "layer")
+        side = "Bottom" if lay and s(lay[1]).startswith("B.") else "Top"
+        rows.append(dict(ref=ref,
+                         X=round(x + HALF_X, 4),      # -> board lower-left
+                         Y=round(HALF_Y - y, 4),      # KiCad Y-down -> Y up
+                         rot=round(rot % 360, 2),
+                         side=side,
+                         value=val.get(ref, "")))
+    rows.sort(key=lambda r: (re.sub(r"\d", "", r["ref"]),
+                             int(re.sub(r"\D", "", r["ref"]) or 0)))
+
+    os.makedirs(OUT, exist_ok=True)
+    cpl = os.path.join(OUT, "touchid-v6-CPL.csv")
+    with open(cpl, "w", newline="", encoding="utf-8") as fh:
+        w = csv.writer(fh)
+        w.writerow(["Designator", "Mid X", "Mid Y", "Layer", "Rotation"])
+        for r in rows:
+            w.writerow([r["ref"], "%.4fmm" % r["X"], "%.4fmm" % r["Y"],
+                        r["side"], "%g" % r["rot"]])
+
+    # ---- BOM, grouped by PART NUMBER -------------------------------------
+    # Grouping by the value STRING put U3 and U4 on two separate lines, because
+    # the netlist describes them differently ("sensor rail" vs "switched
+    # sensor-MCU rail") even though they are the same TPS7A2033DQNR. JLCPCB's
+    # matcher then saw one part on two lines, assigned the quantity to one and
+    # ZERO to the other, and reported "1 part not selected".
+    #
+    # A BOM line is one PURCHASABLE ITEM, so the key has to be the part number.
+    # Unsourced lines keep falling back to the value string, so they still
+    # cannot silently merge with each other.
+    groups = collections.OrderedDict()
+    for r in rows:
+        key = SRC[r["ref"]][0] if r["ref"] in SRC else "\0" + r["value"]
+        groups.setdefault(key, []).append(r["ref"])
+    # rebuild as {comment: refs}, comment taken from the first designator
+    _named = collections.OrderedDict()
+    _first = {}
+    for key, refs in groups.items():
+        val = next((x["value"] for x in rows if x["ref"] == refs[0]), "")
+        _named[val] = refs
+        _first[val] = refs[0]
+    groups = _named
+    # TWO FILES, and the difference matters.
+    #
+    # touchid-v6-BOM.csv is the one JLCPCB gets: EXACTLY the four columns their
+    # template defines, nothing else. The previous version carried four extra
+    # metadata columns (library, stock, part fitted, note) because they are
+    # useful to a human -- and JLCPCB's matcher, which has to work out which
+    # column holds the part number, dropped C5 to "No Part Selected" on every
+    # single upload even though C18164635 was sitting right there with 1.1 M in
+    # stock. Do not put anything in the upload file that the template does not
+    # ask for; the annotated copy below keeps all of it for us.
+    bom = os.path.join(OUT, "touchid-v6-BOM.csv")
+    bom_note = os.path.join(OUT, "touchid-v6-BOM-annotated.csv")
+    unsourced, zero_stock, extended = [], [], set()
+    fh2 = open(bom_note, "w", newline="", encoding="utf-8")
+    w2 = csv.writer(fh2)
+    w2.writerow(["Comment", "Designator", "Footprint",
+                 "JLCPCB Part # (LCSC Part #)",
+                 "JLC library", "JLC stock", "Part fitted", "NOTE"])
+    with open(bom, "w", newline="", encoding="utf-8") as fh:
+        w = csv.writer(fh)
+        w.writerow(["Comment", "Designator", "Footprint",
+                    "JLCPCB Part # (LCSC Part #)"])
+        for v, refs in groups.items():
+            pkg = ""
+            m = re.search(r"\b(0402|0603|0805|X2SON-4|VQFN-20)\b", v)
+            if m:
+                pkg = m.group(1)
+            # every designator on a line must resolve to the SAME LCSC code,
+            # otherwise the line is not one purchasable item
+            codes = {SRC[r][0] for r in refs if r in SRC}
+            missing = [r for r in refs if r not in SRC]
+            if missing or len(codes) != 1:
+                unsourced.append((v, refs, missing))
+                w.writerow([v, ",".join(refs), pkg, ""])
+                w2.writerow([v, ",".join(refs), pkg, "", "", "", "",
+                             "*** SOURCE THIS -- no LCSC number known ***"
+                             + (("  (" + LAND_REF[pkg] + ")")
+                                if pkg in LAND_REF else "")])
+                continue
+            lc, lib, stock, desc = SRC[refs[0]]
+            if lib != "BASIC":
+                extended.add(lc)
+            need = len(refs)
+            # dedupe: C1 and C2 share one warning, print it once
+            note = "  ".join(dict.fromkeys(WARN[r] for r in refs if r in WARN))
+            if stock < need:
+                zero_stock.append((v, refs, stock, need))
+                note = ("*** JLC ASSEMBLY STOCK %d, NEED %d PER BOARD *** "
+                        % (stock, need)) + note
+            w.writerow([v, ",".join(refs), pkg, lc])
+            w2.writerow([v, ",".join(refs), pkg, lc, lib, stock, desc, note])
+
+    fh2.close()
+    print("wrote %s   (%d parts placed)" % (cpl, len(rows)))
+    print("wrote %s   (%d BOM lines, 4 columns - THIS IS THE UPLOAD FILE)"
+          % (bom, len(groups)))
+    print("wrote %s   (same lines + library/stock/notes, for humans)" % bom_note)
+    print()
+    print("SOURCING")
+    print("  lines fully sourced : %d / %d" % (len(groups) - len(unsourced),
+                                               len(groups)))
+    print("  distinct JLC extended part types : %d  (JLC charges a one-off"
+          " setup fee per type)" % len(extended))
+    if unsourced:
+        print("  *** UNSOURCED ***")
+        for v, refs, missing in unsourced:
+            print("      %-34s %s   missing=%s" % (v, ",".join(refs), missing))
+    if zero_stock:
+        print("  *** INSUFFICIENT JLC ASSEMBLY STOCK ***")
+        for v, refs, stock, need in zero_stock:
+            print("      %-34s %s   stock=%d need=%d/board"
+                  % (v, ",".join(refs), stock, need))
+    if not unsourced and not zero_stock:
+        print("  every line sourced and in stock.")
+    print()
+    print("placement extents: X %.3f..%.3f   Y %.3f..%.3f   (board is 0..%.2f x 0..%.2f)"
+          % (min(r["X"] for r in rows), max(r["X"] for r in rows),
+             min(r["Y"] for r in rows), max(r["Y"] for r in rows),
+             HALF_X * 2, HALF_Y * 2))
+    sides = collections.Counter(r["side"] for r in rows)
+    print("sides:", dict(sides))
+    print("rotations in use:", sorted({r["rot"] for r in rows}))
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())
