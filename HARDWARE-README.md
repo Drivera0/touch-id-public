@@ -30,7 +30,7 @@ It's inspired by **[tinyTouch](https://github.com/ZimengXiong/tinyTouch)** by Zi
 ## Goals
 
 - Working fingerprint-to-password on my own Air75 V3
-- Learn embedded development, PCB design, and applied crypto from first principles by studying tinyTouch and then building an independent design (none of its code is used)
+- Learn embedded development, PCB design, and applied crypto from first principles, starting from a study of tinyTouch
 - Eventually: a clean custom PCB that clicks into the slot like a factory part
 - Possibly sell it (MIT license permits — see [[touchid/Firmware and PCB|Firmware and PCB]])
 
