@@ -1,6 +1,6 @@
 # TouchID Module — Design v3 (body caliper-measured)
 
-Drop-in replacement for the NuPhy Air75 V3 knob module's slot (see [[touchid/Hardware Teardown|Hardware Teardown]]). Same envelope, but the top face is flat and flush with the metal enclosure, with a round fingerprint sensor centered in it.
+Drop-in replacement for the NuPhy Air75 V3 knob module's slot (see [[touchid/docs/bench/Hardware Teardown|Hardware Teardown]]). Same envelope, but the top face is flat and flush with the metal enclosure, with a round fingerprint sensor centered in it.
 
 Body envelope is now **caliper-measured** (2026-08-18): 18.64 × 18.64 mm body, 8.44 mm total height, with a **19.72 mm square lip, 4.20 mm tall, at the back (PCB side)** — confirmed against the side photo: the wide tier is adjacent to the PCB, and the narrower 18.64 section rises to the flush face. Ear hole is 30.4 mm diagonally from the opposite lip corner → hole center 16.46 mm from module center. Pads, screws, posts, and chamfers are still photo estimates.
 
@@ -46,7 +46,7 @@ Board: `cad/kicad/touchid_module.kicad_pcb` (`build_board.py` + `build_board_off
 | PCB 3D | `cad/scripts/touchid_pcb.py` → `exports/touchid_pcb_assembly.step/.stl`; full module: `exports/touchid_module_assembly.step`; exploded: `exports/touchid_full_assembly.step` + `viewers/touchid_exploded_viewer.html` |
 | Fiducials | Knob PCB's two ringed pads = MARK fiducials (per FCC notes), not contacts |
 
-Sensor mounts from inside against the lip (face flush or ≤0.5 mm proud) so press force lands on the housing, not solder joints — per [[touchid/Mechanical and Housing|Mechanical and Housing]]. FPC folds down to the carrier PCB; carrier screws into the housing bosses; pads face down onto J4/J11. Interior clear height between carrier PCB and sensor underside ≈ 4–4.5 mm — enough for the ESP32-C3-MINI-1 (2.4 mm tall) planned in [[touchid/Firmware and PCB|Firmware and PCB]]; cavity is 16.2 mm square, so the C3-MINI-1 (13.2 × 16.6) is a *tight* diagonal or needs the wall thinned to 1.4 on two sides — check during PCB layout.
+Sensor mounts from inside against the lip (face flush or ≤0.5 mm proud) so press force lands on the housing, not solder joints — per [[touchid/docs/design/Mechanical and Housing|Mechanical and Housing]]. FPC folds down to the carrier PCB; carrier screws into the housing bosses; pads face down onto J4/J11. Interior clear height between carrier PCB and sensor underside ≈ 4–4.5 mm — enough for the ESP32-C3-MINI-1 (2.4 mm tall) planned in [[touchid/docs/design/Firmware and PCB|Firmware and PCB]]; cavity is 16.2 mm square, so the C3-MINI-1 (13.2 × 16.6) is a *tight* diagonal or needs the wall thinned to 1.4 on two sides — check during PCB layout.
 
 For the final print, follow the material plan already in the vault: PETG (or SLA tough resin) with brass heat-set inserts. The two PCB bosses (Ø5.2, pilot Ø1.7) are sized for M2 self-tappers for the prototype; for inserts, open the pilot holes to the insert OD in `touchid_module.py` (`pcb_screw_pilot_d`).
 
@@ -130,8 +130,8 @@ thickness and its height above the back plane before it can be modelled.
 - [ ] Check pad mirroring: footprint pads are as seen looking into the slot; confirm against the knob PCB orientation before fab
 - [ ] Confirm boss height in slot vs ear z-position (ear currently at back plane, z 0–1.8)
 - [ ] Set `sensor_window_d` / `sensor_body_d` / `sensor_lip_t` to the actual sensor part
-- [x] Pin test done (2026-08-18) — see [[touchid/Pin Test Results|Pin Test Results]]: **J11-1/2/3 = VBAT (3.47–3.68 V, switched), J4-5 = GND.** Module powers from the keyboard, no data lines needed. Still pending: sleep sweep + load test on J11.
-- [ ] Confirm sensor choice from the shortlist in [[touchid/Mechanical and Housing|Mechanical and Housing]] (ZW-series / R502-B, `0xEF01` family) and update `sensor_*` params to its datasheet dims
+- [x] Pin test done (2026-08-18) — see [[touchid/docs/bench/Pin Test Results|Pin Test Results]]: **J11-1/2/3 = VBAT (3.47–3.68 V, switched), J4-5 = GND.** Module powers from the keyboard, no data lines needed. Still pending: sleep sweep + load test on J11.
+- [ ] Confirm sensor choice from the shortlist in [[touchid/docs/design/Mechanical and Housing|Mechanical and Housing]] (ZW-series / R502-B, `0xEF01` family) and update `sensor_*` params to its datasheet dims
 
 ## Scale caveat
 

@@ -49,7 +49,7 @@ updated: 2026-08-20
 # PCB improvements for the v4 housing
 
 Scope: `cad/pcb-v2/` only. Driven by the new enclosure
-([[touchid/Module Mechanical v3|Module Mechanical v4]]), which allows a bigger,
+([[touchid/docs/design/Module Mechanical v3|Module Mechanical v4]]), which allows a bigger,
 square board.
 
 ## What is already good — don't "fix" it
@@ -60,7 +60,7 @@ Checked before proposing anything:
   including the ESP32 antenna keepout at x [−6.66, 6.60], y [2.95, 8.42].
 - All nets single-island; one sub-0.127 mm pair (the +3V3/VBAT one).
 - Land patterns all now trace to vendor drawings — see
-  [[touchid/JLCPCB DFM Report|JLCPCB DFM Report]].
+  [[touchid/docs/build/JLCPCB DFM Report|JLCPCB DFM Report]].
 
 I expected to find J2 sitting in the antenna keepout. **It isn't** — J2's pads
 are at |x| = 7.6 and the keepout only spans |x| < 6.66. They are immediately
@@ -161,4 +161,4 @@ Steps 6 and 7 are the ones that were skipped before the scrapped order.
 
 The sensor is not sourced. If it turns out to have discrete flying wires rather
 than a 0.5 mm flex tail, item 3 changes completely — see
-[[touchid/Sensor Connector Plan|Sensor Connector Plan]].
+[[touchid/docs/design/Sensor Connector Plan|Sensor Connector Plan]].

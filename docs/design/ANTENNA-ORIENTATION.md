@@ -217,7 +217,7 @@ The MDBT50Q's 15.5 mm length must run along **y**, antenna end toward **+y**.
 
 ## Related
 
-- [[touchid/PART-LIBRARY|Part library]] — §9 item 1, the missing keep-out dimensions
+- [[touchid/docs/design/PART-LIBRARY|Part library]] — §9 item 1, the missing keep-out dimensions
 - [[touchid/cad/scripts/HOUSING-V5-NOTES|Housing v5 notes]]
-- [[touchid/Pin Test Procedure|Pin Test Procedure]] — the physical numbering convention
-- [[touchid/DESIGN-SPEC|DESIGN-SPEC]] — §1 needs the wording fix in §4 above
+- [[touchid/docs/bench/Pin Test Procedure|Pin Test Procedure]] — the physical numbering convention
+- [[touchid/docs/design/DESIGN-SPEC|DESIGN-SPEC]] — §1 needs the wording fix in §4 above

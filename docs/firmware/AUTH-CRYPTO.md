@@ -33,7 +33,7 @@ The knob now holds **two** independent keys, each with its own ratchet:
 `K_kd` shared with the dongle (gates the dongle's FIDO2 signing) and
 `K_kh` shared with the host (gates the Mac CTK lane, relayed through the
 dongle unread). Rationale and provisioning split:
-docs/DONGLE-HOST-PROTOCOL.md.
+docs/dongle/DONGLE-HOST-PROTOCOL.md.
 
 Everything below is **unchanged** by this. The MAC input is identical,
 so both implementations and all test vectors stay valid — two keys need

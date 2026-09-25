@@ -10,7 +10,7 @@ Chain: knob →(2.4 GHz ESB)→ dongle →(USB HID)→ host.
 ## Why HID, and why a vendor-defined usage page
 
 - **No driver, no kext, no install.** Every OS binds HID itself, which
-  is the "zero software for buyers" requirement in docs/CODING-PLAN.md.
+  is the "zero software for buyers" requirement in docs/firmware/CODING-PLAN.md.
 - **Usage page 0xFF00, usage 0x01.** Vendor-defined pages do *not*
   trigger macOS's Input Monitoring TCC prompt — only keyboard/pointer
   usages do. Windows likewise gives raw access to vendor pages without
@@ -60,7 +60,7 @@ ACK codes: `0x00` ok, `0x01` bad request, `0x02` knob unreachable,
 **The dongle does not interpret the auth exchange for this lane.** ARM's
 nonce goes to the knob unmodified; the knob's 35-byte Auth Result comes
 back to the host unmodified as AUTH_RESULT. That payload is exactly the
-BLE Auth Result of docs/AUTH-CRYPTO.md, so:
+BLE Auth Result of docs/firmware/AUTH-CRYPTO.md, so:
 
 - the host verifies the HMAC itself and holds its own K,
 - the hash ratchet still runs strictly between knob and host,
@@ -86,7 +86,7 @@ is plugged in. So there are two, with independent ratchets:
 Consequences, all cheap:
 
 - **The MAC input does not change.** It stays
-  `HMAC(K, nonce ‖ status ‖ slot_be16)` exactly as in docs/AUTH-CRYPTO.md,
+  `HMAC(K, nonce ‖ status ‖ slot_be16)` exactly as in docs/firmware/AUTH-CRYPTO.md,
   so `crypto.py`, `AuthCrypto.swift` and every existing test vector stay
   valid. Two keys need no format change because a verifier holding the
   wrong key simply fails the MAC — key confusion is not possible, so the

@@ -9,7 +9,7 @@ tags:
 
 # Pin Test Results
 
-Raw data: `cad/pin-test-results.csv` (session 1–2), `cad/pin-test-modes-2026-08-26.csv` (session 3, both modes). Logger: `pin-test-v2.html`. Procedure: [[touchid/Pin Test Procedure|Pin Test Procedure]].
+Raw data: `cad/pin-test-results.csv` (session 1–2), `cad/pin-test-modes-2026-08-26.csv` (session 3, both modes). Logger: `pin-test-v2.html`. Procedure: [[touchid/docs/bench/Pin Test Procedure|Pin Test Procedure]].
 
 > [!warning] There is no power rail in the slot
 > Session 3 identifies **J11-1/2/3 as PWM RGB LED drive lines**, not a battery rail, and **J4 as the switch/encoder block**. The module connector carries signals and LED drive only. The keyboard cannot power an ESP32-C3 through these pins. The 2026-08-18 power architecture is **dead**, not merely reopened.
@@ -127,9 +127,9 @@ The 2026-08-18 plan (J11-1+2+3 tied as VBAT in → 3.3 V LDO → ESP32-C3) reste
 
 ## Related
 
-- [[touchid/Harvest Test Procedure|Harvest Test Procedure]] — session 4, decides whether the LED rail can power the module
-- [[touchid/Pin Test Procedure|Pin Test Procedure]]
-- [[touchid/Hardware Teardown|Hardware Teardown]]
-- [[touchid/TouchID Module Design|TouchID Module Design]]
-- [[touchid/Firmware and PCB|Firmware and PCB]]
-- [[touchid/Architecture and Design|Architecture and Design]]
+- [[touchid/docs/bench/Harvest Test Procedure|Harvest Test Procedure]] — session 4, decides whether the LED rail can power the module
+- [[touchid/docs/bench/Pin Test Procedure|Pin Test Procedure]]
+- [[touchid/docs/bench/Hardware Teardown|Hardware Teardown]]
+- [[touchid/docs/design/TouchID Module Design|TouchID Module Design]]
+- [[touchid/docs/design/Firmware and PCB|Firmware and PCB]]
+- [[touchid/docs/design/Architecture and Design|Architecture and Design]]

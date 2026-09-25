@@ -291,11 +291,11 @@ project's voltage.
 ## 10. Dongle
 
 Separate purchase, not part of this board. USB-C requirement points at the
-**Raytac MDBT50Q-CX-40** — per `dongle/OFF-THE-SHELF-DONGLES.md` the only USB-C
+**Raytac MDBT50Q-CX-40** — per `docs/dongle/OFF-THE-SHELF-DONGLES.md` the only USB-C
 finished dongle found, open DFU bootloader, mainline Zephyr support, same module
 family as the knob. DigiKey lists it as shipping.
 
-This is Option C of `dongle/MODULE-TRADE-STUDY.md` — prove the radio and firmware
+This is Option C of `docs/dongle/MODULE-TRADE-STUDY.md` — prove the radio and firmware
 on dev hardware, decide dongle size later. Buying it commits nothing.
 
 The **XIAO nRF52840 Sense Plus** is still needed and is unaffected by any of this:

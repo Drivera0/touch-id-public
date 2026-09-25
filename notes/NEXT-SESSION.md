@@ -10,7 +10,7 @@ sensor part and clearance figures were all superseded on 2026-08-28.
 
 * **Current status → [[CURRENT-STATE]]**
 * **Technical master → [[DESIGN-SPEC]]**
-* The old text, kept for its reasoning → `_archive/NEXT-SESSION-2026-08-27.md`
+* The old text, kept for its reasoning → `notes/archive/NEXT-SESSION-2026-08-27.md`
 
 The standing working rules it set out are still in force and now live in
 `CURRENT-STATE.md`.

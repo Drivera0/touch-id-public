@@ -21,7 +21,7 @@ signs when the knob's challenge-proof says your finger touched it.
 KnobToken.app (menu-bar app)
  ├─ KnobTransport.swift  the seam: requestTouch/provision/enroll
  ├─ DongleClient.swift   USB HID to the dongle (vendor page 0xFF00);
- │                       docs/DONGLE-HOST-PROTOCOL.md
+ │                       docs/dongle/DONGLE-HOST-PROTOCOL.md
  ├─ AuthCrypto.swift     HMAC verify + one-step ratchet (port of
  │                       knobauth/crypto.py, same test vectors)
  └─ TokenExtension (CTK persistent token, extension point
@@ -42,7 +42,7 @@ the knob's *current* firmware, which is still a BLE peripheral.
   material so the gate is cryptographic, or move signing into the knob
   (firmware ECDSA) for the purist version.
 - The app is also the Mac home of everything the Windows helper does
-  (vault release, ssh confirm) — same wire contract, docs/AUTH-CRYPTO.md.
+  (vault release, ssh confirm) — same wire contract, docs/firmware/AUTH-CRYPTO.md.
 
 ## Build (on the Mac)
 

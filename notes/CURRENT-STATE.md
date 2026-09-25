@@ -10,7 +10,7 @@ updated: 2026-08-30
 master for *how the thing works*; this file is the authoritative record of
 *what is decided, what is ordered, and what is still open*.
 
-Anything in `_archive/` is superseded. Do not take a number from there.
+Anything in `notes/archive/` is superseded. Do not take a number from there.
 
 ---
 

@@ -142,7 +142,7 @@ pilot.
   If the module needs repeated servicing, use heat-set inserts — but check they
   fit the boss OD first.
 - **Component positions are provisional.** Nothing goes to copper until the
-  sensor is bought — see [[touchid/Sensor Connector Plan|Sensor Connector Plan]].
+  sensor is bought — see [[touchid/docs/design/Sensor Connector Plan|Sensor Connector Plan]].
 - **PCB outline tolerance.** 19.30 nominal, ±0.2 → 19.50 worst case, inside the
   19.54 lip. Don't go bigger without tightening it.
 - The rear retention shelf is carried over unchanged from v3 and has **not**
@@ -160,6 +160,6 @@ pilot.
 
 ## Related
 
-- [[touchid/Sensor Connector Plan|Sensor Connector Plan]]
-- [[touchid/Mechanical and Housing|Mechanical and Housing]]
-- [[touchid/JLCPCB DFM Report|JLCPCB DFM Report]]
+- [[touchid/docs/design/Sensor Connector Plan|Sensor Connector Plan]]
+- [[touchid/docs/design/Mechanical and Housing|Mechanical and Housing]]
+- [[touchid/docs/build/JLCPCB DFM Report|JLCPCB DFM Report]]

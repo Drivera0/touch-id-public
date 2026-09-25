@@ -62,7 +62,7 @@ Module size reference:
 ## Chip choice REVISITED — 2026-08-26
 
 > [!warning] The ESP32-C3-MINI-1 decision is superseded
-> Two findings force a rethink: the keyboard slot supplies **no power** (see [[touchid/Pin Test Results|Pin Test Results]] — J11 is an RGB LED connector), and the C3-MINI's **13.2 mm width** is what creates the connector-vs-screws deadlock in [[touchid/Module Mechanical v3|Module Mechanical v3]].
+> Two findings force a rethink: the keyboard slot supplies **no power** (see [[touchid/docs/bench/Pin Test Results|Pin Test Results]] — J11 is an RGB LED connector), and the C3-MINI's **13.2 mm width** is what creates the connector-vs-screws deadlock in [[touchid/docs/design/Module Mechanical v3|Module Mechanical v3]].
 
 ### Wi-Fi is not needed
 
@@ -92,7 +92,7 @@ That removes the reason to stay on Espressif. Every ESP32 MINI-1 module is 13.2 
 
 > [!warning] The MDBT42Q recommendation below was superseded before it was acted on
 > Two things changed it: storage now has to be a **cell**, not a supercap (see
-> [[touchid/DESIGN-SPEC|DESIGN-SPEC]] §9), which makes module **height** as binding as
+> [[touchid/docs/design/DESIGN-SPEC|DESIGN-SPEC]] §9), which makes module **height** as binding as
 > width; and a verified pin-by-pin check showed VDDH is far rarer than assumed.
 
 | Part | Size (mm) | LCSC / JLC | 4.2 V direct | Decisive factor |
@@ -145,7 +145,7 @@ Leaving ESP-IDF for Nordic. Smaller than it sounds, because **tinyTouch's USB HI
 | App / password-manager prompts | ✅ |
 | **FileVault unlock at cold boot** | ❌ likely not |
 
-At the FileVault pre-boot screen macOS loads a minimal driver set that generally excludes third-party Bluetooth keyboards; Apple's own Touch ID keyboard gets special treatment, and USB keyboards work. This contradicts the "Mac login ✅ today" row in [[touchid/Architecture and Design|Architecture and Design]], which assumed USB HID. **The module cannot be the only way into the machine.**
+At the FileVault pre-boot screen macOS loads a minimal driver set that generally excludes third-party Bluetooth keyboards; Apple's own Touch ID keyboard gets special treatment, and USB keyboards work. This contradicts the "Mac login ✅ today" row in [[touchid/docs/design/Architecture and Design|Architecture and Design]], which assumed USB HID. **The module cannot be the only way into the machine.**
 
 Worth verifying on the actual Mac: pair any third-party Bluetooth keyboard, restart with FileVault on, see whether it types at the unlock prompt.
 
@@ -157,7 +157,7 @@ The modular-certification escape hatch still applies — MDBT42Q, Holyiot, ISP18
 - **nRF52840** stays the low-power endgame (v3+) if battery life demands it — smaller and sips µA, but different ecosystem.
 - **Note:** C3 can't be a *USB* keyboard (no USB-OTG), which is why it's only viable *because* we went wireless. It can still be flashed over its USB-Serial/JTAG.
 
-See mechanical fit + stack in [[touchid/Mechanical and Housing|Mechanical and Housing]].
+See mechanical fit + stack in [[touchid/docs/design/Mechanical and Housing|Mechanical and Housing]].
 
 ### The custom board is mostly plumbing
 MINI-1 + a 3.3 V regulator + sensor ribbon connector + **pogo pads on the underside** to meet the keyboard pins + optional USB-C + a handful of passives from the datasheet reference. ~20 components — a beginner-appropriate KiCad project. Fab 5 boards at JLCPCB ≈ $10–30. The pogo-pad footprint for the slot will be **custom** (exists nowhere yet).
@@ -175,10 +175,10 @@ You don't hand-solder the module. Order **PCBA (PCB Assembly)** from **JLCPCB or
 > [!tip] Pick in-library parts to keep assembly cheap
 > JLCPCB solders from its **LCSC** parts library — those are auto-loaded and cheap. Parts *not* in the library become consigned/hand-solder add-ons (pricier). The ESP32 modules, regulators, and common passives are stocked, so choose from the library where possible. The castellated ESP32 module and FFC connector are both fine for machine assembly. Option for board #1: **partial assembly** (fab installs the fine-pitch/module parts, you hand-solder easy bits at UBC's soldering station).
 
-Print/soldering/measuring facilities: see [[touchid/UBC Facilities and Contacts|UBC Facilities and Contacts]].
+Print/soldering/measuring facilities: see [[touchid/notes/UBC Facilities and Contacts|UBC Facilities and Contacts]].
 
 ## Related
-- [[touchid/Architecture and Design|Architecture and Design]]
-- [[touchid/Mechanical and Housing|Mechanical and Housing]]
-- [[touchid/UBC Facilities and Contacts|UBC Facilities and Contacts]]
-- [[touchid/Roadmap|Roadmap]]
+- [[touchid/docs/design/Architecture and Design|Architecture and Design]]
+- [[touchid/docs/design/Mechanical and Housing|Mechanical and Housing]]
+- [[touchid/notes/UBC Facilities and Contacts|UBC Facilities and Contacts]]
+- [[touchid/notes/Roadmap|Roadmap]]

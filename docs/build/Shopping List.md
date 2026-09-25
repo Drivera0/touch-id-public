@@ -71,7 +71,7 @@ Handy detail: the TPS7A20's input is rated to **6 V**, so you can feed the VBAT
 pads straight from **USB 5 V** on the bench — no separate battery or supply needed
 for programming.
 
-## Still to measure first (from [[touchid/Pin Test Results|Pin Test Results]])
+## Still to measure first (from [[touchid/docs/bench/Pin Test Results|Pin Test Results]])
 
 - [ ] Sleep sweep on J11-1 — does VBAT survive keyboard sleep? Decides whether firmware needs deep-sleep handling
 - [ ] Load test on J11-1 (100–330 Ω) — confirm the rail holds up through the pogo contacts under the ESP32's ~350 mA TX peaks

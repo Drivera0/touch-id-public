@@ -208,6 +208,6 @@ because the tail decides the part:
 
 ## Related
 
-- [[touchid/JLCPCB DFM Report|JLCPCB DFM Report]] — land pattern audit, all parts
-- [[touchid/Mechanical and Housing|Mechanical and Housing]] — slot budget, sensor shortlist
-- [[touchid/TouchID Module Design|TouchID Module Design]] — board outline history
+- [[touchid/docs/build/JLCPCB DFM Report|JLCPCB DFM Report]] — land pattern audit, all parts
+- [[touchid/docs/design/Mechanical and Housing|Mechanical and Housing]] — slot budget, sensor shortlist
+- [[touchid/docs/design/TouchID Module Design|TouchID Module Design]] — board outline history

@@ -32,20 +32,20 @@ The swappable knob/keyswitch sits on a small **daughterboard** silkscreened `Air
 > Earlier guess was two 6-pin headers (12). The clear FCC photo shows **J4 = 6, J11 = 4 → 10 total**. Confirmed against the physical unit: 6 on the left, 4 on the right.
 
 > [!note] The signal bottleneck
-> 10 pogo contacts feed into only an ~8-conductor FFC (J10), and some of those conductors are used by the S1/S2 slide switches. So **only a handful of the 10 pins carry live signals** — the rest are likely duplicated-for-reliability contacts or split between the keyswitch vs knob modules. A rotary knob needs ~4 lines (encoder A, encoder B, press, ground). Which pins are live — and whether any carry **power** — is what [[touchid/Pin Test Procedure|the pin test]] determines.
+> 10 pogo contacts feed into only an ~8-conductor FFC (J10), and some of those conductors are used by the S1/S2 slide switches. So **only a handful of the 10 pins carry live signals** — the rest are likely duplicated-for-reliability contacts or split between the keyswitch vs knob modules. A rotary knob needs ~4 lines (encoder A, encoder B, press, ground). Which pins are live — and whether any carry **power** — is what [[touchid/docs/bench/Pin Test Procedure|the pin test]] determines.
 
 ## Main board
 
 - **MCU:** WCH **CH592M** — a RISC-V Bluetooth LE SoC. (This is why V2 firmware can't be reused: the V2 uses an ARM chip. Different instruction set entirely.)
 - **Battery:** Li-ion, **4000 mAh, 3.6 V nominal** (label: model DHDIC 3240162, 15.2 Wh, made by Huizhou Donghui Energy). This is the power source the module would ideally tap.
-- On-board PCB antenna (visible in FCC Photo 4), tucked in a corner near plastic — a reminder that the metal frame blocks Bluetooth. See antenna notes in [[touchid/Firmware and PCB|Firmware and PCB]].
+- On-board PCB antenna (visible in FCC Photo 4), tucked in a corner near plastic — a reminder that the metal frame blocks Bluetooth. See antenna notes in [[touchid/docs/design/Firmware and PCB|Firmware and PCB]].
 
 ## Why this matters for the build
 
-The slot is only guaranteed to be a **mechanical mount**. The exciting open question is electrical: if one of the 10 pins carries usable power (3.3 V rail or the raw battery line), the module can be **powered by the keyboard** and go fully wireless. If not, the fallback is a thin wire to the battery connector, or the module carrying its own small LiPo. That single fact is decided by [[touchid/Pin Test Procedure|the pin test]].
+The slot is only guaranteed to be a **mechanical mount**. The exciting open question is electrical: if one of the 10 pins carries usable power (3.3 V rail or the raw battery line), the module can be **powered by the keyboard** and go fully wireless. If not, the fallback is a thin wire to the battery connector, or the module carrying its own small LiPo. That single fact is decided by [[touchid/docs/bench/Pin Test Procedure|the pin test]].
 
 ## Related
 
-- [[touchid/Pin Test Procedure|Pin Test Procedure]]
-- [[touchid/Architecture and Design|Architecture and Design]]
-- [[touchid/README|Project README]]
+- [[touchid/docs/bench/Pin Test Procedure|Pin Test Procedure]]
+- [[touchid/docs/design/Architecture and Design|Architecture and Design]]
+- [[touchid/docs/design/OVERVIEW|Project README]]

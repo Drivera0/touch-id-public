@@ -15,8 +15,8 @@ presents to the computer as a USB device (a FIDO2 security key + a USB
 keyboard). It is a receiver, like a wireless-mouse dongle — but with a
 little more brains (it does the FIDO2 signing; see below).
 
-Firmware and product decisions are LOCKED (see docs/CODING-PLAN.md and
-docs/ROADMAP.md). Your job is the **hardware**: schematic + PCB + a case,
+Firmware and product decisions are LOCKED (see docs/firmware/CODING-PLAN.md and
+docs/firmware/ROADMAP.md). Your job is the **hardware**: schematic + PCB + a case,
 Logi-Bolt-small, USB-C.
 
 ## HARD REQUIREMENTS (from the locked design)

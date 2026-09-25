@@ -18,7 +18,7 @@ updated: 2026-08-26
 > - **Pass** → a self-contained module. Pop it in, nothing modified, nothing to charge.
 > - **Fail** → the only clean option left is tapping the keyboard's internal battery, which means opening the keyboard and soldering a wire.
 >
-> Companion logger: `harvest-test.html` in this vault. Prior work: [[touchid/Pin Test Procedure|Pin Test Procedure]], [[touchid/Pin Test Results|Pin Test Results]].
+> Companion logger: `harvest-test.html` in this vault. Prior work: [[touchid/docs/bench/Pin Test Procedure|Pin Test Procedure]], [[touchid/docs/bench/Pin Test Results|Pin Test Results]].
 
 ## Why this test exists
 
@@ -83,7 +83,7 @@ For scale: the module needs about **5.5 mWh/day**. At 17.7 mW, two hours of harv
 - Keyboard with module removed, USB-C cable
 - Phone camera and a timer
 
-Meter settings are unchanged from [[touchid/Pin Test Procedure|Pin Test Procedure]]: **DC volts**, lowest range above 3.5 V for 1 mV resolution, never `A`/`mA` across a rail.
+Meter settings are unchanged from [[touchid/docs/bench/Pin Test Procedure|Pin Test Procedure]]: **DC volts**, lowest range above 3.5 V for 1 mV resolution, never `A`/`mA` across a rail.
 
 > [!warning] Three specific risks in this session
 > 1. **Never bridge J11-1/2/3 to J11-4.** That is a direct LED overdrive path. Everything here returns to **J4-5**.
@@ -199,7 +199,7 @@ Either way, the sensor's **standby current on its detect rail** is still unmeasu
 
 ## Related
 
-- [[touchid/Pin Test Procedure|Pin Test Procedure]]
-- [[touchid/Pin Test Results|Pin Test Results]]
-- [[touchid/Firmware and PCB|Firmware and PCB]]
-- [[touchid/DESIGN-SPEC|DESIGN-SPEC]]
+- [[touchid/docs/bench/Pin Test Procedure|Pin Test Procedure]]
+- [[touchid/docs/bench/Pin Test Results|Pin Test Results]]
+- [[touchid/docs/design/Firmware and PCB|Firmware and PCB]]
+- [[touchid/docs/design/DESIGN-SPEC|DESIGN-SPEC]]

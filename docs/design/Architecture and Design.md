@@ -35,11 +35,11 @@ The module is a **self-contained device that shares the keyboard's chassis and (
 ## Power strategy (decided by the pin test)
 
 > [!success] Decision (2026-08-18): target = **wireless, powered from the keyboard**
-> Chosen for the cleanest physical result — no cable, no USB port, no battery, so the module sits flush in the slot like the knob (a wired version would need a cable exit = a hole or a module that protrudes too much). **Contingent on the pin test** finding a power pin that holds under load and survives sleep. If it doesn't, fallbacks reintroduce a charge port or case-opening. Consequences: deep-sleep-on-INT and BLE antenna placement move onto the critical path (see [[touchid/Firmware and PCB|Firmware and PCB]]).
+> Chosen for the cleanest physical result — no cable, no USB port, no battery, so the module sits flush in the slot like the knob (a wired version would need a cable exit = a hole or a module that protrudes too much). **Contingent on the pin test** finding a power pin that holds under load and survives sleep. If it doesn't, fallbacks reintroduce a charge port or case-opening. Consequences: deep-sleep-on-INT and BLE antenna placement move onto the critical path (see [[touchid/docs/design/Firmware and PCB|Firmware and PCB]]).
 
 Ranked best → fallback:
 
-1. **Keyboard pin power** — a slot pin carries a usable rail (3.3 V or battery) that survives sleep and holds under load → module runs off the keyboard's 4000 mAh battery. Fully wireless, cleanest. *Confirm via [[touchid/Pin Test Procedure|Pin Test Procedure]] Phase 3 + Sweep 3.*
+1. **Keyboard pin power** — a slot pin carries a usable rail (3.3 V or battery) that survives sleep and holds under load → module runs off the keyboard's 4000 mAh battery. Fully wireless, cleanest. *Confirm via [[touchid/docs/bench/Pin Test Procedure|Pin Test Procedure]] Phase 3 + Sweep 3.*
 2. **Battery-connector tap** — thin wires into the case to the battery connector. Voids warranty, more invasive, but works.
 3. **Own LiPo** — module carries a tiny cell (e.g. 401230). Fully independent, but adds bulk and charging.
 
@@ -55,7 +55,7 @@ The module **always talks over its own link**, independent of the keyboard's mod
 
 So the keyboard's wired/wireless setting is irrelevant to the module. The module's own link is either:
 - **USB cable** (tinyTouch as-written today) — appears as a USB keyboard + serial channel, OR
-- **Bluetooth** (must be added — see [[touchid/Firmware and PCB|Firmware and PCB]]) — the ESP32-S3's idle BLE radio.
+- **Bluetooth** (must be added — see [[touchid/docs/design/Firmware and PCB|Firmware and PCB]]) — the ESP32-S3's idle BLE radio.
 
 ## What it works for
 
@@ -75,10 +75,10 @@ The sensor stores **5 fingerprints** and the code already knows *which* finger m
 - Left index → SSH passphrase
 - Middle → Windows password
 
-Turns a one-trick button into a **five-secret vault**, and it's a perfect first real modification for learning the codebase. Full hardware-security-key behaviour (holding actual SSH keys, passkeys like a YubiKey) is possible on the S3 but a serious project — filed as a late phase in [[touchid/Roadmap|Roadmap]].
+Turns a one-trick button into a **five-secret vault**, and it's a perfect first real modification for learning the codebase. Full hardware-security-key behaviour (holding actual SSH keys, passkeys like a YubiKey) is possible on the S3 but a serious project — filed as a late phase in [[touchid/notes/Roadmap|Roadmap]].
 
 ## Related
 
-- [[touchid/Firmware and PCB|Firmware and PCB]]
-- [[touchid/Pin Test Procedure|Pin Test Procedure]]
-- [[touchid/Roadmap|Roadmap]]
+- [[touchid/docs/design/Firmware and PCB|Firmware and PCB]]
+- [[touchid/docs/bench/Pin Test Procedure|Pin Test Procedure]]
+- [[touchid/notes/Roadmap|Roadmap]]

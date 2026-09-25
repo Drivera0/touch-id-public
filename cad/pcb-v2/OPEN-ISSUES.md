@@ -98,5 +98,5 @@ Three ways forward, best first:
 ## Related
 
 - [[touchid/cad/pcb-v2/PCB-IMPROVEMENTS|PCB improvements]]
-- [[touchid/Module Mechanical v3|Module mechanical v4]]
-- [[touchid/JLCPCB DFM Report|JLCPCB DFM Report]]
+- [[touchid/docs/design/Module Mechanical v3|Module mechanical v4]]
+- [[touchid/docs/build/JLCPCB DFM Report|JLCPCB DFM Report]]

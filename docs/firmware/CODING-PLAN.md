@@ -35,10 +35,10 @@ extra, NEVER a requirement for a buyer.
    transmitted" instead.)
 5. **The dongle is a Logitech-receiver-class device**: nRF52840 does
    radio + USB in one chip; production dongle is a tiny sealed USB-C nub
-   (custom PCB — see docs/DONGLE-PCB-HANDOFF.md). Dev on a Seeed XIAO
+   (custom PCB — see docs/dongle/DONGLE-PCB-HANDOFF.md). Dev on a Seeed XIAO
    nRF52840.
 6. **The knob<->dongle authenticated protocol already exists** — the
-   HMAC challenge/proof + hash ratchet we built (docs/AUTH-CRYPTO.md),
+   HMAC challenge/proof + hash ratchet we built (docs/firmware/AUTH-CRYPTO.md),
    tested in software/windows-helper/tests. It becomes the ESB payload.
 
 ## WHAT THE PRODUCT DELIVERS (the user's goals, and the mechanism)
@@ -78,14 +78,14 @@ extra, NEVER a requirement for a buyer.
 ### Firmware — dongle (nRF52840, dev on XIAO) — NOT STARTED
 - [ ] Bring-up: flash a XIAO, USB enumerates, LED blinks
 - [ ] **Vendor HID control channel to the host** — the Mac host side is
-      already written and waiting: docs/DONGLE-HOST-PROTOCOL.md has the
+      already written and waiting: docs/dongle/DONGLE-HOST-PROTOCOL.md has the
       full report format and a firmware checklist
 - [ ] ESB link to the knob (pair, exchange the HMAC challenge/proof)
 - [ ] Port the auth crypto to the dongle (reuse authkey.c). **Two keys,
       decided 2026-08-31**: `K_kd` knob↔dongle gates FIDO2 signing,
       `K_kh` knob↔host is relayed opaquely for the Mac lane. MAC input
       unchanged (existing vectors stay valid); selector byte rides with
-      the challenge on ESB only. See docs/DONGLE-HOST-PROTOCOL.md.
+      the challenge on ESB only. See docs/dongle/DONGLE-HOST-PROTOCOL.md.
 - [ ] **USB HID keyboard personality** — type a stored login password
       after a verified knob proof (Windows lock-screen route)
 - [ ] **FIDO2/CTAP2 authenticator** — fork OpenSK; knob touch = user
@@ -114,7 +114,7 @@ extra, NEVER a requirement for a buyer.
       AltSecurityIdentities.
 - [x] Build + verify on a real Mac: token loads, keychain vends the
       identity, login window lists it, `sudo` PAM already smartcard-ready.
-      macOS 26+ landmines documented in docs/MAC-KEYCARD.md — flat
+      macOS 26+ landmines documented in docs/firmware/MAC-KEYCARD.md — flat
       `com.apple.ctk.class-id` keys (the documented legacy dict
       **crash-loops ctkd**), never set NSExtensionPrincipalClass,
       TKTokenDriver.Configuration is blocking XPC, and `sc_auth pair` is
@@ -122,7 +122,7 @@ extra, NEVER a requirement for a buyer.
 - [~] **Rework: talk to the DONGLE over USB, not the knob over BLE** —
       host side DONE and building: `KnobTransport` seam, `DongleClient`
       over IOHIDManager (vendor usage page 0xFF00, no driver/TCC prompt),
-      wire format in docs/DONGLE-HOST-PROTOCOL.md. BLE client preserved
+      wire format in docs/dongle/DONGLE-HOST-PROTOCOL.md. BLE client preserved
       in software/mac-helper/archive/ble-direct/. **Blocked on dongle
       firmware existing before it can be run against hardware.**
 - [ ] Custom TKTokenAuthOperation = knob touch (still the stock PIN op:
@@ -152,10 +152,10 @@ extra, NEVER a requirement for a buyer.
 ## WORKING NOTES FOR WHOEVER PICKS THIS UP (Windows or Mac session)
 
 - Env: Zephyr v4.2.0 workspace at ~/zephyrproject; Mac work needs Xcode.
-- The auth crypto is the shared contract: docs/AUTH-CRYPTO.md. Python is
+- The auth crypto is the shared contract: docs/firmware/AUTH-CRYPTO.md. Python is
   the reference implementation with tests; Swift port must stay identical.
 - Do NOT reintroduce BLE between knob and host — the transport is
   ESB knob<->dongle, USB dongle<->host. BLE-direct sketches predate this.
 - Do NOT propose a single self-contained USB-C fingerprint stick — the
   user chose knob+dongle deliberately.
-- Hardware for the dongle: docs/DONGLE-PCB-HANDOFF.md.
+- Hardware for the dongle: docs/dongle/DONGLE-PCB-HANDOFF.md.

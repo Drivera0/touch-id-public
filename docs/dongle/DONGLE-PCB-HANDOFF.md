@@ -6,7 +6,7 @@ USB-C receiver**: compact, sealed, barely protrudes from the port. This
 doc is the brief. The person is a **beginner at electronics — explain,
 don't assume; never invent a part number or dimension.**
 
-## SIZE — the honest budget is in docs/DONGLE-SIZE-BUDGET.md; read it first
+## SIZE — the honest budget is in docs/dongle/DONGLE-SIZE-BUDGET.md; read it first
 
 Do NOT hand-wave "the chip is 7 mm so it's fine." A prior session traced
 the real mechanical floor; the summary:
@@ -24,7 +24,7 @@ the real mechanical floor; the summary:
   antenna + full intentional-radiator certification — NOT a v1 move.
 
 Design target: a sealed YubiKey-5C-class nub. Full trace, part numbers,
-and the length budget: **docs/DONGLE-SIZE-BUDGET.md**.
+and the length budget: **docs/dongle/DONGLE-SIZE-BUDGET.md**.
 
 ## WHAT THIS DONGLE IS
 
@@ -35,8 +35,8 @@ presents to the computer as a USB device (a FIDO2 security key + a USB
 keyboard). It is a receiver, like a wireless-mouse dongle — but with a
 little more brains (it does the FIDO2 signing; see below).
 
-Firmware and product decisions are LOCKED (see docs/CODING-PLAN.md and
-docs/ROADMAP.md). Your job is the **hardware**: schematic + PCB + a case,
+Firmware and product decisions are LOCKED (see docs/firmware/CODING-PLAN.md and
+docs/firmware/ROADMAP.md). Your job is the **hardware**: schematic + PCB + a case,
 Logi-Bolt-small, USB-C.
 
 ## HARD REQUIREMENTS (from the locked design)

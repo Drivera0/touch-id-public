@@ -13,7 +13,7 @@ tags:
 > Find out what each of the **10 pogo pins** does — especially **whether any pin can power the module**, and **how the pins change between the keyboard's switch-module and knob-module settings**. Written for a first-time multimeter user. Companion interactive logger: `pin-test-v2.html` in this vault.
 
 > [!warning] The v1 result was a fail
-> The first 100 Ω load test collapsed J11-1/2/3 from 3.466 V to 1.031 / 0.596 / 0.526 V — implying **236 / 482 / 559 Ω** of source resistance, far too high for a battery rail. The keyboard's lights also changed under load. That reopened the power decision. See [[touchid/Pin Test Results|Pin Test Results]].
+> The first 100 Ω load test collapsed J11-1/2/3 from 3.466 V to 1.031 / 0.596 / 0.526 V — implying **236 / 482 / 559 Ω** of source resistance, far too high for a battery rail. The keyboard's lights also changed under load. That reopened the power decision. See [[touchid/docs/bench/Pin Test Results|Pin Test Results]].
 
 ## Pin naming convention
 
@@ -151,11 +151,11 @@ Use `pin-test-v2.html` — two tables, live source-resistance calculation, mode 
 **Raw numbers only** — don't round to what "seems right," don't skip zeros. Always record the resistor value in `notes`. Include `slot-labeled.jpg` and `knob-underside.jpg`.
 
 > [!note] Then what
-> The results feed the power decision and the pinout map in [[touchid/Architecture and Design|Architecture and Design]]. Best case: a pin holds ≥3.3 V under a 100 Ω load, in at least one mode, even while asleep → module runs off keyboard power. Worst case: fall back to a battery-connector tap or an on-board LiPo.
+> The results feed the power decision and the pinout map in [[touchid/docs/design/Architecture and Design|Architecture and Design]]. Best case: a pin holds ≥3.3 V under a 100 Ω load, in at least one mode, even while asleep → module runs off keyboard power. Worst case: fall back to a battery-connector tap or an on-board LiPo.
 
 ## Related
 
-- [[touchid/Harvest Test Procedure|Harvest Test Procedure]] — session 4, the loaded-while-asleep test this session never ran
-- [[touchid/Pin Test Results|Pin Test Results]]
-- [[touchid/Hardware Teardown|Hardware Teardown]]
-- [[touchid/Architecture and Design|Architecture and Design]]
+- [[touchid/docs/bench/Harvest Test Procedure|Harvest Test Procedure]] — session 4, the loaded-while-asleep test this session never ran
+- [[touchid/docs/bench/Pin Test Results|Pin Test Results]]
+- [[touchid/docs/bench/Hardware Teardown|Hardware Teardown]]
+- [[touchid/docs/design/Architecture and Design|Architecture and Design]]

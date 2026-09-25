@@ -28,7 +28,7 @@ Read this before changing anything. Sources of truth, in order:
 | The sensor | `cad/pcb-v3/SENSOR-ZW0922.md` |
 | The cell | `cad/pcb-v3/CELL-DECIDED.md` |
 | Go/no-go before ordering | `cad/pcb-v3/preflight.py` |
-| Superseded notes — **do not take numbers from here** | `_archive/` |
+| Superseded notes — **do not take numbers from here** | `notes/archive/` |
 
 > The v2-era pointers this table used to carry (`pcb-v2.kicad_pcb`,
 > `touchid_module_v4.py`, `pcb-v2/OPEN-ISSUES.md`) were **three revisions stale**.
@@ -40,7 +40,7 @@ Read this before changing anything. Sources of truth, in order:
 > outline, mounting holes, pogo positions and housing all carry forward unchanged.
 > But **U1 (ESP32-C3-MINI-1), U2 (TPS7A2033) and the whole VBAT path are dead** —
 > the slot supplies no power. See **§9 Power architecture** below, which is the
-> current thinking, and [[touchid/Pin Test Results|Pin Test Results]] for why.
+> current thinking, and [[touchid/docs/bench/Pin Test Results|Pin Test Results]] for why.
 
 ---
 
@@ -58,7 +58,7 @@ toward the screen.
 > +1.12…+8.32 instead of −8.32…−1.12 and had the board back to front.
 > Every table in this file follows `global − origin` and is correct as printed.
 > Full derivation, with two independent confirmations from the file:
-> [[touchid/ANTENNA-ORIENTATION|Antenna orientation]].
+> [[touchid/docs/design/ANTENNA-ORIENTATION|Antenna orientation]].
 
 **Housing (CadQuery):**
 - `Z = 0` is the housing back plane **and** the PCB top face
@@ -630,6 +630,6 @@ on module presence. Harvesting therefore does not depend on the setting.
 
 - [[touchid/cad/pcb-v2/OPEN-ISSUES|Open issues]]
 - [[touchid/cad/pcb-v2/PCB-IMPROVEMENTS|PCB improvements]]
-- [[touchid/Module Mechanical v3|Module mechanical v4]]
-- [[touchid/JLCPCB DFM Report|JLCPCB DFM Report]]
-- [[touchid/Sensor Connector Plan|Sensor connector plan]]
+- [[touchid/docs/design/Module Mechanical v3|Module mechanical v4]]
+- [[touchid/docs/build/JLCPCB DFM Report|JLCPCB DFM Report]]
+- [[touchid/docs/design/Sensor Connector Plan|Sensor connector plan]]

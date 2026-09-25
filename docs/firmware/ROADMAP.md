@@ -56,7 +56,7 @@
 > POWER (critical for the ~6 uA harvest budget: shorter radio-on, no
 > connection upkeep) and LATENCY, with simpler pairing. ESB has no link
 > encryption, but our security is app-layer (HMAC challenge-proof +
-> ratchet, docs/AUTH-CRYPTO.md), transport-independent, so nothing is
+> ratchet, docs/firmware/AUTH-CRYPTO.md), transport-independent, so nothing is
 > lost. Consequence: the knob can no longer talk to a host DIRECTLY over
 > BLE — everything routes host->USB->dongle->2.4 GHz->knob, so the dongle
 > is mandatory (already the decision). The Mac keycard's BLE-direct

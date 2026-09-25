@@ -55,7 +55,7 @@ a custom board (the Raytac dev-board target is NOT this PCB) with:
 ## Decided since (2026-08-31, same day)
 
 - **Protocol: EF-01**, implemented in full and verified against the
-  Hi-Link manual in the vault — see docs/SENSOR-PROTOCOL.md.
+  Hi-Link manual in the vault — see docs/firmware/SENSOR-PROTOCOL.md.
 - **Transport: custom GATT + Mac helper** (user decision, over HID).
   Service in `ble.c`: auth-result notify, challenge write, control write
   (enroll/delete — the no-button enrollment path). Encrypted chars,
@@ -65,9 +65,9 @@ a custom board (the Raytac dev-board target is NOT this PCB) with:
 
 - On-hardware verification of everything (first flash pending).
 - The Mac helper's BLE rewrite — must implement the crypto contract in
-  docs/AUTH-CRYPTO.md (HMAC verify + one-step ratchet resync).
+  docs/firmware/AUTH-CRYPTO.md (HMAC verify + one-step ratchet resync).
 - Sleep/advertising policy vs the ~6 µA budget; BL_FLAG thresholds.
 
 Crypto binding is DONE firmware-side (2026-08-31): LESC-only pairing,
 HMAC-SHA256 challenge-response with helper-provisioned key in NVS, hash
-ratchet per successful auth — docs/AUTH-CRYPTO.md.
+ratchet per successful auth — docs/firmware/AUTH-CRYPTO.md.
