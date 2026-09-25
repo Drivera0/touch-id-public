@@ -9,7 +9,7 @@ this folder rather than editing it.
 
 > **Flash jig: superseded.** The printed `flash-jig/` parts failed (the pogo-pin
 > holes didn't print through, and the lever doesn't fit). Use `../carrier-v1/`
-> instead: that carrier PCB and flash frame are built.
+> instead (carrier PCB and flash frame, both ordered).
 
 ## What each file is
 
