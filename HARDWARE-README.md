@@ -22,7 +22,7 @@ tags:
 
 A drop-in **fingerprint-authentication module** that replaces the swappable knob/keyswitch in the top-right corner slot of a **NuPhy Air75 V3**. Touch it and it types your Mac (or Windows) password — unlock, `sudo`, login — without paying $149 for Apple's Touch ID keyboard.
 
-It's inspired by, and forks, **[tinyTouch](https://github.com/ZimengXiong/tinyTouch)** by Zimeng Xiong (MIT licensed): an ESP32-S3 + ZW101 fingerprint sensor that does an encrypted handshake with a small Mac helper app and types the stored password over USB HID.
+It's inspired by **[tinyTouch](https://github.com/ZimengXiong/tinyTouch)** by Zimeng Xiong (MIT licensed): an ESP32-S3 + ZW101 fingerprint sensor that does an encrypted handshake with a small Mac helper app and types the stored password over USB HID.
 
 > [!note] The core insight
 > The Air75 V3 runs NuPhy's own closed firmware (no QMK, unlike the V2), so the keyboard's own chip can't be taught about a fingerprint sensor. The module is therefore an **independent sidecar**: it uses the corner slot as a mechanical mount (and hopefully a power source), but does all its own sensing, crypto, and talking to the computer. The keyboard never knows it exists. See [[touchid/Architecture and Design|Architecture and Design]].
@@ -30,7 +30,7 @@ It's inspired by, and forks, **[tinyTouch](https://github.com/ZimengXiong/tinyTo
 ## Goals
 
 - Working fingerprint-to-password on my own Air75 V3
-- Learn embedded development, PCB design, and applied crypto from first principles by forking and rewriting tinyTouch
+- Learn embedded development, PCB design, and applied crypto from first principles by studying tinyTouch and then building an independent design (none of its code is used)
 - Eventually: a clean custom PCB that clicks into the slot like a factory part
 - Possibly sell it (MIT license permits — see [[touchid/Firmware and PCB|Firmware and PCB]])
 
