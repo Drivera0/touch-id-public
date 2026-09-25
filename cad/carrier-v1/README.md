@@ -1,4 +1,7 @@
-# carrier-v1 — flashing fixture for pcb-v7 (DRAFT, not ordered)
+# carrier-v1 — flashing fixture for pcb-v7 (BUILT, September 2026)
+
+> **Built:** the carrier PCB and the printed flash frame have both been made.
+> They haven't flashed a real board yet, because the main PCB isn't built.
 
 > **Ordering? Read `ORDER.md`, not this file.** It carries the current numbers
 > and the one thing that must be measured first. Parts of the tables below

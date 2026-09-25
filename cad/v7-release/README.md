@@ -6,6 +6,11 @@ was verified the day it was copied here: preflight 0 blockers, verify_gerbers
 one in `pcb-v3/`, the one in `pcb-v3/` is the live working copy — regenerate
 this folder rather than editing it.
 
+
+> **Flash jig: superseded.** The printed `flash-jig/` parts failed (the pogo-pin
+> holes didn't print through, and the lever doesn't fit). Use `../carrier-v1/`
+> instead: that carrier PCB and flash frame are built.
+
 ## What each file is
 
 | file | what it is | where it goes |
